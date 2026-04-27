@@ -2,10 +2,15 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/scripts/agent-roles.sh"
 missing=0
 
 required_files=(
   "AGENTS.md"
+  ".agents/design-notes.md"
+  ".agents/product-requirements.md"
+  ".agents/qa-plan.md"
+  ".agents/release-notes.md"
   ".agents/intake-notes.md"
   ".agents/project-target.md"
   ".agents/brief.md"
@@ -44,6 +49,7 @@ required_files=(
   ".agents/prompts/final-acceptance.md"
   ".agents/prompts/reviewer.md"
   ".agents/prompts/security.md"
+  ".agents/prompts/integration.md"
   ".agents/agent-log/orchestrator.md"
   ".agents/agent-log/reviewer.md"
   ".agents/agent-log/security.md"
@@ -106,6 +112,9 @@ required_files=(
   ".agents/inbox/integration.md"
   ".tmux.agent-team.conf"
   "scripts/start-agent-team.sh"
+  "scripts/agent-roles.sh"
+  "scripts/codex-role.sh"
+  "scripts/watch-routes.sh"
   "scripts/new-coding-project.sh"
   "scripts/reset-agent-team-state.sh"
   "scripts/set-project-target.sh"
@@ -141,6 +150,9 @@ if [ "$missing" -ne 0 ]; then
 fi
 
 bash -n "$ROOT/scripts/start-agent-team.sh"
+bash -n "$ROOT/scripts/agent-roles.sh"
+bash -n "$ROOT/scripts/codex-role.sh"
+bash -n "$ROOT/scripts/watch-routes.sh"
 bash -n "$ROOT/scripts/new-coding-project.sh"
 bash -n "$ROOT/scripts/reset-agent-team-state.sh"
 bash -n "$ROOT/scripts/set-project-target.sh"
@@ -167,7 +179,22 @@ bash -n "$ROOT/scripts/check-secrets.sh"
 bash -n "$ROOT/scripts/check-milestone-budget.sh"
 bash -n "$ROOT/scripts/validate-structured-state.sh"
 
-for role in orchestrator cto pm frontend backend validation reviewer security integration; do
+bash "$ROOT/tests/test-auto-codex-agent-team.sh"
+
+for role in "${AGENT_ROLES[@]}"; do
+  for role_file in \
+    ".agents/prompts/$role.md" \
+    ".agents/skills/$role.md" \
+    ".agents/memory/$role.md" \
+    ".agents/agent-config/$role.yaml" \
+    ".agents/ownership/$role.paths" \
+    ".agents/inbox/$role.md" \
+    ".agents/agent-log/$role.md"; do
+    if [ ! -f "$ROOT/$role_file" ]; then
+      printf "Missing role file for %s: %s\n" "$role" "$role_file" >&2
+      exit 1
+    fi
+  done
   "$ROOT/scripts/check-agent-config.sh" "$role" >/dev/null
 done
 

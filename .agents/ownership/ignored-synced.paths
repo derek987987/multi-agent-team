@@ -12,6 +12,10 @@ scripts/*
 .agents/state/*
 .agents/agent-config/*
 .agents/brief.md
+.agents/product-requirements.md
+.agents/design-notes.md
+.agents/qa-plan.md
+.agents/release-notes.md
 .agents/project-target.md
 .agents/intake-notes.md
 .agents/sop.md

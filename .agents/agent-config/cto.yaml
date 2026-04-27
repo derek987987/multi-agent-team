@@ -2,6 +2,7 @@ role: cto
 required_reads:
   - AGENTS.md
   - .agents/project-target.md
+  - scripts/codex-role.sh
   - .agents/prompts/cto.md
   - .agents/skills/cto.md
   - .agents/memory/cto.md

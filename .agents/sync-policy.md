@@ -15,7 +15,12 @@ These files are copied from the root checkout to implementation worktrees:
 - `.agents/skills/`
 - `.agents/schemas/`
 - `.agents/ownership/`
+- `.agents/agent-config/`
 - `.agents/brief.md`
+- `.agents/product-requirements.md`
+- `.agents/design-notes.md`
+- `.agents/qa-plan.md`
+- `.agents/release-notes.md`
 - `.agents/intake-notes.md`
 - `.agents/sop.md`
 - `.agents/roles.md`
@@ -55,4 +60,3 @@ These files are not deleted or overwritten by sync:
 ## Rule
 
 Root is the authority for planning and control-plane files. Worktrees can keep local logs and evidence until the integration owner pulls them back deliberately.
-

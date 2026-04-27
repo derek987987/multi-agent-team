@@ -22,7 +22,7 @@ Response:
 ## Lifecycle
 
 1. `scripts/route-agent.sh` creates a queued route.
-2. `scripts/dispatch-routes.sh` can mark it dispatched.
+2. `scripts/watch-routes.sh` normally runs in the control window and calls `scripts/dispatch-routes.sh` to mark it dispatched.
 3. `scripts/claim-route.sh` marks it in-progress.
 4. `scripts/complete-route.sh` marks it done.
 5. `scripts/cancel-route.sh` marks it cancelled.

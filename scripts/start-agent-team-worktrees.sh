@@ -3,12 +3,17 @@ set -euo pipefail
 
 SESSION="${1:-agent-team}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/scripts/agent-roles.sh"
 TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)"
 TARGET_PATH="${TARGET_PATH:-$ROOT}"
 TARGET_PATH="$(cd "$TARGET_PATH" && pwd)"
 PROJECT="$(basename "$TARGET_PATH")"
 BASE="$(dirname "$TARGET_PATH")/agent-worktrees"
 TMUX_CONF="$ROOT/.tmux.agent-team.conf"
+
+shell_join() {
+  printf '%q ' "$@"
+}
 
 if ! git -C "$TARGET_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   printf "This script requires target project %s to be inside a git repository.\n" "$TARGET_PATH" >&2
@@ -37,38 +42,34 @@ create_worktree() {
   fi
 }
 
-create_worktree frontend
-create_worktree backend
-create_worktree validation
+for role in "${PROJECT_WORKTREE_ROLES[@]}"; do
+  create_worktree "$role"
+done
 
 "$ROOT/scripts/sync-agent-state.sh" --push
 
 tmux -f "$TMUX_CONF" new-session -d -s "$SESSION" -c "$ROOT" -n control
-tmux send-keys -t "$SESSION:control" "printf 'Control terminal\nAgent home: $ROOT\nProject target: $TARGET_PATH\n\n'; ./scripts/agent-status.sh 2>/dev/null || true" C-m
+control_cmd="$(shell_join printf 'Control terminal\nAgent home: %s\nProject target: %s\nRoute watcher: active\n\n' "$ROOT" "$TARGET_PATH") && ./scripts/agent-status.sh 2>/dev/null || true; exec ./scripts/watch-routes.sh $(printf '%q' "$SESSION") --send"
+tmux send-keys -t "$SESSION:control" "$control_cmd" C-m
 
-tmux new-window -t "$SESSION" -c "$ROOT" -n orchestrator
-tmux send-keys -t "$SESSION:orchestrator" "printf 'Orchestrator agent terminal\nPrompt: .agents/prompts/orchestrator.md\nProject target: $TARGET_PATH\nUse this window for most human requests.\n\n'" C-m
+start_role_window() {
+  local role="$1"
+  local workdir="$2"
+  local cmd
+  tmux new-window -t "$SESSION" -c "$workdir" -n "$role"
+  cmd="$(shell_join "$ROOT/scripts/codex-role.sh" "$role" --workdir "$workdir")"
+  tmux send-keys -t "$SESSION:$role" "$cmd" C-m
+}
 
-tmux new-window -t "$SESSION" -c "$ROOT" -n cto
-tmux send-keys -t "$SESSION:cto" 'printf "CTO agent terminal\nPrompt: .agents/prompts/cto.md\nSOP: .agents/sop.md\n\n"' C-m
-
-tmux new-window -t "$SESSION" -c "$ROOT" -n pm
-tmux send-keys -t "$SESSION:pm" 'printf "PM agent terminal\nPrompt: .agents/prompts/pm.md\nTask template: .agents/task-template.md\n\n"' C-m
-
-tmux new-window -t "$SESSION" -c "$BASE/$PROJECT-frontend" -n frontend
-tmux send-keys -t "$SESSION:frontend" 'printf "Frontend worktree\nPrompt: .agents/prompts/frontend.md\nQuality gates: .agents/quality-gates.md\n\n"; git status' C-m
-
-tmux new-window -t "$SESSION" -c "$BASE/$PROJECT-backend" -n backend
-tmux send-keys -t "$SESSION:backend" 'printf "Backend worktree\nPrompt: .agents/prompts/backend.md\nQuality gates: .agents/quality-gates.md\n\n"; git status' C-m
-
-tmux new-window -t "$SESSION" -c "$BASE/$PROJECT-validation" -n validation
-tmux send-keys -t "$SESSION:validation" 'printf "Validation worktree\nPrompt: .agents/prompts/validation.md\nQuality gates: .agents/quality-gates.md\n\n"; git status' C-m
-
-tmux new-window -t "$SESSION" -c "$ROOT" -n reviewer
-tmux send-keys -t "$SESSION:reviewer" 'printf "Reviewer agent terminal\nPrompt: .agents/prompts/reviewer.md\nInbox: .agents/inbox/reviewer.md\n\n"' C-m
-
-tmux new-window -t "$SESSION" -c "$ROOT" -n security
-tmux send-keys -t "$SESSION:security" 'printf "Security agent terminal\nPrompt: .agents/prompts/security.md\nInbox: .agents/inbox/security.md\n\n"' C-m
+for role in "${AGENT_ROLES[@]}"; do
+  if role_uses_project_worktree "$role"; then
+    start_role_window "$role" "$BASE/$PROJECT-$role"
+  elif [ "$role" = "integration" ]; then
+    start_role_window "$role" "$TARGET_PATH"
+  else
+    start_role_window "$role" "$ROOT"
+  fi
+done
 
 tmux new-window -t "$SESSION" -c "$ROOT" -n server
 tmux send-keys -t "$SESSION:server" "cd '$TARGET_PATH'; printf 'Dev server and logs terminal\nProject target: $TARGET_PATH\n\n'" C-m

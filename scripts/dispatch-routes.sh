@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/scripts/agent-roles.sh"
 SESSION="${1:-agent-team}"
 MODE="${2:---dry-run}"
 ROUTES_JSONL="$ROOT/.agents/state/routes.jsonl"
@@ -11,18 +12,12 @@ json_escape() {
 }
 
 prompt_for_role() {
-  case "$1" in
-    orchestrator) printf ".agents/prompts/orchestrator.md" ;;
-    cto) printf ".agents/prompts/cto.md" ;;
-    pm) printf ".agents/prompts/pm.md" ;;
-    frontend) printf ".agents/prompts/frontend.md" ;;
-    backend) printf ".agents/prompts/backend.md" ;;
-    validation) printf ".agents/prompts/validation.md" ;;
-    reviewer) printf ".agents/prompts/reviewer.md" ;;
-    security) printf ".agents/prompts/security.md" ;;
-    integration) printf ".agents/skills/integration.md" ;;
-    *) printf "" ;;
-  esac
+  local role="$1"
+  if is_agent_role "$role" && [ -f "$ROOT/.agents/prompts/$role.md" ]; then
+    printf ".agents/prompts/%s.md" "$role"
+  else
+    printf ""
+  fi
 }
 
 for inbox in "$ROOT"/.agents/inbox/*.md; do
@@ -39,7 +34,7 @@ done | while IFS=$'\t' read -r role route prompt title; do
     printf "No prompt mapping for role %s route %s\n" "$role" "$route" >&2
     continue
   fi
-  message="Route $route queued: $title. Use $prompt and .agents/inbox/$role.md."
+  message="Route $route queued: $title. Use $prompt and .agents/inbox/$role.md. Read the route, claim the route with ./scripts/claim-route.sh $route $role, complete your role-specific work from shared files, write results to your owned outputs and .agents/handoffs.md when another role is needed, then run ./scripts/complete-route.sh $route $role \"<summary>\". If blocked, update the route Response, .agents/handoffs.md, and .agents/workflow-state.md with the blocker and needed owner."
   if [ "$MODE" = "--send" ]; then
     tmux send-keys -t "$SESSION:$role" -l "$message"
     tmux send-keys -t "$SESSION:$role" C-m

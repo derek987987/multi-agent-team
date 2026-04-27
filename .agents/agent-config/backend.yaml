@@ -2,6 +2,7 @@ role: backend
 required_reads:
   - AGENTS.md
   - .agents/project-target.md
+  - scripts/codex-role.sh
   - .agents/prompts/backend.md
   - .agents/skills/backend.md
   - .agents/memory/backend.md
