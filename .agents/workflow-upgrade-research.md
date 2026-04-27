@@ -100,3 +100,29 @@ Local integration:
 - Updated worktree mode so project-editing specialists get role-specific worktrees.
 - Updated routing matrix and quality gates so specialist review is part of production readiness.
 - Updated existing skill packs with productivity defaults and cross-role routing rules.
+
+## Adaptable Production Workflow Upgrade - 2026-04-28
+
+Sources checked:
+
+- OpenAI Agents SDK tracing (`https://openai.github.io/openai-agents-js/guides/tracing/`) and guardrails (`https://openai.github.io/openai-agents-python/guardrails/`): production workflows need visible handoffs, guardrail spans, and structured traces.
+- LangChain context engineering (`https://docs.langchain.com/oss/python/langchain/context-engineering`) and supervisor patterns (`https://docs.langchain.com/oss/python/langchain/supervisor`): reliable agents need intentional context selection, subagents for heavy work, and documented context strategy.
+- Microsoft AutoGen teams (`https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/tutorial/teams.html`): multi-agent teams need termination conditions and steering to avoid loops.
+- Google ADK multi-agent systems (`https://google.github.io/adk-docs/agents/multi-agents/`): multi-agent applications use hierarchy, workflow agents, and interaction mechanisms to coordinate larger goals.
+
+Gaps found in the local workflow:
+
+- Context strategy was implicit; agents had prompts and configs but no role-specific context map.
+- Guardrail and stop-condition policy was spread across several files instead of one policy reference.
+- There was no workflow evaluation suite beyond scaffold checks.
+- Failure recovery and retry ownership were under-specified.
+- Project-type adaptation was implicit, so the Orchestrator had no guide for which specialists to route early.
+- Unknown external facts had no dedicated Research owner.
+- Performance work was split across frontend/backend/data/devops with no clear budget owner.
+
+Local integration:
+
+- Added `.agents/context-map.md`, `.agents/agent-policy.md`, `.agents/evaluation-suite.md`, `.agents/failure-recovery.md`, and `.agents/adaptation-guide.md`.
+- Added Research and Performance roles with prompts, skill packs, memory, inboxes, logs, schemas, configs, and ownership.
+- Updated Codex role launch prompts so every agent reads context, policy, eval, recovery, and adaptation controls.
+- Updated routing matrix, quality gates, SOP, README, AGENTS, and existing skill packs so Research and Performance are first-class routes.

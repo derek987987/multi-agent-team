@@ -44,7 +44,7 @@ Idea:
 Please interview me if needed, refine my idea, write .agents/brief.md, and ask me to approve the brief before routing Product/CTO work.
 ```
 
-The Orchestrator asks at most 3 questions at a time, writes `.agents/brief.md`, and waits for approval. After approval, the Orchestrator creates routes in `.agents/inbox/<role>.md`; the watcher dispatches those routes to the matching Codex windows. You should not need to prompt Product, CTO, Design, PM, coder, Data, DevOps, QA, Reviewer, Security, Docs, Validation, or Integration agents directly during normal work.
+The Orchestrator asks at most 3 questions at a time, writes `.agents/brief.md`, and waits for approval. After approval, the Orchestrator creates routes in `.agents/inbox/<role>.md`; the watcher dispatches those routes to the matching Codex windows. You should not need to prompt Product, Research, CTO, Design, PM, coder, Data, DevOps, QA, Performance, Reviewer, Security, Docs, Validation, or Integration agents directly during normal work.
 
 Review the brief:
 
@@ -101,20 +101,22 @@ Agents treat the target directory as the codebase and the copied agent-team dire
 1. `control` - status and route watcher
 2. `orchestrator`
 3. `product`
-4. `cto`
-5. `design`
-6. `pm`
-7. `frontend`
-8. `backend`
-9. `data`
-10. `devops`
-11. `qa`
-12. `validation`
-13. `reviewer`
-14. `security`
-15. `docs`
-16. `integration`
-17. `server`
+4. `research`
+5. `cto`
+6. `design`
+7. `pm`
+8. `frontend`
+9. `backend`
+10. `data`
+11. `devops`
+12. `qa`
+13. `performance`
+14. `validation`
+15. `reviewer`
+16. `security`
+17. `docs`
+18. `integration`
+19. `server`
 
 All agent windows run:
 
@@ -128,6 +130,7 @@ via `scripts/codex-role.sh`. The server window remains a plain terminal for dev 
 
 - `orchestrator`: human intake, classification, routing, state, approval gates.
 - `product`: users, journeys, scope, non-goals, acceptance risks.
+- `research`: unfamiliar stacks, libraries, APIs, platform constraints, sourced recommendations.
 - `cto`: architecture, decisions, boundaries, technical risk.
 - `design`: user flows, UI states, accessibility, frontend handoff.
 - `pm`: task board, sequencing, dependencies, acceptance criteria.
@@ -135,6 +138,7 @@ via `scripts/codex-role.sh`. The server window remains a plain terminal for dev 
 - `data`: schemas, migrations, seed data, analytics, query contracts.
 - `devops`: setup, CI, build, deploy, environment, observability.
 - `qa`: automated test strategy, fixtures, smoke/regression coverage.
+- `performance`: latency, memory, bundle size, query speed, load, profiling, cost.
 - `reviewer`: code correctness, maintainability, architecture drift, missing tests.
 - `security`: auth, permissions, secrets, sensitive data, dependency risk.
 - `docs`: user docs, developer docs, runbooks, release notes.
@@ -160,7 +164,7 @@ Worktrees are created under:
 /Users/hay/Documents/agent-worktrees/
 ```
 
-Worktree mode creates role worktrees for project-editing roles from `PROJECT_WORKTREE_ROLES` in `scripts/agent-roles.sh`: `frontend`, `backend`, `data`, `devops`, `qa`, `docs`, and `validation`.
+Worktree mode creates role worktrees for project-editing roles from `PROJECT_WORKTREE_ROLES` in `scripts/agent-roles.sh`: `frontend`, `backend`, `data`, `devops`, `qa`, `performance`, `docs`, and `validation`.
 
 Worktree mode runs:
 
@@ -175,16 +179,18 @@ Run that again whenever the root checkout changes `.agents/*` and implementation
 1. User gives rough idea to Orchestrator.
 2. Orchestrator interviews, drafts `.agents/brief.md`, and asks for approval.
 3. Product clarifies users, journeys, scope, non-goals, and acceptance risks when needed.
-4. CTO writes `.agents/architecture.md` and `.agents/decisions.md`.
-5. Design writes `.agents/design-notes.md` for user-facing flows.
-6. PM writes `.agents/task-board.md` and routes implementation/specialist work.
-7. Human approves architecture and task board before broad implementation.
-8. Implementation and specialist agents work only on ready assigned tasks.
-9. QA creates or updates regression/smoke automation and `.agents/qa-plan.md`.
-10. Reviewer, Security, and Validation review the work.
-11. Docs updates docs and `.agents/release-notes.md` when behavior, setup, API, or release messaging changes.
-12. Integration merges one branch/worktree at a time.
-13. CTO and PM perform final review/acceptance.
+4. Research resolves unknown stack, API, framework, or platform questions before planning depends on assumptions.
+5. CTO writes `.agents/architecture.md` and `.agents/decisions.md`.
+6. Design writes `.agents/design-notes.md` for user-facing flows.
+7. PM writes `.agents/task-board.md` and routes implementation/specialist work.
+8. Human approves architecture and task board before broad implementation.
+9. Implementation and specialist agents work only on ready assigned tasks.
+10. QA creates or updates regression/smoke automation and `.agents/qa-plan.md`.
+11. Performance defines budgets or checks when latency, memory, bundle size, load, query speed, or runtime cost matters.
+12. Reviewer, Security, and Validation review the work.
+13. Docs updates docs and `.agents/release-notes.md` when behavior, setup, API, or release messaging changes.
+14. Integration merges one branch/worktree at a time.
+15. CTO and PM perform final review/acceptance.
 
 Agents communicate through `.agents/*` files. If a role needs another role, it writes a concrete handoff or route; it should not ask the human to prompt that other role.
 
@@ -287,6 +293,7 @@ Before review/merge, implementation agents should run:
 ./scripts/check-ownership.sh data
 ./scripts/check-ownership.sh devops
 ./scripts/check-ownership.sh qa
+./scripts/check-ownership.sh performance
 ./scripts/check-ownership.sh docs
 ```
 
@@ -341,17 +348,24 @@ Control plane:
 - `.agents/milestone-budget.md`
 - `.agents/events.jsonl`
 - `.agents/state/`
+- `.agents/context-map.md`
+- `.agents/agent-policy.md`
+- `.agents/evaluation-suite.md`
+- `.agents/failure-recovery.md`
+- `.agents/adaptation-guide.md`
 
 Planning:
 
 - `.agents/intake-notes.md`
 - `.agents/brief.md`
 - `.agents/product-requirements.md`
+- `.agents/research-notes.md`
 - `.agents/design-notes.md`
 - `.agents/architecture.md`
 - `.agents/decisions.md`
 - `.agents/task-board.md`
 - `.agents/qa-plan.md`
+- `.agents/performance-report.md`
 - `.agents/release-notes.md`
 
 Agent behavior:

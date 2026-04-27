@@ -11,9 +11,16 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/brief.md` - product goal, users, scope, and definition of done
 - `.agents/project-target.md` - current coding project directory and target mode
 - `.agents/intake-notes.md` - rough ideas, clarifying questions, assumptions, and brief readiness
+- `.agents/context-map.md` - role context loading rules and handoff context contract
+- `.agents/agent-policy.md` - autonomy, guardrails, stop conditions, and output discipline
+- `.agents/evaluation-suite.md` - scaffold and project evals for repeatable workflow assessment
+- `.agents/failure-recovery.md` - blocked-route recovery owners, retry rules, and evidence requirements
+- `.agents/adaptation-guide.md` - project-type routing guide for adaptable teams
 - `.agents/product-requirements.md` - product-owned users, journeys, scope, non-goals, and acceptance risks
+- `.agents/research-notes.md` - research-owned external/source findings and recommendations
 - `.agents/design-notes.md` - design-owned user flows, UI states, accessibility, and frontend handoff notes
 - `.agents/qa-plan.md` - QA-owned test strategy, fixtures, smoke coverage, and regression plan
+- `.agents/performance-report.md` - performance-owned metrics, baselines, budgets, and profiling notes
 - `.agents/release-notes.md` - docs-owned release notes, migration notes, and user-facing change summary
 - `.agents/sop.md` - standard operating procedure for the agent team
 - `.agents/roles.md` - role responsibilities and file ownership rules
@@ -78,16 +85,17 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 1. Human gives rough idea to Orchestrator.
 2. Orchestrator confirms `.agents/project-target.md`, interviews, drafts `.agents/brief.md`, and asks for approval.
 3. Product clarifies scope when the brief needs stronger user, journey, or acceptance-risk detail.
-4. CTO writes or updates `.agents/architecture.md` and `.agents/decisions.md`.
-5. Design writes UI/UX handoff notes when the work is user-facing.
-6. PM writes or updates `.agents/task-board.md` and routes implementation work.
-7. Human approves the architecture and task board before broad implementation.
-8. Implementation and specialist agents work only on ready assigned tasks.
-9. QA, Reviewer, Security, and Validation agents check branches/worktrees.
-10. Docs updates user/developer/release documentation when behavior or setup changes.
-11. Integration owner merges one branch at a time.
-12. CTO performs final architecture review.
-13. PM performs final acceptance review.
+4. Research resolves unfamiliar or drift-prone stack/API/platform questions.
+5. CTO writes or updates `.agents/architecture.md` and `.agents/decisions.md`.
+6. Design writes UI/UX handoff notes when the work is user-facing.
+7. PM writes or updates `.agents/task-board.md` and routes implementation work.
+8. Human approves the architecture and task board before broad implementation.
+9. Implementation and specialist agents work only on ready assigned tasks.
+10. QA, Performance, Reviewer, Security, and Validation agents check branches/worktrees.
+11. Docs updates user/developer/release documentation when behavior or setup changes.
+12. Integration owner merges one branch at a time.
+13. CTO performs final architecture review.
+14. PM performs final acceptance review.
 
 ## Validation
 
