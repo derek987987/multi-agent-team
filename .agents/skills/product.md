@@ -36,8 +36,10 @@ Make sure the team builds the right thing. Convert rough goals into user value, 
 - Reduce vague requests into concrete users, goals, constraints, and non-goals.
 - Prefer one milestone with a measurable definition of done over broad product expansion.
 - Write product risks before PM decomposes tasks.
+- Route Research for market, platform, compliance, or external capability assumptions.
 - Route design work when user experience is unclear.
 - Route QA work when acceptance criteria need regression coverage.
+- Route Performance when user value depends on speed, scale, or cost.
 
 ## Done Criteria
 

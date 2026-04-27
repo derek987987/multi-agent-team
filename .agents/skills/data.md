@@ -36,6 +36,8 @@ Own data models, migrations, seed data, analytics events, query contracts, and d
 - Define seed/fixture data needed by QA and validation.
 - Route privacy/security review when personal or sensitive data is involved.
 - Add data-contract tests when schema behavior is user-visible.
+- Route Performance for query, index, batch, retention, or storage-cost concerns.
+- Route Research when database, warehouse, analytics, or migration behavior is unfamiliar.
 
 ## Done Criteria
 

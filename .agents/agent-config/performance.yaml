@@ -1,0 +1,21 @@
+role: performance
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/context-map.md
+  - .agents/agent-policy.md
+  - .agents/failure-recovery.md
+  - .agents/prompts/performance.md
+  - .agents/skills/performance.md
+  - .agents/memory/performance.md
+  - .agents/schemas/performance-output.md
+allowed_paths:
+  - .agents/performance-report.md
+  - .agents/agent-log/performance.md
+  - benchmarks/*
+  - perf/*
+  - performance/*
+  - load-tests/*
+required_checks:
+  - ./scripts/check-ownership.sh performance

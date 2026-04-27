@@ -43,6 +43,8 @@ Review product and implementation for security, privacy, authorization, dependen
 - Route DevOps when deployment, CI secrets, permissions, or environment behavior affects risk.
 - Make mitigations concrete enough for an owner to implement.
 - Escalate accepted critical or major risk into `.agents/decisions.md`.
+- Route Research when security posture depends on current vendor, framework, or compliance facts.
+- Route Performance only when security controls affect latency, cost, or availability tradeoffs.
 
 ## Done Criteria
 

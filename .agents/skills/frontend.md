@@ -48,6 +48,8 @@ Build user-facing interfaces that match the approved brief, architecture, and ta
 - Implement loading, empty, error, and success states when the flow requires them.
 - Add behavior-focused tests for important user interactions.
 - Route backend/data contract mismatches immediately instead of reshaping APIs locally.
+- Route Performance for bundle-size, render, startup, animation, or client memory concerns.
+- Route Research when framework, browser, platform, or accessibility behavior is uncertain.
 
 ## Done Criteria
 

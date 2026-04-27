@@ -6,6 +6,13 @@ This workflow borrows the best practical ideas from role-based multi-agent syste
 
 The human normally prompts only the Orchestrator. The Orchestrator creates routes and handoffs in `.agents/*`, and the route watcher dispatches those routes to auto-launched Codex agents running with `--full-auto`. Agents communicate through markdown control-plane files, not by asking the human to relay messages.
 
+Production controls:
+- `.agents/context-map.md` controls what context each role should load.
+- `.agents/agent-policy.md` defines autonomy, guardrails, stop conditions, and output discipline.
+- `.agents/evaluation-suite.md` tracks scaffold and project evals.
+- `.agents/failure-recovery.md` routes blockers and repeated failures.
+- `.agents/adaptation-guide.md` maps project types to early specialist involvement.
+
 ## Phase 0 - Intake
 
 Owner: Human or Orchestrator
@@ -32,6 +39,7 @@ Exit criteria:
 Owners:
 - Orchestrator agent
 - Product agent
+- Research agent
 - CTO agent
 - Design agent
 - PM agent
@@ -53,6 +61,7 @@ Outputs:
 Exit criteria:
 - Major modules are identified.
 - Product/user acceptance risks are identified.
+- Unfamiliar stack or platform assumptions are researched.
 - Design handoff exists for user-facing work.
 - File/module ownership is explicit.
 - Validation method exists for every task.
@@ -66,6 +75,7 @@ Owners:
 - data-agent
 - devops-agent
 - qa-agent
+- performance-agent
 - docs-agent
 - other role-specific agents as needed
 
@@ -95,6 +105,7 @@ Owners:
 - validation-agent
 - reviewer-agent
 - security-agent
+- performance-agent when budgets or regressions matter
 - integration owner
 
 Inputs:

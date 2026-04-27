@@ -36,6 +36,8 @@ Keep user, developer, operational, and release documentation aligned with the pr
 - Do not describe unimplemented features as available.
 - Update release notes when user-visible behavior, setup, migration, or risk changes.
 - Route missing product or validation evidence instead of guessing.
+- Route Research when docs depend on current external APIs, SDKs, or platform behavior.
+- Include performance or operational budgets in docs when Performance marks them release-relevant.
 
 ## Done Criteria
 

@@ -8,6 +8,7 @@ The orchestrator uses this matrix to decide where a human request should go.
 | --- | --- | --- | --- |
 | project intake / idea refinement | orchestrator, then CTO after brief approval | `intake-notes`, `brief`, `workflow-state`, `inbox/cto`, `handoffs` | yes, approve brief or proceed with assumptions |
 | product clarification | product, then PM/Design/CTO as needed | `product-requirements`, `brief`, `decisions`, `workflow-state`, `handoffs` | yes if scope changes materially |
+| external research / unknown stack | research, then owning specialist | `research-notes`, `decisions`, `handoffs`, `workflow-state` | no unless recommendation changes scope/risk |
 | initial planning | product if scope is unclear, CTO, then PM | `brief`, `product-requirements`, `architecture`, `decisions`, `task-board`, `workflow-state` | yes, before implementation |
 | spec change | product and CTO, then PM | `change-request`, `product-requirements`, `brief`, `decisions`, `architecture`, `task-board`, `workflow-state` | yes if scope/risk changes materially |
 | feature change | PM, CTO if architecture affected | `change-request`, `brief`, `task-board`, `handoffs`, `workflow-state` | usually no for small changes |
@@ -17,6 +18,7 @@ The orchestrator uses this matrix to decide where a human request should go.
 | data model / migration | data, then backend/security/validation | `architecture`, `decisions`, `task-board`, `handoffs`, `workflow-state` | yes if irreversible or high-risk |
 | CI / deployment / environment | devops, then security/validation/docs | `quality-gates`, `task-board`, `handoffs`, `workflow-state` | yes if release process or infrastructure risk changes |
 | test automation | QA, then validation | `qa-plan`, `task-board`, `quality-gates`, `handoffs`, `workflow-state` | no unless release gates change |
+| performance risk / regression | performance, then owner and validation | `performance-report`, `quality-gates`, `task-board`, `handoffs`, `workflow-state` | yes if budget/risk acceptance changes |
 | validation change | validation-agent, PM if task criteria change | `quality-gates`, `validation-report`, `task-board`, `workflow-state` | no unless release gate changes |
 | code review | reviewer | `review-report`, `task-board`, `workflow-state`, `handoffs` | no unless blocking risk is accepted |
 | security review | security | `security-report`, `decisions`, `task-board`, `workflow-state`, `handoffs` | yes for accepted critical/major risk |
@@ -36,15 +38,17 @@ The orchestrator uses this matrix to decide where a human request should go.
 
 ## Routing Rules
 
-1. If the request changes architecture, route to CTO before implementation.
-2. If the request changes task ownership, dependencies, or acceptance criteria, route to PM.
-3. If the request crosses file ownership boundaries, create a handoff.
-4. If the request is a bug with clear ownership, create a bug task and route directly to the owner and validation.
-5. If a route blocks active implementation, mark affected tasks `blocked`.
-6. If a route requires human approval, record that in `.agents/workflow-state.md`.
-7. If implementation touches auth, permissions, secrets, payments, personal data, or shared infrastructure, route security review.
-8. If implementation touches data models, migrations, analytics, retention, or seed data, route data review.
-9. If implementation touches setup, CI, deployment, environment, observability, or release automation, route DevOps review.
-10. If implementation changes user-visible UI flows, route design review before frontend work and QA coverage before validation.
-11. If implementation changes user-facing behavior, setup, API behavior, or release notes, route docs work.
-12. If implementation is ready for merge, route reviewer, security when relevant, QA/validation, then integration.
+1. If the stack, library, API, platform, or standard is unfamiliar or drift-prone, route Research first.
+2. If the request changes architecture, route to CTO before implementation.
+3. If the request changes task ownership, dependencies, or acceptance criteria, route to PM.
+4. If the request crosses file ownership boundaries, create a handoff.
+5. If the request is a bug with clear ownership, create a bug task and route directly to the owner and validation.
+6. If a route blocks active implementation, mark affected tasks `blocked`.
+7. If a route requires human approval, record that in `.agents/workflow-state.md`.
+8. If implementation touches auth, permissions, secrets, payments, personal data, or shared infrastructure, route security review.
+9. If implementation touches data models, migrations, analytics, retention, or seed data, route data review.
+10. If implementation touches setup, CI, deployment, environment, observability, or release automation, route DevOps review.
+11. If implementation changes user-visible UI flows, route design review before frontend work and QA coverage before validation.
+12. If implementation could affect latency, memory, bundle size, query speed, throughput, startup, or runtime cost, route Performance.
+13. If implementation changes user-facing behavior, setup, API behavior, or release notes, route docs work.
+14. If implementation is ready for merge, route reviewer, security when relevant, QA/validation, then integration.

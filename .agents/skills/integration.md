@@ -43,6 +43,8 @@ Merge reviewed work safely, resolve conflicts deliberately, and keep the main br
 - Prefer rerunning targeted checks after each merge over batching risky changes.
 - Route missing docs or release notes before final acceptance.
 - Leave main branch state, known risks, and next route explicit in workflow state.
+- Confirm evaluation-suite expectations before final merge when project evals exist.
+- Route failure recovery when merge, validation, or ownership issues repeat.
 
 ## Done Criteria
 

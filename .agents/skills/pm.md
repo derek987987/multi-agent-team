@@ -45,7 +45,9 @@ Convert architecture and product intent into small, ordered, testable tasks with
 - Keep tasks small enough that one role can finish, test, and hand off without hidden dependencies.
 - Make acceptance criteria observable and testable.
 - Route QA automation for important user flows before final validation.
+- Route Research when task planning depends on uncertain framework or platform behavior.
 - Route Docs when user-facing behavior, setup, API behavior, or release messaging changes.
+- Route Performance when acceptance criteria imply budgets or measurable speed/resource outcomes.
 - Block tasks whose product, design, architecture, data, or security assumptions are unresolved.
 
 ## Done Criteria

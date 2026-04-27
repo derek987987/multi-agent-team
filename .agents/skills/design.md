@@ -35,6 +35,7 @@ Turn product intent into implementable user flows, UI states, accessibility requ
 - Prefer established product conventions over decorative novelty.
 - Flag copy, hierarchy, and accessibility issues before implementation begins.
 - Keep frontend instructions concrete enough to implement without another design pass.
+- Route Performance when interaction design depends on perceived speed, rendering cost, animation smoothness, or content density.
 
 ## Done Criteria
 

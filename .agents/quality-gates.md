@@ -15,6 +15,7 @@ Every implementation task should satisfy:
 - validation findings are resolved or explicitly accepted
 - reviewer/security findings are resolved or explicitly accepted when applicable
 - auto-launch workflow changes pass `bash tests/test-auto-codex-agent-team.sh`
+- context, policy, evaluation, failure recovery, and adaptation guidance are current when workflow behavior changes
 
 ## Command Matrix
 
@@ -53,6 +54,14 @@ Add project-specific commands as the repo takes shape.
 - Scope changes are reflected in `.agents/brief.md` or `.agents/product-requirements.md`.
 - Product decisions that affect scope or release risk are recorded.
 - Design, PM, QA, or docs follow-up is routed when needed.
+
+### Research
+
+- Local repo docs and dependency files were checked before external sources when applicable.
+- External facts use primary/official sources when possible.
+- Drift-prone facts include links and access dates.
+- Recommendations distinguish sourced facts from inference.
+- Follow-up is routed to the owner who can act on the research.
 
 ### Design
 
@@ -105,6 +114,13 @@ Add project-specific commands as the repo takes shape.
 - Commands, fixtures, and known flake risks are recorded in `.agents/qa-plan.md`.
 - Validation can reuse QA commands as release evidence.
 
+### Performance
+
+- Relevant metric, baseline, budget/threshold, and command are documented when measured.
+- Performance risks are tied to user, operational, or cost impact.
+- Performance checks are added to release gates only when stable enough to enforce.
+- Data, DevOps, frontend, backend, or validation follow-up is routed when needed.
+
 ### Reviewer
 
 - Diff is scoped to the task.
@@ -144,6 +160,14 @@ Add project-specific commands as the repo takes shape.
 - `scripts/check-secrets.sh` passes.
 - Relevant quality gates are rerun after merge.
 - Main branch status is known.
+
+## Workflow Control Gates
+
+- `.agents/context-map.md` defines role context and handoff context requirements.
+- `.agents/agent-policy.md` defines autonomy, guardrails, stop conditions, and output discipline.
+- `.agents/evaluation-suite.md` lists scaffold and project evals.
+- `.agents/failure-recovery.md` defines blocked-route recovery owners and retry policy.
+- `.agents/adaptation-guide.md` maps common project types to early specialist routes.
 
 ## Validation Report Format
 

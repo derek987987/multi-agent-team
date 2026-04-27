@@ -1,0 +1,17 @@
+role: research
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/context-map.md
+  - .agents/agent-policy.md
+  - .agents/adaptation-guide.md
+  - .agents/prompts/research.md
+  - .agents/skills/research.md
+  - .agents/memory/research.md
+  - .agents/schemas/research-output.md
+allowed_paths:
+  - .agents/research-notes.md
+  - .agents/agent-log/research.md
+required_checks:
+  - ./scripts/validate-agent-workflow.sh

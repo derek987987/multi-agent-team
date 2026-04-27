@@ -36,6 +36,8 @@ Make the project repeatable to install, test, build, deploy, observe, and recove
 - Put project-specific commands into `.agents/quality-gates.md`.
 - Route security review for secret, permission, deploy, or infrastructure changes.
 - Route docs when setup or deployment behavior changes.
+- Route Performance when infrastructure affects latency, scale, build time, runtime cost, or observability budgets.
+- Route Research when cloud, CI, deployment, or platform rules are uncertain.
 
 ## Done Criteria
 

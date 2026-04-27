@@ -36,6 +36,8 @@ Design and implement practical automated test coverage that proves accepted beha
 - Convert every reproduced bug into a durable test when feasible.
 - Record exact commands and fixture assumptions.
 - Hand off flaky or blocked cases with evidence instead of weakening release gates.
+- Route Performance when tests need timing, load, or resource thresholds.
+- Route Research when automation framework behavior or platform constraints are uncertain.
 
 ## Done Criteria
 

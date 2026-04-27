@@ -49,6 +49,8 @@ Build server-side behavior, data models, APIs, persistence, and integrations acc
 - Add regression tests for bug fixes and high-value integration tests for shared behavior.
 - Route Data for schema, migration, seed, analytics, or query performance questions.
 - Route Security for auth, permission, secret, payment, or sensitive-data behavior.
+- Route Performance for latency, throughput, memory, query, cache, or runtime-cost concerns.
+- Route Research when dependency, protocol, API, or platform behavior is uncertain.
 
 ## Done Criteria
 

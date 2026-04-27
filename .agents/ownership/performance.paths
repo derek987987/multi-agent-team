@@ -1,0 +1,6 @@
+.agents/performance-report.md
+.agents/agent-log/performance.md
+benchmarks/*
+perf/*
+performance/*
+load-tests/*

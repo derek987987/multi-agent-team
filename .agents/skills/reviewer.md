@@ -43,6 +43,8 @@ Review implementation for correctness, maintainability, simplicity, architecture
 - Keep findings actionable with file/path references and owner routing.
 - Avoid style-only feedback unless it affects readability or consistency.
 - Route systemic design or architecture drift to CTO, not only the coder.
+- Check `.agents/context-map.md` and `.agents/agent-policy.md` when review failures suggest missing context or policy drift.
+- Route Performance, Security, Data, DevOps, or Docs when review findings belong to those domains.
 
 ## Done Criteria
 

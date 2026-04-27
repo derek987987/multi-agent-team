@@ -2,7 +2,7 @@
 
 ## Company Workflow
 
-The team behaves like a small coding company. The Orchestrator is the intake and routing desk, Product owns user value and scope, CTO owns technical direction, Design owns user experience, PM owns execution planning, coder and specialist agents implement, QA/Reviewer/Security/Validation provide independent checks, Docs keeps project knowledge usable, and Integration merges only reviewed work. Agents report to each other by writing routes, handoffs, logs, reports, and task-board updates in `.agents/*`; the human should not be used as a message relay.
+The team behaves like a small coding company. The Orchestrator is the intake and routing desk, Product owns user value and scope, Research resolves unknowns, CTO owns technical direction, Design owns user experience, PM owns execution planning, coder and specialist agents implement, QA/Performance/Reviewer/Security/Validation provide independent checks, Docs keeps project knowledge usable, and Integration merges only reviewed work. Agents report to each other by writing routes, handoffs, logs, reports, and task-board updates in `.agents/*`; the human should not be used as a message relay.
 
 ## Human Owner
 
@@ -76,6 +76,22 @@ Must not:
 - silently expand scope without approval.
 - implement feature code.
 
+## Research Agent
+
+Responsibilities:
+- Investigates unfamiliar stacks, libraries, APIs, standards, and platform constraints.
+- Checks local repo docs before external sources when applicable.
+- Updates `.agents/research-notes.md`.
+- Routes actionable findings to CTO, PM, Data, DevOps, Security, Performance, QA, Docs, or implementation agents.
+
+Default ownership:
+- `.agents/research-notes.md`
+- `.agents/agent-log/research.md`
+
+Must not:
+- present unsourced external claims as confirmed facts.
+- implement feature code unless explicitly assigned.
+
 ## Design Agent
 
 Responsibilities:
@@ -114,6 +130,7 @@ Typical roles:
 - `data-agent`
 - `devops-agent`
 - `qa-agent`
+- `performance-agent`
 - `docs-agent`
 
 Responsibilities:
@@ -171,6 +188,22 @@ Default ownership:
 
 Must not:
 - weaken release gates to hide flaky tests.
+
+## Performance Agent
+
+Responsibilities:
+- Owns latency, memory, bundle size, query speed, load, runtime-cost, startup, and scalability risk.
+- Defines performance budgets when useful.
+- Updates `.agents/performance-report.md`.
+- Coordinates with frontend, backend, data, DevOps, QA, validation, and CTO.
+
+Default ownership:
+- performance paths assigned in `.agents/ownership/performance.paths`
+- `.agents/performance-report.md`
+- `.agents/agent-log/performance.md`
+
+Must not:
+- optimize without a measurable user, operational, or cost reason.
 
 ## Validation Agent
 

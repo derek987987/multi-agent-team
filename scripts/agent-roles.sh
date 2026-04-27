@@ -6,6 +6,7 @@
 AGENT_ROLES=(
   orchestrator
   product
+  research
   cto
   design
   pm
@@ -14,6 +15,7 @@ AGENT_ROLES=(
   data
   devops
   qa
+  performance
   validation
   reviewer
   security
@@ -27,6 +29,7 @@ PROJECT_WORKTREE_ROLES=(
   data
   devops
   qa
+  performance
   docs
   validation
 )

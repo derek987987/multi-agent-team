@@ -44,9 +44,11 @@ Turn approved product intent into a simple, maintainable technical direction tha
 ## Productivity Defaults
 
 - Prefer boring, framework-native architecture that coder agents can implement in small tasks.
+- Route Research before making decisions based on unfamiliar APIs, libraries, standards, or platform limits.
 - Define ownership boundaries before implementation routes are created.
 - Record tradeoffs only when they affect implementation, risk, or future maintenance.
 - Route Data for persistence or analytics concerns and DevOps for deployment or build concerns.
+- Route Performance when architecture affects latency, memory, throughput, bundle size, query speed, or runtime cost.
 - Make validation implications concrete enough for PM and QA to convert into tasks.
 
 ## Done Criteria
