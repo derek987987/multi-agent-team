@@ -1,0 +1,8 @@
+.agents/agent-log/backend.md
+src/backend/*
+src/server/*
+server/*
+api/*
+db/*
+migrations/*
+

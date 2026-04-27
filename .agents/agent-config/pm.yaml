@@ -1,0 +1,13 @@
+role: pm
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - .agents/prompts/pm.md
+  - .agents/skills/pm.md
+  - .agents/memory/pm.md
+allowed_paths:
+  - .agents/task-board.md
+  - .agents/final-acceptance.md
+  - .agents/agent-log/pm.md
+required_checks:
+  - ./scripts/check-ready.sh

@@ -1,0 +1,7 @@
+.agents/agent-log/frontend.md
+src/frontend/*
+frontend/*
+app/*
+components/*
+pages/*
+

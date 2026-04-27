@@ -1,0 +1,18 @@
+role: orchestrator
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - .agents/prompts/orchestrator.md
+  - .agents/skills/orchestrator.md
+  - .agents/memory/orchestrator.md
+allowed_paths:
+  - .agents/intake-notes.md
+  - .agents/project-target.md
+  - .agents/brief.md
+  - .agents/workflow-state.md
+  - .agents/handoffs.md
+  - .agents/change-request.md
+  - .agents/inbox/*
+  - .agents/agent-log/orchestrator.md
+required_checks:
+  - ./scripts/validate-agent-workflow.sh

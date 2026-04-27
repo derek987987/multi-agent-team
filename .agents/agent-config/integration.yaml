@@ -1,0 +1,14 @@
+role: integration
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - .agents/skills/integration.md
+  - .agents/memory/integration.md
+allowed_paths:
+  - .agents/agent-log/*
+  - .agents/workflow-state.md
+  - .agents/validation-report.md
+  - .agents/review-report.md
+  - .agents/security-report.md
+required_checks:
+  - ./scripts/run-quality-gates.sh

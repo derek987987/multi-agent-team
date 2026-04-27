@@ -1,0 +1,16 @@
+role: frontend
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - .agents/prompts/frontend.md
+  - .agents/skills/frontend.md
+  - .agents/memory/frontend.md
+allowed_paths:
+  - src/frontend/*
+  - frontend/*
+  - app/*
+  - components/*
+  - pages/*
+  - .agents/agent-log/frontend.md
+required_checks:
+  - ./scripts/check-ownership.sh frontend

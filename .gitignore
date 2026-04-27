@@ -1,0 +1,11 @@
+.DS_Store
+
+# Local dependencies and generated artifacts
+node_modules/
+agent-worktrees/
+
+# Local environment and logs
+.env
+.env.*
+*.log
+

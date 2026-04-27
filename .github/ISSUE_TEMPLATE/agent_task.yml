@@ -1,0 +1,54 @@
+name: Agent Task
+description: Create a scoped task for a local or cloud coding agent.
+title: "[Agent Task]: "
+labels:
+  - agent-task
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What should the agent accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Relevant files, product notes, architecture decisions, or constraints.
+    validations:
+      required: true
+  - type: textarea
+    id: ownership
+    attributes:
+      label: File / Module Ownership
+      description: Which files or modules may the agent edit?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know this task is complete?
+      value: |
+        - 
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation Commands
+      description: Commands the agent or reviewer should run.
+      value: |
+        - 
+    validations:
+      required: true
+  - type: textarea
+    id: restrictions
+    attributes:
+      label: Restrictions
+      value: |
+        - Do not edit files outside the ownership section.
+        - Do not change architecture without recording a decision.
+        - Do not mark complete until validation passes.
+

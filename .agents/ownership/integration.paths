@@ -1,0 +1,6 @@
+.agents/agent-log/*
+.agents/workflow-state.md
+.agents/validation-report.md
+.agents/review-report.md
+.agents/security-report.md
+

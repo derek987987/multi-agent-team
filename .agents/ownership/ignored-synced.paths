@@ -1,0 +1,36 @@
+# Files synced from the root control plane into worktrees.
+# These should not fail role ownership checks by default.
+AGENTS.md
+README.md
+.tmux.agent-team.conf
+.github/*
+scripts/*
+.agents/prompts/*
+.agents/skills/*
+.agents/schemas/*
+.agents/ownership/*
+.agents/state/*
+.agents/agent-config/*
+.agents/brief.md
+.agents/project-target.md
+.agents/intake-notes.md
+.agents/sop.md
+.agents/roles.md
+.agents/architecture.md
+.agents/decisions.md
+.agents/task-board.md
+.agents/task-template.md
+.agents/handoffs.md
+.agents/quality-gates.md
+.agents/definition-of-ready.md
+.agents/definition-of-done.md
+.agents/conflict-resolution.md
+.agents/change-control.md
+.agents/change-request.md
+.agents/workflow-state.md
+.agents/routing-matrix.md
+.agents/route-schema.md
+.agents/memory-policy.md
+.agents/sync-policy.md
+.agents/route-budget.md
+.agents/secrets-policy.md

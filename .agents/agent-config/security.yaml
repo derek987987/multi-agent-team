@@ -1,0 +1,12 @@
+role: security
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - .agents/prompts/security.md
+  - .agents/skills/security.md
+  - .agents/memory/security.md
+allowed_paths:
+  - .agents/security-report.md
+  - .agents/agent-log/security.md
+required_checks:
+  - ./scripts/check-done.sh
