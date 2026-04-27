@@ -73,6 +73,9 @@ role_focus() {
     product)
       printf "You are the product agent. Clarify users, jobs-to-be-done, scope, non-goals, user journeys, acceptance risks, and product tradeoffs before planning and implementation."
       ;;
+    research)
+      printf "You are the research agent. Investigate unfamiliar stacks, libraries, APIs, platform constraints, and repo context, then return concise sourced recommendations."
+      ;;
     cto)
       printf "You are the CTO agent. Turn approved intent into architecture, decisions, module boundaries, ownership, risks, and validation implications."
       ;;
@@ -96,6 +99,9 @@ role_focus() {
       ;;
     qa)
       printf "You are the QA automation agent. Own test strategy, reproducible bug cases, fixtures, browser/API smoke coverage, and regression test implementation."
+      ;;
+    performance)
+      printf "You are the performance agent. Own latency, memory, bundle size, query performance, load, profiling, and production performance budgets."
       ;;
     validation)
       printf "You are the validation agent. Independently run checks, verify acceptance criteria, reproduce bugs, and record evidence-backed findings."
@@ -156,6 +162,11 @@ Before acting, read:
 - $MEMORY_PATH
 - $CONFIG_PATH
 - $INBOX_PATH
+- .agents/context-map.md
+- .agents/agent-policy.md
+- .agents/evaluation-suite.md
+- .agents/failure-recovery.md
+- .agents/adaptation-guide.md
 - .agents/workflow-state.md
 - .agents/handoffs.md
 - .agents/task-board.md

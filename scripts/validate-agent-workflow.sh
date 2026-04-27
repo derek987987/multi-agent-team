@@ -7,10 +7,17 @@ missing=0
 
 required_files=(
   "AGENTS.md"
+  ".agents/context-map.md"
+  ".agents/agent-policy.md"
+  ".agents/evaluation-suite.md"
+  ".agents/failure-recovery.md"
+  ".agents/adaptation-guide.md"
   ".agents/design-notes.md"
   ".agents/product-requirements.md"
   ".agents/qa-plan.md"
   ".agents/release-notes.md"
+  ".agents/research-notes.md"
+  ".agents/performance-report.md"
   ".agents/intake-notes.md"
   ".agents/project-target.md"
   ".agents/brief.md"

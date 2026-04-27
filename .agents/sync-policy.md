@@ -17,10 +17,17 @@ These files are copied from the root checkout to implementation worktrees:
 - `.agents/ownership/`
 - `.agents/agent-config/`
 - `.agents/brief.md`
+- `.agents/context-map.md`
+- `.agents/agent-policy.md`
+- `.agents/evaluation-suite.md`
+- `.agents/failure-recovery.md`
+- `.agents/adaptation-guide.md`
 - `.agents/product-requirements.md`
 - `.agents/design-notes.md`
 - `.agents/qa-plan.md`
 - `.agents/release-notes.md`
+- `.agents/research-notes.md`
+- `.agents/performance-report.md`
 - `.agents/intake-notes.md`
 - `.agents/sop.md`
 - `.agents/roles.md`

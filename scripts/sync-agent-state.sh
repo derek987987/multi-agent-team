@@ -39,8 +39,10 @@ while IFS= read -r line; do
       rsync -a "$ROOT/.agents/agent-config/" "$wt/.agents/agent-config/"
       rsync -a "$ROOT/.agents/state/" "$wt/.agents/state/"
       for file in \
-        brief.md product-requirements.md design-notes.md qa-plan.md \
-        release-notes.md intake-notes.md sop.md roles.md architecture.md decisions.md \
+        brief.md context-map.md agent-policy.md evaluation-suite.md \
+        failure-recovery.md adaptation-guide.md product-requirements.md \
+        design-notes.md qa-plan.md release-notes.md research-notes.md \
+        performance-report.md intake-notes.md sop.md roles.md architecture.md decisions.md \
         task-board.md task-template.md handoffs.md quality-gates.md \
         definition-of-ready.md definition-of-done.md conflict-resolution.md \
         change-control.md change-request.md workflow-state.md routing-matrix.md \

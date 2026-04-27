@@ -38,7 +38,18 @@ assert_executable "scripts/codex-role.sh"
 assert_executable "scripts/watch-routes.sh"
 
 role_registry="$(cat "$ROOT/scripts/agent-roles.sh")"
-for role in orchestrator product cto design pm frontend backend data devops qa validation reviewer security docs integration; do
+for required_artifact in \
+  .agents/context-map.md \
+  .agents/agent-policy.md \
+  .agents/evaluation-suite.md \
+  .agents/failure-recovery.md \
+  .agents/adaptation-guide.md \
+  .agents/research-notes.md \
+  .agents/performance-report.md; do
+  assert_file_exists "$required_artifact"
+done
+
+for role in orchestrator product research cto design pm frontend backend data devops qa performance validation reviewer security docs integration; do
   assert_contains "$role_registry" "$role" "role registry"
   assert_file_exists ".agents/prompts/$role.md"
   assert_file_exists ".agents/skills/$role.md"
@@ -50,6 +61,9 @@ for role in orchestrator product cto design pm frontend backend data devops qa v
   assert_contains "$role_output" "codex --full-auto" "$role launcher"
   assert_contains "$role_output" ".agents/prompts/$role.md" "$role launcher"
   assert_contains "$role_output" ".agents/inbox/$role.md" "$role launcher"
+  assert_contains "$role_output" ".agents/context-map.md" "$role launcher"
+  assert_contains "$role_output" ".agents/agent-policy.md" "$role launcher"
+  assert_contains "$role_output" ".agents/failure-recovery.md" "$role launcher"
 done
 
 assert_contains "$(cat "$ROOT/scripts/start-agent-team.sh")" "codex-role.sh" "standard tmux start"
