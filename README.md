@@ -31,6 +31,8 @@ cd /Users/hay/Documents/agent-team-instances/my-app-team
 ./scripts/start-agent-team.sh
 ```
 
+Startup launches Codex in every agent window with `--full-auto`. The `control` window runs the route watcher, and the `orchestrator` window is the normal place where you talk to the team.
+
 In the `orchestrator` tmux window, give a rough idea:
 
 ```text
@@ -39,10 +41,10 @@ Use .agents/prompts/intake-orchestrator.md.
 Idea:
 <describe the coding project in rough words>
 
-Please interview me if needed, refine my idea, write .agents/brief.md, and ask me to approve the brief before routing CTO work.
+Please interview me if needed, refine my idea, write .agents/brief.md, and ask me to approve the brief before routing Product/CTO work.
 ```
 
-The Orchestrator asks at most 3 questions at a time, writes `.agents/brief.md`, and waits for approval.
+The Orchestrator asks at most 3 questions at a time, writes `.agents/brief.md`, and waits for approval. After approval, the Orchestrator creates routes in `.agents/inbox/<role>.md`; the watcher dispatches those routes to the matching Codex windows. You should not need to prompt Product, CTO, Design, PM, coder, Data, DevOps, QA, Reviewer, Security, Docs, Validation, or Integration agents directly during normal work.
 
 Review the brief:
 
@@ -53,7 +55,7 @@ sed -n '1,220p' .agents/brief.md
 Approve:
 
 ```text
-Approved. Proceed with CTO research and architecture routing.
+Approved. Proceed with Product/CTO planning and routing.
 ```
 
 ## Template And Project Copies
@@ -94,18 +96,50 @@ Agents treat the target directory as the codebase and the copied agent-team dire
 
 ## Windows
 
-`./scripts/start-agent-team.sh` creates:
+`./scripts/start-agent-team.sh` creates one window for every role in `scripts/agent-roles.sh`:
 
-1. `control`
+1. `control` - status and route watcher
 2. `orchestrator`
-3. `cto`
-4. `pm`
-5. `frontend`
-6. `backend`
-7. `validation`
-8. `reviewer`
-9. `security`
-10. `server`
+3. `product`
+4. `cto`
+5. `design`
+6. `pm`
+7. `frontend`
+8. `backend`
+9. `data`
+10. `devops`
+11. `qa`
+12. `validation`
+13. `reviewer`
+14. `security`
+15. `docs`
+16. `integration`
+17. `server`
+
+All agent windows run:
+
+```bash
+codex --full-auto --no-alt-screen
+```
+
+via `scripts/codex-role.sh`. The server window remains a plain terminal for dev servers and logs.
+
+## Production Roles
+
+- `orchestrator`: human intake, classification, routing, state, approval gates.
+- `product`: users, journeys, scope, non-goals, acceptance risks.
+- `cto`: architecture, decisions, boundaries, technical risk.
+- `design`: user flows, UI states, accessibility, frontend handoff.
+- `pm`: task board, sequencing, dependencies, acceptance criteria.
+- `frontend` / `backend`: implementation in owned files with tests and handoffs.
+- `data`: schemas, migrations, seed data, analytics, query contracts.
+- `devops`: setup, CI, build, deploy, environment, observability.
+- `qa`: automated test strategy, fixtures, smoke/regression coverage.
+- `reviewer`: code correctness, maintainability, architecture drift, missing tests.
+- `security`: auth, permissions, secrets, sensitive data, dependency risk.
+- `docs`: user docs, developer docs, runbooks, release notes.
+- `validation`: independent command execution and acceptance evidence.
+- `integration`: reviewed merges, conflict resolution, final validation routing.
 
 ## Real Coding Mode
 
@@ -126,6 +160,8 @@ Worktrees are created under:
 /Users/hay/Documents/agent-worktrees/
 ```
 
+Worktree mode creates role worktrees for project-editing roles from `PROJECT_WORKTREE_ROLES` in `scripts/agent-roles.sh`: `frontend`, `backend`, `data`, `devops`, `qa`, `docs`, and `validation`.
+
 Worktree mode runs:
 
 ```bash
@@ -138,15 +174,19 @@ Run that again whenever the root checkout changes `.agents/*` and implementation
 
 1. User gives rough idea to Orchestrator.
 2. Orchestrator interviews, drafts `.agents/brief.md`, and asks for approval.
-3. Orchestrator routes CTO work.
+3. Product clarifies users, journeys, scope, non-goals, and acceptance risks when needed.
 4. CTO writes `.agents/architecture.md` and `.agents/decisions.md`.
-5. Orchestrator or CTO routes PM work.
-6. PM writes `.agents/task-board.md`.
-7. Human approves architecture and task board.
-8. Implementation agents work only on ready assigned tasks.
-9. Reviewer, Security, and Validation review the work.
-10. Integration merges one branch/worktree at a time.
-11. CTO and PM perform final review/acceptance.
+5. Design writes `.agents/design-notes.md` for user-facing flows.
+6. PM writes `.agents/task-board.md` and routes implementation/specialist work.
+7. Human approves architecture and task board before broad implementation.
+8. Implementation and specialist agents work only on ready assigned tasks.
+9. QA creates or updates regression/smoke automation and `.agents/qa-plan.md`.
+10. Reviewer, Security, and Validation review the work.
+11. Docs updates docs and `.agents/release-notes.md` when behavior, setup, API, or release messaging changes.
+12. Integration merges one branch/worktree at a time.
+13. CTO and PM perform final review/acceptance.
+
+Agents communicate through `.agents/*` files. If a role needs another role, it writes a concrete handoff or route; it should not ask the human to prompt that other role.
 
 ## Agent Routine
 
@@ -165,6 +205,7 @@ Check an inbox:
 ```bash
 ./scripts/agent-inbox.sh cto
 ./scripts/agent-inbox.sh frontend
+./scripts/agent-inbox.sh qa
 ```
 
 Claim and complete a route:
@@ -203,6 +244,12 @@ Dispatch queued routes to tmux windows:
 ./scripts/dispatch-routes.sh agent-team --send
 ```
 
+The control window normally runs this automatically through:
+
+```bash
+./scripts/watch-routes.sh agent-team --send
+```
+
 Check route health:
 
 ```bash
@@ -237,6 +284,10 @@ Before review/merge, implementation agents should run:
 ```bash
 ./scripts/check-ownership.sh frontend
 ./scripts/check-ownership.sh backend
+./scripts/check-ownership.sh data
+./scripts/check-ownership.sh devops
+./scripts/check-ownership.sh qa
+./scripts/check-ownership.sh docs
 ```
 
 For task-specific ownership:
@@ -249,7 +300,7 @@ For task-specific ownership:
 
 Human approval is required before:
 
-- routing CTO/PM work from an unapproved brief, unless explicitly proceeding with assumptions
+- routing Product/CTO/PM work from an unapproved brief, unless explicitly proceeding with assumptions
 - starting implementation after initial architecture/task planning
 - accepting unresolved critical/major validation, review, or security findings
 - changing architecture materially
@@ -295,9 +346,13 @@ Planning:
 
 - `.agents/intake-notes.md`
 - `.agents/brief.md`
+- `.agents/product-requirements.md`
+- `.agents/design-notes.md`
 - `.agents/architecture.md`
 - `.agents/decisions.md`
 - `.agents/task-board.md`
+- `.agents/qa-plan.md`
+- `.agents/release-notes.md`
 
 Agent behavior:
 
@@ -327,6 +382,10 @@ Coordination:
 - `.agents/conflict-resolution.md`
 - `.agents/sync-policy.md`
 
+Research and rationale:
+
+- `.agents/workflow-upgrade-research.md`
+
 ## Status Dashboard
 
 Use:
@@ -339,13 +398,13 @@ This shows workflow state, git status, task counts, open handoffs, validation su
 
 ## Final Acceptance
 
-Ask CTO:
+Route final CTO review:
 
 ```text
 Use .agents/prompts/final-cto-review.md.
 ```
 
-Ask PM:
+Route final PM acceptance:
 
 ```text
 Use .agents/prompts/final-acceptance.md.

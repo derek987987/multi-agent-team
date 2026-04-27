@@ -11,6 +11,10 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/brief.md` - product goal, users, scope, and definition of done
 - `.agents/project-target.md` - current coding project directory and target mode
 - `.agents/intake-notes.md` - rough ideas, clarifying questions, assumptions, and brief readiness
+- `.agents/product-requirements.md` - product-owned users, journeys, scope, non-goals, and acceptance risks
+- `.agents/design-notes.md` - design-owned user flows, UI states, accessibility, and frontend handoff notes
+- `.agents/qa-plan.md` - QA-owned test strategy, fixtures, smoke coverage, and regression plan
+- `.agents/release-notes.md` - docs-owned release notes, migration notes, and user-facing change summary
 - `.agents/sop.md` - standard operating procedure for the agent team
 - `.agents/roles.md` - role responsibilities and file ownership rules
 - `.agents/architecture.md` - CTO-owned architecture plan
@@ -41,6 +45,8 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/validation-report.md` - validation results and findings
 - `.agents/review-report.md` - reviewer findings
 - `.agents/security-report.md` - security findings
+- `scripts/codex-role.sh` - launches each role-specific Codex agent with `--full-auto`
+- `scripts/watch-routes.sh` - watches queued routes and dispatches them to tmux agent windows
 
 ## Core Rules
 
@@ -64,19 +70,24 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 18. Prefer small, reviewable branches or worktrees over broad edits in one checkout.
 19. For new projects, send rough ideas to the orchestrator using `.agents/prompts/intake-orchestrator.md`; the orchestrator drafts `.agents/brief.md`.
 20. For minimal prompting, route mid-workflow scope changes, feature changes, bugs, or status questions through the orchestrator prompt in `.agents/prompts/orchestrator.md`.
+21. Do not ask the human to prompt another role during normal work; write a route or handoff and let the route watcher dispatch it.
+22. Auto-launched role agents run with `--full-auto`; they must still respect ownership, approval gates, and required checks.
 
 ## Recommended Flow
 
 1. Human gives rough idea to Orchestrator.
 2. Orchestrator confirms `.agents/project-target.md`, interviews, drafts `.agents/brief.md`, and asks for approval.
-3. CTO writes or updates `.agents/architecture.md` and `.agents/decisions.md`.
-4. PM writes or updates `.agents/task-board.md`.
-5. Human approves the architecture and task board.
-6. Implementation agents work only on ready assigned tasks.
-7. Reviewer, Security, and Validation agents check branches/worktrees.
-8. Integration owner merges one branch at a time.
-9. CTO performs final architecture review.
-10. PM performs final acceptance review.
+3. Product clarifies scope when the brief needs stronger user, journey, or acceptance-risk detail.
+4. CTO writes or updates `.agents/architecture.md` and `.agents/decisions.md`.
+5. Design writes UI/UX handoff notes when the work is user-facing.
+6. PM writes or updates `.agents/task-board.md` and routes implementation work.
+7. Human approves the architecture and task board before broad implementation.
+8. Implementation and specialist agents work only on ready assigned tasks.
+9. QA, Reviewer, Security, and Validation agents check branches/worktrees.
+10. Docs updates user/developer/release documentation when behavior or setup changes.
+11. Integration owner merges one branch at a time.
+12. CTO performs final architecture review.
+13. PM performs final acceptance review.
 
 ## Validation
 

@@ -71,3 +71,32 @@ Additional enforcement added from multi-agent workflow review:
 - `.agents/secrets-policy.md` defines secret-handling rules.
 - `.agents/milestone-budget.md` defines active task, branch, retry, and escalation budgets.
 - `.agents/ownership/ignored-synced.paths` prevents synced control-plane files from producing false ownership failures in worktrees.
+
+## Production Coding Company Upgrade - 2026-04-28
+
+Sources checked:
+
+- Anthropic engineering (`https://www.anthropic.com/engineering/multi-agent-research-system`): multi-agent systems benefit from orchestrator-worker specialization, parallel subagents, clear task descriptions, effort budgets, observability, evals, and filesystem artifacts for durable outputs.
+- LangChain multi-agent docs (`https://docs.langchain.com/oss/python/langchain/multi-agent/index`): multi-agent patterns are useful when one agent has too many tools, when specialized context is needed, when work can be parallelized, or when sequential constraints need explicit handoffs.
+- Microsoft AutoGen teams docs (`https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/tutorial/teams.html`): teams add value for complex work with diverse expertise but need extra scaffolding, termination/stop conditions, and steering.
+- OpenAI Agents SDK tracing and guardrails docs (`https://openai.github.io/openai-agents-js/guides/tracing/`, `https://openai.github.io/openai-agents-python/guardrails/`): production agent systems need handoffs, guardrails, and tracing of agent/tool/handoff spans.
+- CrewAI hierarchical process docs (`https://docs.crewai.com/en/learn/hierarchical-process`): manager-led delegation and result validation match a company-style operating model.
+
+Gaps found in the local workflow:
+
+- Missing Product role for user value, scope, non-goals, and acceptance-risk clarification.
+- Missing Design role for user flows, UI states, accessibility, and frontend handoff quality.
+- Missing Data role for schema, migration, seed, analytics, and query-contract ownership.
+- Missing DevOps role for setup, CI, deployment, environments, observability, and release automation.
+- Missing QA Automation role for durable regression tests, fixtures, smoke checks, and reproducible bug cases.
+- Missing Docs role for developer docs, user docs, runbooks, and release notes.
+- Role lists were duplicated in scripts, making future role additions brittle.
+
+Local integration:
+
+- Added `scripts/agent-roles.sh` as the central role registry.
+- Added Product, Design, Data, DevOps, QA, and Docs prompts, skills, memory, inboxes, logs, configs, schemas, and ownership rules.
+- Updated startup scripts to launch every role from the registry with Codex `--full-auto`.
+- Updated worktree mode so project-editing specialists get role-specific worktrees.
+- Updated routing matrix and quality gates so specialist review is part of production readiness.
+- Updated existing skill packs with productivity defaults and cross-role routing rules.
