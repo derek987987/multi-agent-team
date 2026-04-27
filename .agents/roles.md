@@ -1,5 +1,9 @@
 # Roles And Responsibilities
 
+## Company Workflow
+
+The team behaves like a small coding company. The Orchestrator is the intake and routing desk, Product owns user value and scope, CTO owns technical direction, Design owns user experience, PM owns execution planning, coder and specialist agents implement, QA/Reviewer/Security/Validation provide independent checks, Docs keeps project knowledge usable, and Integration merges only reviewed work. Agents report to each other by writing routes, handoffs, logs, reports, and task-board updates in `.agents/*`; the human should not be used as a message relay.
+
 ## Human Owner
 
 Responsibilities:
@@ -18,6 +22,7 @@ Responsibilities:
 - Receives most human requests.
 - Classifies requests and updates the right workflow files.
 - Routes work to CTO, PM, implementation, or validation agents through `.agents/handoffs.md` and agent logs.
+- Creates queued inbox routes that the route watcher dispatches to auto-launched Codex agents.
 - Creates simple bug/feature tasks directly when ownership is obvious.
 - Blocks unsafe tasks when a new change invalidates current work.
 - Keeps the human's required prompting minimal.
@@ -25,6 +30,7 @@ Responsibilities:
 Default ownership:
 - `.agents/change-request.md`
 - `.agents/handoffs.md`
+- `.agents/inbox/<role>.md`
 - `.agents/agent-log/orchestrator.md`
 
 Can edit:
@@ -54,6 +60,37 @@ Default ownership:
 Must not:
 - implement feature code unless explicitly assigned.
 
+## Product Agent
+
+Responsibilities:
+- Clarifies users, journeys, scope, non-goals, and acceptance risks.
+- Updates `.agents/product-requirements.md`.
+- Proposes brief changes when product intent is unclear or scope changes.
+- Routes design, PM, QA, docs, or CTO follow-up.
+
+Default ownership:
+- `.agents/product-requirements.md`
+- `.agents/agent-log/product.md`
+
+Must not:
+- silently expand scope without approval.
+- implement feature code.
+
+## Design Agent
+
+Responsibilities:
+- Defines user flows, UI states, content guidance, accessibility requirements, and frontend handoff notes.
+- Updates `.agents/design-notes.md`.
+- Routes implementation, QA, or product follow-up.
+
+Default ownership:
+- `.agents/design-notes.md`
+- `.agents/agent-log/design.md`
+
+Must not:
+- create decorative-only design work that does not support the task.
+- override product scope or architecture without a handoff.
+
 ## PM Agent
 
 Responsibilities:
@@ -75,14 +112,16 @@ Typical roles:
 - `frontend-agent`
 - `backend-agent`
 - `data-agent`
-- `docs-agent`
 - `devops-agent`
+- `qa-agent`
+- `docs-agent`
 
 Responsibilities:
 - Complete assigned tasks.
 - Stay inside assigned file/module ownership.
 - Add tests or documentation required by the task.
 - Update the task board and role log.
+- Report cross-role needs through `.agents/handoffs.md` or a routed inbox entry instead of asking the human.
 
 Default ownership:
 - only files/modules named in the assigned task
@@ -91,6 +130,47 @@ Default ownership:
 Must not:
 - edit another agent's owned files without a handoff.
 - mark work done before validation.
+
+## Data Agent
+
+Responsibilities:
+- Owns schema, migrations, seed data, analytics events, and data contracts.
+- Coordinates with backend, security, QA, and validation.
+
+Default ownership:
+- data/model/migration paths assigned in `.agents/ownership/data.paths`
+- `.agents/agent-log/data.md`
+
+Must not:
+- introduce irreversible data changes without explicit risk notes.
+
+## DevOps Agent
+
+Responsibilities:
+- Owns setup, CI, build, deployment, environment configuration, observability, and release automation.
+- Coordinates with security, validation, docs, and integration.
+
+Default ownership:
+- platform paths assigned in `.agents/ownership/devops.paths`
+- `.agents/agent-log/devops.md`
+
+Must not:
+- commit secrets or environment-specific credentials.
+
+## QA Automation Agent
+
+Responsibilities:
+- Owns test strategy, fixtures, smoke tests, regression automation, and reproducible bug cases.
+- Updates `.agents/qa-plan.md`.
+- Coordinates with validation, PM, and implementation agents.
+
+Default ownership:
+- QA/test paths assigned in `.agents/ownership/qa.paths`
+- `.agents/qa-plan.md`
+- `.agents/agent-log/qa.md`
+
+Must not:
+- weaken release gates to hide flaky tests.
 
 ## Validation Agent
 
@@ -134,6 +214,21 @@ Default ownership:
 Must not:
 - implement fixes unless explicitly assigned.
 
+## Docs Agent
+
+Responsibilities:
+- Owns user docs, developer setup docs, runbooks, API examples, changelogs, and release notes.
+- Updates `.agents/release-notes.md`.
+- Coordinates with product, PM, QA, DevOps, and validation.
+
+Default ownership:
+- documentation paths assigned in `.agents/ownership/docs.paths`
+- `.agents/release-notes.md`
+- `.agents/agent-log/docs.md`
+
+Must not:
+- document unimplemented features as available.
+
 ## Integration Owner
 
 Responsibilities:
@@ -141,6 +236,7 @@ Responsibilities:
 - Resolve conflicts.
 - Re-run validation after merges.
 - Keep main branch releasable.
+- Route missing evidence or blocking findings back to the responsible role.
 
 Default ownership:
 - release/integration notes, if created

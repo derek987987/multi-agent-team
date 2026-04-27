@@ -9,6 +9,9 @@ Read:
 - `.agents/inbox/reviewer.md`
 - `.agents/task-board.md`
 - `.agents/architecture.md`
+- `.agents/product-requirements.md`
+- `.agents/design-notes.md`
+- `.agents/qa-plan.md`
 - `.agents/definition-of-ready.md`
 - `.agents/definition-of-done.md`
 - `.agents/quality-gates.md`
@@ -21,6 +24,8 @@ Your job:
 4. Route blocking issues through `.agents/handoffs.md` or the appropriate inbox.
 
 Rules:
+- Claim the assigned route before reviewing and complete or block it when finished.
 - Do not implement code unless explicitly assigned.
 - Findings should be concrete and actionable.
 - Separate blocking findings from non-blocking suggestions.
+- Do not ask the human to prompt another role; create a route or handoff for the owner.

@@ -1,0 +1,20 @@
+role: qa
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/prompts/qa.md
+  - .agents/skills/qa.md
+  - .agents/memory/qa.md
+  - .agents/schemas/qa-output.md
+allowed_paths:
+  - .agents/qa-plan.md
+  - .agents/agent-log/qa.md
+  - tests/*
+  - e2e/*
+  - specs/*
+  - fixtures/*
+  - playwright.config.*
+required_checks:
+  - ./scripts/check-ownership.sh qa
+  - ./scripts/check-done.sh

@@ -1,0 +1,18 @@
+role: design
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/prompts/design.md
+  - .agents/skills/design.md
+  - .agents/memory/design.md
+  - .agents/schemas/design-output.md
+allowed_paths:
+  - .agents/design-notes.md
+  - .agents/agent-log/design.md
+  - design/*
+  - assets/*
+  - public/*
+  - styles/*
+required_checks:
+  - ./scripts/validate-agent-workflow.sh

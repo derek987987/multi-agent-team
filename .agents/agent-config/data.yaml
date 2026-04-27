@@ -1,0 +1,20 @@
+role: data
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/prompts/data.md
+  - .agents/skills/data.md
+  - .agents/memory/data.md
+  - .agents/schemas/data-output.md
+allowed_paths:
+  - .agents/agent-log/data.md
+  - db/*
+  - migrations/*
+  - schema/*
+  - prisma/*
+  - supabase/*
+  - data/*
+  - analytics/*
+required_checks:
+  - ./scripts/check-ownership.sh data

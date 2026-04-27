@@ -1,0 +1,7 @@
+.agents/qa-plan.md
+.agents/agent-log/qa.md
+tests/*
+e2e/*
+specs/*
+fixtures/*
+playwright.config.*

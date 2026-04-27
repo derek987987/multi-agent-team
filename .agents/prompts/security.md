@@ -9,6 +9,7 @@ Read:
 - `.agents/inbox/security.md`
 - `.agents/brief.md`
 - `.agents/architecture.md`
+- `.agents/product-requirements.md`
 - `.agents/task-board.md`
 - `.agents/quality-gates.md`
 - `.agents/schemas/security-output.md`
@@ -20,6 +21,8 @@ Your job:
 4. Route blocking issues through `.agents/handoffs.md` or the appropriate inbox.
 
 Rules:
+- Claim the assigned route before reviewing and complete or block it when finished.
 - Do not implement code unless explicitly assigned.
 - Critical security findings block merge unless the human explicitly accepts the risk.
 - Record assumptions when context is incomplete.
+- Do not ask the human to prompt another role; create a route or handoff for the owner.

@@ -14,6 +14,7 @@ Every implementation task should satisfy:
 - no unrelated files are changed
 - validation findings are resolved or explicitly accepted
 - reviewer/security findings are resolved or explicitly accepted when applicable
+- auto-launch workflow changes pass `bash tests/test-auto-codex-agent-team.sh`
 
 ## Command Matrix
 
@@ -35,6 +36,7 @@ Add project-specific commands as the repo takes shape.
 - `.agents/state/routes.jsonl` mirrors created routes.
 - `scripts/check-route-budget.sh` passes.
 - `scripts/check-stale-routes.sh` passes or stale routes are escalated.
+- `scripts/watch-routes.sh <session> --send` is active in the control window or routes are manually dispatched.
 - Human approval needs are explicit.
 - Scope/architecture changes are recorded in `.agents/decisions.md`.
 
@@ -44,6 +46,20 @@ Add project-specific commands as the repo takes shape.
 - Major tradeoffs are recorded.
 - Module/file ownership is explicit.
 - PM has enough validation implications to create tasks.
+
+### Product
+
+- Users, goals, non-goals, and acceptance risks are explicit.
+- Scope changes are reflected in `.agents/brief.md` or `.agents/product-requirements.md`.
+- Product decisions that affect scope or release risk are recorded.
+- Design, PM, QA, or docs follow-up is routed when needed.
+
+### Design
+
+- User flows and interaction states are clear.
+- Accessibility, empty/loading/error states, and responsive risks are covered when UI changes.
+- Frontend handoff is implementable without another design pass.
+- QA has enough state coverage guidance for tests.
 
 ### PM
 
@@ -68,6 +84,27 @@ Add project-specific commands as the repo takes shape.
 - Frontend contract changes are handed off instead of edited across ownership.
 - `scripts/check-ownership.sh backend` passes before review/merge.
 
+### Data
+
+- Schema, migration, seed, analytics, and query-contract changes are documented.
+- Reversibility or rollback risk is explicit.
+- Data-contract tests or validation commands are recorded when relevant.
+- Security/privacy review is routed for personal, sensitive, retained, or externally shared data.
+
+### DevOps
+
+- Setup, CI, build, deploy, and rollback steps are reproducible.
+- Project-specific commands are reflected in this file when they become release gates.
+- Environment variables and secrets follow `.agents/secrets-policy.md`.
+- `scripts/check-secrets.sh` passes before review/merge.
+
+### QA Automation
+
+- Test plan maps to product acceptance criteria.
+- Automated coverage includes high-value smoke/regression paths before broad edge cases.
+- Commands, fixtures, and known flake risks are recorded in `.agents/qa-plan.md`.
+- Validation can reuse QA commands as release evidence.
+
 ### Reviewer
 
 - Diff is scoped to the task.
@@ -88,6 +125,13 @@ Add project-specific commands as the repo takes shape.
 - Findings include severity and evidence.
 - Critical/major findings block done/merge unless accepted.
 - Merge recommendation is explicit.
+
+### Docs
+
+- User-facing docs, developer setup docs, runbooks, and release notes match implemented behavior.
+- Exact commands and paths are documented where operational behavior depends on them.
+- Migration, compatibility, and known-risk notes are explicit when relevant.
+- Documentation gaps are routed instead of guessed.
 
 ### Integration
 

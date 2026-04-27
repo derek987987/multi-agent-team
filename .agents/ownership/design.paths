@@ -1,0 +1,6 @@
+.agents/design-notes.md
+.agents/agent-log/design.md
+design/*
+assets/*
+public/*
+styles/*

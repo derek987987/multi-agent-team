@@ -33,12 +33,22 @@ Build server-side behavior, data models, APIs, persistence, and integrations acc
 
 ## Operating Rules
 
+- Claim backend routes before coding and complete or block the route when your evidence is written.
 - Work only on assigned backend tasks.
 - Do not edit frontend-owned files unless explicitly assigned.
 - Keep APIs aligned with architecture.
 - Add regression tests for bug fixes.
 - Use handoffs for frontend/API contract changes.
+- Route frontend, PM, reviewer, security, or validation follow-up through shared files instead of asking the human to coordinate.
 - Run relevant lint/type/test/build checks before ready-for-review.
+
+## Productivity Defaults
+
+- Keep business logic testable outside transport/framework glue when possible.
+- Respect CTO data/API contracts and route contract changes before implementation spreads.
+- Add regression tests for bug fixes and high-value integration tests for shared behavior.
+- Route Data for schema, migration, seed, analytics, or query performance questions.
+- Route Security for auth, permission, secret, payment, or sensitive-data behavior.
 
 ## Done Criteria
 
@@ -47,4 +57,3 @@ Build server-side behavior, data models, APIs, persistence, and integrations acc
 - Acceptance criteria are met.
 - Relevant checks pass.
 - Task status and backend log are updated.
-

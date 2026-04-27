@@ -1,0 +1,18 @@
+role: docs
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/prompts/docs.md
+  - .agents/skills/docs.md
+  - .agents/memory/docs.md
+  - .agents/schemas/docs-output.md
+allowed_paths:
+  - .agents/release-notes.md
+  - .agents/agent-log/docs.md
+  - README.md
+  - docs/*
+  - CHANGELOG.md
+  - RUNBOOK.md
+required_checks:
+  - ./scripts/check-ownership.sh docs

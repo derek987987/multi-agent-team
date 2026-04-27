@@ -1,0 +1,16 @@
+role: product
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/prompts/product.md
+  - .agents/skills/product.md
+  - .agents/memory/product.md
+  - .agents/schemas/product-output.md
+allowed_paths:
+  - .agents/product-requirements.md
+  - .agents/brief.md
+  - .agents/decisions.md
+  - .agents/agent-log/product.md
+required_checks:
+  - ./scripts/validate-agent-workflow.sh

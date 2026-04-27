@@ -1,0 +1,6 @@
+.agents/release-notes.md
+.agents/agent-log/docs.md
+README.md
+docs/*
+CHANGELOG.md
+RUNBOOK.md

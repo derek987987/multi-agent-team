@@ -1,0 +1,21 @@
+role: devops
+required_reads:
+  - AGENTS.md
+  - .agents/project-target.md
+  - scripts/codex-role.sh
+  - .agents/prompts/devops.md
+  - .agents/skills/devops.md
+  - .agents/memory/devops.md
+  - .agents/schemas/devops-output.md
+allowed_paths:
+  - .agents/agent-log/devops.md
+  - .github/*
+  - Dockerfile
+  - docker-compose.yml
+  - compose.yml
+  - infra/*
+  - deploy/*
+  - scripts/*
+required_checks:
+  - ./scripts/check-ownership.sh devops
+  - ./scripts/check-secrets.sh

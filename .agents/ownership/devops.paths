@@ -1,0 +1,8 @@
+.agents/agent-log/devops.md
+.github/*
+Dockerfile
+docker-compose.yml
+compose.yml
+infra/*
+deploy/*
+scripts/*

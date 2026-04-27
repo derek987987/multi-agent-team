@@ -1,0 +1,8 @@
+.agents/agent-log/data.md
+db/*
+migrations/*
+schema/*
+prisma/*
+supabase/*
+data/*
+analytics/*
