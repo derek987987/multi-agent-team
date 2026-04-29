@@ -18,7 +18,7 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
 fi
 
 tmux -f "$TMUX_CONF" new-session -d -s "$SESSION" -c "$PROJECT_DIR" -n control
-control_cmd="$(shell_join printf 'Control terminal\nAgent home: %s\nProject target: %s\nRoute watcher: active\n\n' "$PROJECT_DIR" "$TARGET_PATH") && ./scripts/agent-status.sh 2>/dev/null || true; exec ./scripts/watch-routes.sh $(printf '%q' "$SESSION") --send"
+control_cmd="$(shell_join printf 'Control terminal\nAgent home: %s\nProject target: %s\nRoute watcher: active\n\n' "$PROJECT_DIR" "$TARGET_PATH") && ./scripts/agent-status.sh 2>/dev/null || true; while true; do ./scripts/watch-routes.sh $(printf '%q' "$SESSION") --send; status=\$?; printf 'watch-routes exited with status %s; restarting in 5s\n' \"\$status\"; sleep 5; done"
 tmux send-keys -t "$SESSION:control" "$control_cmd" C-m
 
 start_role_window() {
@@ -37,5 +37,5 @@ done
 tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n server
 tmux send-keys -t "$SESSION:server" "cd '$TARGET_PATH'; printf 'Dev server and logs terminal\nProject target: $TARGET_PATH\n\n'" C-m
 
-tmux select-window -t "$SESSION:control"
+tmux select-window -t "$SESSION:control" 2>/dev/null || tmux select-window -t "$SESSION:orchestrator"
 tmux attach-session -t "$SESSION"

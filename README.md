@@ -18,6 +18,18 @@ Create a per-project agent-team copy for a coding project:
 
 Run `./scripts/new-coding-project.sh` with no arguments if you prefer to be prompted for the project path and copy destination.
 
+Create and start the copied team in one command:
+
+```bash
+./scripts/new-coding-project.sh /Users/hay/Documents/my-app --start
+```
+
+Use `--worktrees` instead of `--start` when the target project is already a git repository and you want role-specific implementation worktrees:
+
+```bash
+./scripts/new-coding-project.sh /Users/hay/Documents/my-app --worktrees
+```
+
 Or provide the exact destination for the copied agent team:
 
 ```bash
@@ -32,6 +44,8 @@ cd /Users/hay/Documents/agent-team-instances/my-app-team
 ```
 
 Startup launches Codex in every agent window with `--full-auto`. The `control` window runs the route watcher, and the `orchestrator` window is the normal place where you talk to the team.
+
+If this is the first time Codex has opened the generated agent-team copy or target project, Codex may ask whether you trust the directory. Choose `Yes, continue` for local projects you created and trust.
 
 In the `orchestrator` tmux window, give a rough idea:
 
@@ -255,6 +269,8 @@ The control window normally runs this automatically through:
 ```bash
 ./scripts/watch-routes.sh agent-team --send
 ```
+
+The startup scripts keep this watcher inside a restart loop. If `watch-routes.sh` exits, the `control` window stays open, prints the exit status, waits 5 seconds, and restarts the watcher. Startup also falls back to the `orchestrator` window if the `control` window is unavailable, so a watcher crash should not abort startup with `can't find window: control`.
 
 Check route health:
 
