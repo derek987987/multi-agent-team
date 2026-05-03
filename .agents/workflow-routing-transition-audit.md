@@ -522,6 +522,8 @@ Implementation status: completed in the P2 follow-up. Completion now supports re
 4. Add route depth enforcement.
 5. Add health checks for Codex pane readiness.
 
+Implementation status: completed in the P3 follow-up. `scripts/recover-stale-routes.sh` previews or applies stale-route recovery, stale UTC detection is covered by routing reliability tests, retry attempts are incremented during requeue, over-budget stale routes are blocked with report evidence, route depth is enforced at creation time, and recovery captures tmux pane evidence when a session is supplied.
+
 ## Bottom Line
 
 The local workflow is strong as a control-plane design, but it still treats route transfer as a tmux prompt delivery problem. It should treat route transfer as a durable state-machine problem where tmux is only a notification channel.

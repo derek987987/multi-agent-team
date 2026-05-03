@@ -41,3 +41,14 @@ Every blocker should include:
 - suspected next owner
 - files inspected
 - next action requested
+
+## Stale Route Recovery
+
+Run `scripts/recover-stale-routes.sh --dry-run` before changing state. Run `scripts/recover-stale-routes.sh --apply` when recovery should proceed automatically.
+
+Recovery behavior:
+
+- stale routes inside retry budget are requeued with `Attempt` incremented
+- stale routes at retry budget are blocked
+- route reports receive `### Recovery Event` evidence
+- pane evidence is captured when a tmux session is supplied

@@ -29,7 +29,7 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
   role="$(basename "$inbox" .md)"
   while IFS=$'\t' read -r route route_status created; do
     case "$route_status" in
-      queued|dispatched|in-progress)
+      queued|dispatching|dispatched|in-progress)
         created_epoch="$(parse_ts "$created")"
         if [ "$created_epoch" = "0" ]; then
           printf "%s/%s missing or invalid Created timestamp\n" "$role" "$route"
@@ -41,7 +41,7 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
           queued)
             limit=$((QUEUED_MINUTES * 60))
             ;;
-          dispatched)
+          dispatching|dispatched)
             limit=$((DISPATCHED_MINUTES * 60))
             ;;
           in-progress)
@@ -57,14 +57,19 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
   done < <(awk '
     /^## R[0-9]+/ { if (route) print route "\t" status "\t" created; route=$2; status=""; created=""; created_next=0 }
     /^Status: / { status=$2 }
-    /^Created:/ { created_next=1; next }
+    /^Created:/ {
+      created=$0
+      sub(/^Created:[[:space:]]*/, "", created)
+      if (created == "") { created_next=1 }
+      next
+    }
     created_next && $0 != "" { created=$0; created_next=0 }
     END { if (route) print route "\t" status "\t" created }
   ' "$inbox")
 done
 
 if [ "$status" -ne 0 ]; then
-  printf "\nStale routes found. Escalate through Orchestrator or human.\n" >&2
+  printf "\nStale routes found. Run scripts/recover-stale-routes.sh --dry-run, then --apply when automatic recovery is appropriate.\n" >&2
   exit 1
 fi
 

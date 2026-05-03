@@ -43,7 +43,7 @@ Add project-specific commands as the repo takes shape.
 - Meeting-driven routes include `Meeting ID` and `Decision ID` when applicable.
 - Human approvals and accepted risks are mirrored in `.agents/approvals.jsonl`.
 - `scripts/check-route-budget.sh` passes.
-- `scripts/check-stale-routes.sh` passes or stale routes are escalated.
+- `scripts/check-stale-routes.sh` passes or stale routes are recovered with `scripts/recover-stale-routes.sh --apply` and then escalated if still blocked.
 - `scripts/watch-routes.sh <session> --send` is active in the control window or routes are manually dispatched.
 - Human approval needs are explicit.
 - Scope/architecture changes are recorded in `.agents/decisions.md`.

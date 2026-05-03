@@ -45,6 +45,7 @@ Non-draft routes must not contain `TBD` in `Instruction`, `Expected output`, or 
 6. `scripts/block-route.sh` marks the route `blocked` with a reason and route report note.
 7. `scripts/cancel-route.sh` marks it `cancelled`.
 8. `scripts/route-status.sh R000` reads the route report first and prints owner, status, evidence, output refs, and next action.
+9. `scripts/recover-stale-routes.sh --apply` requeues stale active routes inside retry budget and blocks stale routes after retry budget is exhausted.
 
 All lifecycle scripts append to `.agents/events.jsonl`.
 
@@ -64,4 +65,5 @@ Required route report fields:
 - dispatch evidence
 - completion summary or blocked reason
 - output refs produced by completion
+- recovery events with pane evidence when a stale route is requeued or blocked
 - next owner when work cannot finish in the current role

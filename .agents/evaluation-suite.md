@@ -28,3 +28,4 @@ Score a completed milestone from 0 to 2:
 - Evidence quality: outputs cite commands, files, and findings.
 - Ownership hygiene: diffs stay inside assigned ownership.
 - Recovery quality: blockers and failures route to the right owner.
+- Stale recovery: stale active routes are requeued inside retry budget and blocked after retry budget.

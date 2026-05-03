@@ -77,7 +77,7 @@ if [ "$found" -eq 0 ]; then
   exit 1
 fi
 
-if [ "$ACTOR" != "dispatch-routes" ] && [ "$ACTOR" != "orchestrator" ] && [ "$ACTOR" != "$route_role" ]; then
+if [ "$ACTOR" != "dispatch-routes" ] && [ "$ACTOR" != "recover-stale-routes" ] && [ "$ACTOR" != "orchestrator" ] && [ "$ACTOR" != "$route_role" ]; then
   printf "Route %s is assigned to %s, not %s\n" "$ROUTE_ID" "$route_role" "$ACTOR" >&2
   exit 1
 fi

@@ -373,10 +373,14 @@ Check route health:
 ```bash
 ./scripts/check-route-budget.sh
 ./scripts/check-stale-routes.sh
+./scripts/recover-stale-routes.sh --dry-run
+./scripts/recover-stale-routes.sh --apply
 ./scripts/validate-route-state.sh
 ./scripts/route-status.sh R001
 ./scripts/update-agent-state.sh frontend --status busy --active-route R001
 ```
+
+`recover-stale-routes.sh --apply` increments `Attempt` and requeues stale active routes while they are inside `.agents/route-budget.md`; routes at retry budget are blocked with recovery evidence in `.agents/routes/R000.md`.
 
 ## Quality Gates
 

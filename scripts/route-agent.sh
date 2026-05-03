@@ -229,6 +229,20 @@ UPDATED="$CREATED"
 TARGET_PROJECT="${TARGET_PROJECT:-$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)}"
 TARGET_PROJECT="${TARGET_PROJECT:-$ROOT}"
 NEXT_OWNER="${NEXT_OWNER:-$TO_ROLE}"
+MAX_ROUTE_DEPTH="${MAX_ROUTE_DEPTH:-$(awk -F':[[:space:]]*' '/Max route depth:/ { print $2; exit }' "$ROOT/.agents/route-budget.md" 2>/dev/null || true)}"
+MAX_ROUTE_DEPTH="${MAX_ROUTE_DEPTH:-3}"
+
+case "$ROUTE_DEPTH" in
+  ''|*[!0-9]*)
+    printf "Route depth must be a number: %s\n" "$ROUTE_DEPTH" >&2
+    exit 1
+    ;;
+esac
+
+if [ "$ROUTE_DEPTH" -gt "$MAX_ROUTE_DEPTH" ]; then
+  printf "Route depth %s exceeds max route depth %s. See .agents/route-budget.md.\n" "$ROUTE_DEPTH" "$MAX_ROUTE_DEPTH" >&2
+  exit 1
+fi
 
 if [ "$DRAFT" -eq 0 ]; then
   missing=()

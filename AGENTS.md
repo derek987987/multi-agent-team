@@ -63,6 +63,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `scripts/codex-role.sh` - launches each role-specific Codex agent sandboxed with command approval prompts disabled
 - `scripts/watch-routes.sh` - watches queued routes and dispatches them to tmux agent windows
 - `scripts/route-status.sh` - summarizes a route from its canonical report, owner, evidence, output refs, and next action
+- `scripts/recover-stale-routes.sh` - requeues stale routes inside retry budget and blocks stale routes after retry budget is exhausted
 - `scripts/block-route.sh` - records blocked route state with reason and report evidence
 - `scripts/validate-route-state.sh` - validates route markdown/report consistency
 
@@ -85,14 +86,15 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 15. Run `scripts/validate-structured-state.sh` before review/merge.
 16. Run `scripts/validate-route-state.sh` before review/merge.
 17. Run `scripts/check-stale-routes.sh` and escalate stale routes.
-18. Run `scripts/check-secrets.sh` before review/merge.
-19. Prefer small, reviewable branches or worktrees over broad edits in one checkout.
-20. For new projects, send rough ideas to the orchestrator using `.agents/prompts/intake-orchestrator.md`; the orchestrator drafts `.agents/brief.md`.
-21. For minimal prompting, route mid-workflow scope changes, feature changes, bugs, or status questions through the orchestrator prompt in `.agents/prompts/orchestrator.md`.
-22. Do not ask the human to prompt another role during normal work; write a route or handoff and let the route watcher dispatch it.
-23. Auto-launched role agents run sandboxed without shell-command approval prompts; they must still respect ownership, approval gates, and required checks.
-24. Use `.agents/company/agent-profiles.jsonl` to choose the right role before routing; use meetings when several roles need a shared decision before tasking.
-25. Attach media through `scripts/attach-media.sh` so future visual tools can render the same references without changing workflow files.
+18. Run `scripts/recover-stale-routes.sh --apply` to requeue or block stale routes when automatic recovery is appropriate.
+19. Run `scripts/check-secrets.sh` before review/merge.
+20. Prefer small, reviewable branches or worktrees over broad edits in one checkout.
+21. For new projects, send rough ideas to the orchestrator using `.agents/prompts/intake-orchestrator.md`; the orchestrator drafts `.agents/brief.md`.
+22. For minimal prompting, route mid-workflow scope changes, feature changes, bugs, or status questions through the orchestrator prompt in `.agents/prompts/orchestrator.md`.
+23. Do not ask the human to prompt another role during normal work; write a route or handoff and let the route watcher dispatch it.
+24. Auto-launched role agents run sandboxed without shell-command approval prompts; they must still respect ownership, approval gates, and required checks.
+25. Use `.agents/company/agent-profiles.jsonl` to choose the right role before routing; use meetings when several roles need a shared decision before tasking.
+26. Attach media through `scripts/attach-media.sh` so future visual tools can render the same references without changing workflow files.
 
 ## Recommended Flow
 

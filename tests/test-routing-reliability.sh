@@ -52,7 +52,13 @@ restore_files() {
       cp "$backup_dir/$file" "$ROOT/$file"
     fi
   done
-  rm -rf "$ROOT/.agents/routes/R901.md" "$ROOT/.agents/routes/R902.md" "$ROOT/.agents/routes/R903.md"
+  rm -rf \
+    "$ROOT/.agents/routes/R901.md" \
+    "$ROOT/.agents/routes/R902.md" \
+    "$ROOT/.agents/routes/R903.md" \
+    "$ROOT/.agents/routes/R904.md" \
+    "$ROOT/.agents/routes/R905.md" \
+    "$ROOT/.agents/routes/R906.md"
   rm -rf "$backup_dir"
 }
 trap restore_files EXIT
@@ -146,5 +152,67 @@ assert_contains "$(cat /tmp/route-status-done.out)" "Status: done" "route-status
 assert_contains "$(cat /tmp/route-status-done.out)" "Report: .agents/routes/R903.md" "route-status done"
 assert_contains "$(cat /tmp/route-status-done.out)" "Output refs:" "route-status done"
 assert_contains "$(cat /tmp/route-status-done.out)" "Next action: no action; route is done" "route-status done"
+
+set_route_created() {
+  local route="$1"
+  local role="$2"
+  local created="$3"
+  local inbox="$ROOT/.agents/inbox/$role.md"
+  local report="$ROOT/.agents/routes/$route.md"
+  local tmp
+  tmp="$(mktemp)"
+  awk -v id="$route" -v created="$created" '
+    /^## / { in_route = ($2 == id) }
+    in_route && /^Created:/ { print; getline; print created; next }
+    { print }
+  ' "$inbox" > "$tmp"
+  mv "$tmp" "$inbox"
+
+  tmp="$(mktemp)"
+  awk -v created="$created" '/^Created:/ { print "Created: " created; next } { print }' "$report" > "$tmp"
+  mv "$tmp" "$report"
+}
+
+if "$ROOT/scripts/route-agent.sh" R906 pm "Too deep route" \
+  --instruction "This route should exceed route depth." \
+  --expected-output ".agents/routes/R906.md" \
+  --validation "Route depth over budget is rejected." \
+  --route-depth 4 >/tmp/route-depth.out 2>/tmp/route-depth.err; then
+  fail "route-agent allowed a route depth over budget"
+fi
+assert_contains "$(cat /tmp/route-depth.err)" "route depth" "route depth enforcement"
+
+"$ROOT/scripts/route-agent.sh" R904 pm "Recover stale queued route" \
+  --instruction "Recover this stale queued route." \
+  --expected-output ".agents/routes/R904.md recovery note" \
+  --validation "recover-stale-routes requeues within retry budget." \
+  --attempt 0 \
+  --context ".agents/failure-recovery.md" >/tmp/route-r904.out
+set_route_created R904 pm "2020-01-01T00:00:00Z"
+
+if QUEUED_MINUTES=1 "$ROOT/scripts/check-stale-routes.sh" >/tmp/stale-utc.out 2>/tmp/stale-utc.err; then
+  fail "check-stale-routes did not flag an old UTC queued route"
+fi
+assert_contains "$(cat /tmp/stale-utc.out /tmp/stale-utc.err)" "pm/R904 stale" "UTC stale route detection"
+
+"$ROOT/scripts/recover-stale-routes.sh" --apply >/tmp/recover-r904.out
+assert_contains "$(cat /tmp/recover-r904.out)" "Recovered stale route R904" "stale recovery retry"
+assert_contains "$(cat "$ROOT/.agents/inbox/pm.md")" "Attempt: 1" "stale recovery attempt increment"
+assert_contains "$(cat "$ROOT/.agents/routes/R904.md")" "### Recovery Event" "stale recovery report"
+assert_contains "$(cat "$ROOT/.agents/routes/R904.md")" "Requeued by recover-stale-routes" "stale recovery report"
+
+"$ROOT/scripts/route-agent.sh" R905 pm "Block stale over retry budget" \
+  --instruction "Block this stale route after retry budget is exhausted." \
+  --expected-output ".agents/routes/R905.md blocked recovery note" \
+  --validation "recover-stale-routes blocks routes over retry budget." \
+  --attempt 2 \
+  --context ".agents/failure-recovery.md" >/tmp/route-r905.out
+set_route_created R905 pm "2020-01-01T00:00:00Z"
+
+"$ROOT/scripts/recover-stale-routes.sh" --apply >/tmp/recover-r905.out
+assert_contains "$(cat /tmp/recover-r905.out)" "Blocked stale route R905" "stale recovery retry budget"
+assert_contains "$(cat "$ROOT/.agents/inbox/pm.md")" "## R905 - Block stale over retry budget" "stale recovery route"
+assert_contains "$(cat "$ROOT/.agents/inbox/pm.md")" "Status: blocked" "stale recovery retry budget"
+assert_contains "$(cat "$ROOT/.agents/routes/R905.md")" "Retry budget exhausted" "stale recovery retry budget"
 
 printf "Routing reliability tests passed.\n"
