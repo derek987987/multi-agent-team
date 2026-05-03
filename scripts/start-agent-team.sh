@@ -26,6 +26,14 @@ start_role_window() {
   local workdir="$2"
   local cmd
   tmux new-window -t "$SESSION" -c "$workdir" -n "$role"
+  "$PROJECT_DIR/scripts/update-agent-state.sh" "$role" \
+    --session "$SESSION" \
+    --window "$role" \
+    --status launching \
+    --workdir "$workdir" \
+    --target-project "$TARGET_PATH" \
+    --pid-or-command "codex-role.sh $role" \
+    --process-status starting
   cmd="$(shell_join "$PROJECT_DIR/scripts/codex-role.sh" "$role" --workdir "$workdir")"
   tmux send-keys -t "$SESSION:$role" "$cmd" C-m
 }

@@ -20,3 +20,5 @@ Optional fields:
 - `current_route`
 - `last_active`
 - `notes`
+
+Live process and routing telemetry belongs in `.agents/state/agents.jsonl` and follows `.agents/schemas/agent-state.md`.

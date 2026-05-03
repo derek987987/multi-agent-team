@@ -141,6 +141,7 @@ Completion summary: $SUMMARY
 REPORT
 
 "$ROOT/scripts/log-event.sh" route-completed "$ACTOR" "$SUMMARY" "" "$ROUTE_ID"
+"$ROOT/scripts/update-agent-state.sh" "$ACTOR" --status available --active-route none --blocked-reason none
 printf '{"route_id":"%s","status":"done","actor":"%s","summary":"%s","report":"%s","updated":"%s"}\n' \
   "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$SUMMARY")" "$(json_escape "$REPORT")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
 printf "Completed route %s\n" "$ROUTE_ID"

@@ -1,4 +1,5 @@
 role: orchestrator
+output_schema: .agents/schemas/orchestrator-output.md
 required_reads:
   - AGENTS.md
   - .agents/project-target.md
@@ -9,6 +10,7 @@ required_reads:
   - .agents/prompts/orchestrator.md
   - .agents/skills/orchestrator.md
   - .agents/memory/orchestrator.md
+  - .agents/schemas/orchestrator-output.md
 allowed_paths:
   - .agents/intake-notes.md
   - .agents/project-target.md
@@ -20,3 +22,53 @@ allowed_paths:
   - .agents/agent-log/orchestrator.md
 required_checks:
   - ./scripts/validate-agent-workflow.sh
+owned_outputs:
+  - .agents/intake-notes.md
+  - .agents/brief.md
+  - .agents/workflow-state.md
+  - .agents/handoffs.md
+  - .agents/agent-log/orchestrator.md
+route_input_schema: .agents/route-schema.md
+completion_report_required: true
+handoff_targets:
+  - product
+  - research
+  - cto
+  - design
+  - pm
+  - frontend
+  - backend
+  - data
+  - devops
+  - qa
+  - performance
+  - validation
+  - reviewer
+  - security
+  - docs
+  - integration
+reads_before_claim:
+  - .agents/inbox/orchestrator.md
+  - .agents/workflow-state.md
+  - .agents/routes/<route-id>.md
+reads_before_complete:
+  - .agents/routes/<route-id>.md
+  - .agents/quality-gates.md
+  - .agents/definition-of-done.md
+live_state_fields:
+  - session
+  - window
+  - status
+  - last_seen_at
+  - active_route
+  - workdir
+  - target_project
+  - branch_or_worktree
+  - blocked_reason
+max_parallel_routes: 4
+dispatch_timeout_seconds: 30
+stale_after: 12h
+escalation_owner: pm
+can_create_routes: true
+can_update_workflow_state: true
+can_modify_task_board: false

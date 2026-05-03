@@ -1,4 +1,5 @@
 role: cto
+output_schema: .agents/schemas/cto-output.md
 required_reads:
   - AGENTS.md
   - .agents/project-target.md
@@ -6,6 +7,7 @@ required_reads:
   - .agents/prompts/cto.md
   - .agents/skills/cto.md
   - .agents/memory/cto.md
+  - .agents/schemas/cto-output.md
 allowed_paths:
   - .agents/architecture.md
   - .agents/decisions.md
@@ -13,3 +15,50 @@ allowed_paths:
   - .agents/agent-log/cto.md
 required_checks:
   - ./scripts/validate-agent-workflow.sh
+owned_outputs:
+  - .agents/architecture.md
+  - .agents/decisions.md
+  - .agents/final-cto-review.md
+  - .agents/agent-log/cto.md
+route_input_schema: .agents/route-schema.md
+completion_report_required: true
+handoff_targets:
+  - orchestrator
+  - product
+  - research
+  - design
+  - pm
+  - frontend
+  - backend
+  - data
+  - devops
+  - qa
+  - performance
+  - reviewer
+  - security
+  - integration
+reads_before_claim:
+  - .agents/inbox/cto.md
+  - .agents/workflow-state.md
+  - .agents/routes/<route-id>.md
+reads_before_complete:
+  - .agents/routes/<route-id>.md
+  - .agents/quality-gates.md
+  - .agents/definition-of-done.md
+live_state_fields:
+  - session
+  - window
+  - status
+  - last_seen_at
+  - active_route
+  - workdir
+  - target_project
+  - branch_or_worktree
+  - blocked_reason
+max_parallel_routes: 2
+dispatch_timeout_seconds: 30
+stale_after: 24h
+escalation_owner: orchestrator
+can_create_routes: false
+can_update_workflow_state: false
+can_modify_task_board: false

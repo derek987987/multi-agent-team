@@ -93,6 +93,7 @@ if [ -f "$ROOT/$report" ]; then
 fi
 
 "$ROOT/scripts/log-event.sh" route-claimed "$ACTOR" "Claimed route $ROUTE_ID" "" "$ROUTE_ID"
+"$ROOT/scripts/update-agent-state.sh" "$ACTOR" --status busy --active-route "$ROUTE_ID"
 printf '{"route_id":"%s","status":"in-progress","actor":"%s","updated":"%s"}\n' \
   "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
 printf "Claimed route %s\n" "$ROUTE_ID"

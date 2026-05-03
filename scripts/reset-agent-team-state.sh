@@ -231,7 +231,7 @@ Owner: orchestrator
 | architecture | pending | CTO | architecture, decisions, ownership, and risks are documented |
 | planning | pending | PM | tasks have owners, dependencies, acceptance criteria, and validation |
 | implementation | pending | implementation agents | assigned tasks are ready for review |
-| validation | pending | validation-agent | quality gates pass or findings are documented |
+| validation | pending | validation | quality gates pass or findings are documented |
 | integration | pending | integration owner | reviewed work is merged one branch/worktree at a time |
 | acceptance | pending | CTO/PM/human | final review and acceptance are complete |
 
@@ -401,6 +401,7 @@ EOF
 cat > "$ROOT/.agents/media/manifest.jsonl" </dev/null
 cat > "$ROOT/.agents/approvals.jsonl" </dev/null
 cat > "$ROOT/.agents/state/projects.jsonl" </dev/null
+cat > "$ROOT/.agents/state/agents.jsonl" </dev/null
 cat > "$ROOT/.agents/state/routes.jsonl" </dev/null
 cat > "$ROOT/.agents/state/tasks.jsonl" </dev/null
 cat > "$ROOT/.agents/state/findings.jsonl" </dev/null
@@ -417,6 +418,15 @@ for inbox in "${AGENT_ROLES[@]}"; do
 Queued, dispatched, in-progress, and blocked routes arrive here.
 
 EOF
+done
+
+for role in "${AGENT_ROLES[@]}"; do
+  "$ROOT/scripts/update-agent-state.sh" "$role" \
+    --status available \
+    --active-route none \
+    --workdir "$ROOT" \
+    --target-project "$ROOT" \
+    --process-status unknown
 done
 
 "$ROOT/scripts/log-event.sh" reset reset-agent-team-state "Reset agent-team runtime state" "$UPDATED"

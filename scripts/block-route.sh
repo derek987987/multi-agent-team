@@ -125,6 +125,7 @@ REPORT
 fi
 
 "$ROOT/scripts/log-event.sh" route-blocked "$ACTOR" "$REASON" "" "$ROUTE_ID"
+"$ROOT/scripts/update-agent-state.sh" "$route_role" --status blocked --active-route "$ROUTE_ID" --blocked-reason "$REASON"
 printf '{"route_id":"%s","status":"blocked","actor":"%s","reason":"%s","report":"%s","updated":"%s"}\n' \
   "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$REASON")" "$(json_escape "$REPORT")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
 printf "Blocked route %s\n" "$ROUTE_ID"

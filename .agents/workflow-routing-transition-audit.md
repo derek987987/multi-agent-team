@@ -503,6 +503,8 @@ Health should inspect:
 3. Add `.agents/state/agents.jsonl` live telemetry.
 4. Add Integration output schema.
 
+Implementation status: completed in the P1 follow-up. Every `.agents/agent-config/<role>.yaml` now carries the required attribute set, active workflow docs use canonical role IDs, `.agents/state/agents.jsonl` plus `scripts/update-agent-state.sh` provide live role telemetry, and `.agents/schemas/integration-output.md` defines Integration completion output.
+
 ### P2 - Make Reporting Smooth
 
 1. Require `.agents/routes/R000.md` completion reports.

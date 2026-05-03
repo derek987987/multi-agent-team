@@ -1,4 +1,5 @@
 role: integration
+output_schema: .agents/schemas/integration-output.md
 required_reads:
   - AGENTS.md
   - .agents/project-target.md
@@ -6,6 +7,7 @@ required_reads:
   - .agents/prompts/integration.md
   - .agents/skills/integration.md
   - .agents/memory/integration.md
+  - .agents/schemas/integration-output.md
 allowed_paths:
   - .agents/agent-log/*
   - .agents/workflow-state.md
@@ -14,3 +16,50 @@ allowed_paths:
   - .agents/security-report.md
 required_checks:
   - ./scripts/run-quality-gates.sh
+owned_outputs:
+  - .agents/agent-log/*
+  - .agents/workflow-state.md
+  - .agents/validation-report.md
+  - .agents/review-report.md
+  - .agents/security-report.md
+route_input_schema: .agents/route-schema.md
+completion_report_required: true
+handoff_targets:
+  - orchestrator
+  - cto
+  - pm
+  - frontend
+  - backend
+  - data
+  - devops
+  - qa
+  - performance
+  - validation
+  - reviewer
+  - security
+  - docs
+reads_before_claim:
+  - .agents/inbox/integration.md
+  - .agents/workflow-state.md
+  - .agents/routes/<route-id>.md
+reads_before_complete:
+  - .agents/routes/<route-id>.md
+  - .agents/quality-gates.md
+  - .agents/definition-of-done.md
+live_state_fields:
+  - session
+  - window
+  - status
+  - last_seen_at
+  - active_route
+  - workdir
+  - target_project
+  - branch_or_worktree
+  - blocked_reason
+max_parallel_routes: 1
+dispatch_timeout_seconds: 30
+stale_after: 24h
+escalation_owner: pm
+can_create_routes: false
+can_update_workflow_state: true
+can_modify_task_board: false

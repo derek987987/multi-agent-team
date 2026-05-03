@@ -131,13 +131,13 @@ Must not:
 ## Implementation Agents
 
 Typical roles:
-- `frontend-agent`
-- `backend-agent`
-- `data-agent`
-- `devops-agent`
-- `qa-agent`
-- `performance-agent`
-- `docs-agent`
+- `frontend`
+- `backend`
+- `data`
+- `devops`
+- `qa`
+- `performance`
+- `docs`
 
 Responsibilities:
 - Complete assigned tasks.

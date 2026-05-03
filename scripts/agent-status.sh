@@ -15,6 +15,20 @@ else
 fi
 printf "\n"
 
+printf "== Live Agent Telemetry ==\n"
+if [ -s "$ROOT/.agents/state/agents.jsonl" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    jq -r '"\(.role)\t\(.status)\t\(.active_route)\t\(.window)\t\(.last_seen_at)\t\((.blocked_reason // "none") | if . == "" then "none" else . end)"' "$ROOT/.agents/state/agents.jsonl" |
+      awk -F '\t' 'BEGIN { printf "%-14s %-12s %-12s %-14s %-22s %s\n", "role", "status", "route", "window", "last_seen_at", "blocked" }
+           { printf "%-14s %-12s %-12s %-14s %-22s %s\n", $1, $2, $3, $4, $5, $6 }'
+  else
+    sed -n '1,40p' "$ROOT/.agents/state/agents.jsonl"
+  fi
+else
+  printf "No live agent telemetry recorded yet.\n"
+fi
+printf "\n"
+
 printf "== Workflow State ==\n"
 if [ -f "$ROOT/.agents/workflow-state.md" ]; then
   sed -n '1,80p' "$ROOT/.agents/workflow-state.md"

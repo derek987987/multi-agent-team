@@ -6,6 +6,7 @@ Read:
 - `AGENTS.md`
 - `.agents/skills/integration.md`
 - `.agents/memory/integration.md`
+- `.agents/schemas/integration-output.md`
 - `.agents/project-target.md`
 - `.agents/inbox/integration.md`
 - `.agents/task-board.md`

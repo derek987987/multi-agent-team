@@ -70,13 +70,13 @@ Exit criteria:
 ## Phase 2 - Implementation
 
 Owners:
-- frontend-agent
-- backend-agent
-- data-agent
-- devops-agent
-- qa-agent
-- performance-agent
-- docs-agent
+- frontend
+- backend
+- data
+- devops
+- qa
+- performance
+- docs
 - other role-specific agents as needed
 
 Inputs:
@@ -101,11 +101,11 @@ Exit criteria:
 ## Phase 3 - Review And Validation
 
 Owners:
-- qa-agent
-- validation-agent
-- reviewer-agent
-- security-agent
-- performance-agent when budgets or regressions matter
+- qa
+- validation
+- reviewer
+- security
+- performance when budgets or regressions matter
 - integration owner
 
 Inputs:

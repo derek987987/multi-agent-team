@@ -7,6 +7,8 @@ SESSION="${1:-agent-team}"
 MODE="${2:---dry-run}"
 ROUTES_JSONL="$ROOT/.agents/state/routes.jsonl"
 ACK_TIMEOUT="${ROUTE_DISPATCH_ACK_TIMEOUT:-30}"
+TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)"
+TARGET_PATH="${TARGET_PATH:-$ROOT}"
 
 json_escape() {
   printf '%s' "$1" | tr '\n' ' ' | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g'
@@ -162,6 +164,14 @@ done | while IFS=$'\t' read -r role route prompt title; do
       continue
     fi
     update_route_status "$route" "$role" "dispatching" "$report"
+    "$ROOT/scripts/update-agent-state.sh" "$role" \
+      --session "$SESSION" \
+      --window "$role" \
+      --status dispatching \
+      --active-route "$route" \
+      --target-project "$TARGET_PATH" \
+      --pid-or-command "tmux:$SESSION:$role" \
+      --process-status alive
     tmux send-keys -t "$SESSION:$role" -l "$message"
     tmux send-keys -t "$SESSION:$role" C-m
     "$ROOT/scripts/log-event.sh" route-dispatched dispatch-routes "Dispatched $route to $role" "$message" "$route"
@@ -179,6 +189,15 @@ done | while IFS=$'\t' read -r role route prompt title; do
         capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -40 2>/dev/null || true)"
         printf "Route %s ack timeout for %s after %ss\n" "$route" "$role" "$ACK_TIMEOUT" >&2
         append_report_note "$report" "Dispatch failure" "Ack timeout after ${ACK_TIMEOUT}s. Pane tail:\n\n\`\`\`text\n$capture\n\`\`\`"
+        "$ROOT/scripts/update-agent-state.sh" "$role" \
+          --session "$SESSION" \
+          --window "$role" \
+          --status blocked \
+          --active-route "$route" \
+          --blocked-reason "ack timeout after ${ACK_TIMEOUT}s" \
+          --target-project "$TARGET_PATH" \
+          --pid-or-command "tmux:$SESSION:$role" \
+          --process-status unknown
         "$ROOT/scripts/block-route.sh" "$route" dispatch-routes "ack timeout after ${ACK_TIMEOUT}s for $SESSION:$role" --report "$report" >/dev/null
         ;;
     esac

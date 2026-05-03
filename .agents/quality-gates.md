@@ -36,6 +36,7 @@ Add project-specific commands as the repo takes shape.
 - Routes are in the right `.agents/inbox/<role>.md` files.
 - Route lifecycle changes are reflected in `.agents/events.jsonl`.
 - `.agents/state/routes.jsonl` mirrors created routes.
+- `.agents/state/agents.jsonl` reflects live role telemetry when routes are dispatched, claimed, completed, blocked, or cancelled.
 - `.agents/routes/R000.md` exists for each created route and is used as the durable route contract.
 - Non-draft routes have concrete instruction, expected output, and validation fields.
 - `scripts/validate-route-state.sh` passes.
@@ -174,6 +175,7 @@ Add project-specific commands as the repo takes shape.
 
 - `.agents/context-map.md` defines role context and handoff context requirements.
 - `.agents/agent-policy.md` defines autonomy, guardrails, stop conditions, and output discipline.
+- `.agents/agent-config/<role>.yaml` defines output schema, route schema, allowed handoff targets, telemetry fields, capacity, stale timeout, and escalation owner for every canonical role.
 - `.agents/evaluation-suite.md` lists scaffold and project evals.
 - `.agents/failure-recovery.md` defines blocked-route recovery owners and retry policy.
 - `.agents/adaptation-guide.md` maps common project types to early specialist routes.

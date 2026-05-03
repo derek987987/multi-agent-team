@@ -39,6 +39,7 @@ files_to_restore=(
   ".agents/inbox/frontend.md"
   ".agents/handoffs.md"
   ".agents/workflow-state.md"
+  ".agents/state/agents.jsonl"
   ".agents/state/routes.jsonl"
   ".agents/events.jsonl"
 )

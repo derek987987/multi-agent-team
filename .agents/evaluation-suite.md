@@ -24,6 +24,7 @@ Score a completed milestone from 0 to 2:
 
 - Correct routing: the right roles received the right routes.
 - Context quality: agents read the files needed for the task.
+- Agent attributes: role configs include output schema, route schema, handoff targets, live state fields, capacity, stale timeout, and escalation owner.
 - Evidence quality: outputs cite commands, files, and findings.
 - Ownership hygiene: diffs stay inside assigned ownership.
 - Recovery quality: blockers and failures route to the right owner.

@@ -34,8 +34,10 @@ assert_executable() {
 assert_file_exists "scripts/codex-role.sh"
 assert_file_exists "scripts/watch-routes.sh"
 assert_file_exists "scripts/agent-roles.sh"
+assert_file_exists "scripts/update-agent-state.sh"
 assert_executable "scripts/codex-role.sh"
 assert_executable "scripts/watch-routes.sh"
+assert_executable "scripts/update-agent-state.sh"
 
 role_registry="$(cat "$ROOT/scripts/agent-roles.sh")"
 for required_artifact in \
@@ -90,10 +92,14 @@ assert_contains "$frontend_output" "claim assigned routes" "frontend launcher"
 assert_contains "$(cat /tmp/agent-team-watch-routes-test.out)" "watch-routes" "route watcher"
 
 cto_backup="$(mktemp)"
+agents_backup="$(mktemp)"
 cp "$ROOT/.agents/inbox/cto.md" "$cto_backup"
+cp "$ROOT/.agents/state/agents.jsonl" "$agents_backup"
 restore_cto_inbox() {
   cp "$cto_backup" "$ROOT/.agents/inbox/cto.md"
+  cp "$agents_backup" "$ROOT/.agents/state/agents.jsonl"
   rm -f "$cto_backup"
+  rm -f "$agents_backup"
 }
 trap restore_cto_inbox EXIT
 
@@ -123,5 +129,18 @@ dispatch_output="$("$ROOT/scripts/dispatch-routes.sh" agent-team-test --dry-run)
 assert_contains "$dispatch_output" "claim the route" "route dispatch"
 assert_contains "$dispatch_output" "complete-route.sh" "route dispatch"
 assert_contains "$dispatch_output" ".agents/handoffs.md" "route dispatch"
+
+"$ROOT/scripts/update-agent-state.sh" frontend \
+  --session agent-team-test \
+  --window frontend \
+  --status busy \
+  --active-route R999 \
+  --workdir "$ROOT" \
+  --target-project "$ROOT" \
+  --process-status alive
+agent_state="$(cat "$ROOT/.agents/state/agents.jsonl")"
+assert_contains "$agent_state" '"role":"frontend"' "agent telemetry"
+assert_contains "$agent_state" '"status":"busy"' "agent telemetry"
+assert_contains "$agent_state" '"active_route":"R999"' "agent telemetry"
 
 printf "Auto Codex agent-team tests passed.\n"

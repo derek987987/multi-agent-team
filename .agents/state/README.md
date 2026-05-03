@@ -7,6 +7,7 @@ Markdown remains the human-readable source for now, but scripts should prefer st
 ## Files
 
 - `projects.jsonl` - project target and company registry records
+- `agents.jsonl` - live role telemetry records
 - `routes.jsonl` - route lifecycle records
 - `tasks.jsonl` - task records
 - `findings.jsonl` - validation/review/security findings

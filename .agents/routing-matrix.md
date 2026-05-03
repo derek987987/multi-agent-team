@@ -19,7 +19,7 @@ The orchestrator uses this matrix to decide where a human request should go.
 | CI / deployment / environment | devops, then security/validation/docs | `quality-gates`, `task-board`, `handoffs`, `workflow-state` | yes if release process or infrastructure risk changes |
 | test automation | QA, then validation | `qa-plan`, `task-board`, `quality-gates`, `handoffs`, `workflow-state` | no unless release gates change |
 | performance risk / regression | performance, then owner and validation | `performance-report`, `quality-gates`, `task-board`, `handoffs`, `workflow-state` | yes if budget/risk acceptance changes |
-| validation change | validation-agent, PM if task criteria change | `quality-gates`, `validation-report`, `task-board`, `workflow-state` | no unless release gate changes |
+| validation change | validation, PM if task criteria change | `quality-gates`, `validation-report`, `task-board`, `workflow-state` | no unless release gate changes |
 | code review | reviewer | `review-report`, `task-board`, `workflow-state`, `handoffs` | no unless blocking risk is accepted |
 | security review | security | `security-report`, `decisions`, `task-board`, `workflow-state`, `handoffs` | yes for accepted critical/major risk |
 | documentation / release notes | docs, PM if acceptance changes | `release-notes`, docs files, `task-board`, `workflow-state`, `handoffs` | no unless release messaging changes materially |

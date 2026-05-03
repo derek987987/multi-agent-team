@@ -184,6 +184,7 @@ Company files:
 
 - `.agents/company/projects.jsonl` - project registry updated by `set-project-target.sh`.
 - `.agents/company/agent-profiles.jsonl` - machine-readable agent skill cards.
+- `.agents/state/agents.jsonl` - live role telemetry for session, window, status, active route, target path, and recovery owner.
 - `.agents/meetings/M*.md` - cross-agent meeting records, decisions, and action items.
 - `.agents/media/manifest.jsonl` - image, video, screenshot, audio, and document attachment metadata.
 - `.agents/approvals.jsonl` - approval and accepted-risk ledger.
@@ -238,6 +239,7 @@ Functional records map like this:
 | --- | --- |
 | Current projects | `.agents/company/projects.jsonl`, `scripts/set-project-target.sh` |
 | Agent skill cards | `.agents/company/agent-profiles.jsonl` |
+| Live agent telemetry | `.agents/state/agents.jsonl`, `scripts/update-agent-state.sh` |
 | Cross-agent decisions | `.agents/meetings/M*.md` |
 | Media references | `.agents/media/manifest.jsonl`, `scripts/attach-media.sh` |
 | Human approvals | `.agents/approvals.jsonl`, `scripts/record-approval.sh` |
@@ -307,6 +309,8 @@ Every agent should read:
 - its config in `.agents/agent-config/<role>.yaml`
 - its inbox in `.agents/inbox/<role>.md`
 
+Each role config declares its output schema, owned outputs, route input schema, allowed handoff targets, completion-report requirement, live telemetry fields, dispatch timeout, stale timeout, capacity, escalation owner, and workflow-edit permissions.
+
 Check an inbox:
 
 ```bash
@@ -370,6 +374,7 @@ Check route health:
 ./scripts/check-route-budget.sh
 ./scripts/check-stale-routes.sh
 ./scripts/validate-route-state.sh
+./scripts/update-agent-state.sh frontend --status busy --active-route R001
 ```
 
 ## Quality Gates
@@ -519,6 +524,7 @@ Use:
 ```
 
 This shows workflow state, git status, task counts, open handoffs, validation summary, review summary, and security summary.
+It also shows live agent telemetry from `.agents/state/agents.jsonl`.
 
 ## Final Acceptance
 

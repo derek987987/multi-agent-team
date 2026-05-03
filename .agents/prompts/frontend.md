@@ -19,7 +19,7 @@ Read:
 - `.agents/definition-of-ready.md`
 - `.agents/definition-of-done.md`
 
-Only work on tasks assigned to `frontend-agent`.
+Only work on tasks assigned to `frontend`.
 
 Rules:
 - Claim the assigned route before coding and complete or block it when finished.

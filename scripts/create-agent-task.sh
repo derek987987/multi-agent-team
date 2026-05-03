@@ -6,7 +6,7 @@ TASK_BOARD="$ROOT/.agents/task-board.md"
 
 if [ "$#" -lt 3 ]; then
   printf "Usage: %s <task-id> <owner> <title>\n" "$(basename "$0")" >&2
-  printf "Example: %s T004 frontend-agent \"Build login form\"\n" "$(basename "$0")" >&2
+  printf "Example: %s T004 frontend \"Build login form\"\n" "$(basename "$0")" >&2
   exit 1
 fi
 
@@ -40,4 +40,3 @@ Notes:
 TASK
 
 printf "Added %s to %s\n" "$TASK_ID" "$TASK_BOARD"
-

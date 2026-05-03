@@ -15,6 +15,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/agent-policy.md` - autonomy, guardrails, stop conditions, and output discipline
 - `.agents/company/projects.jsonl` - coding company project registry
 - `.agents/company/agent-profiles.jsonl` - machine-readable agent skill cards and current status
+- `.agents/state/agents.jsonl` - live role telemetry for session/window/status/active-route routing decisions
 - `.agents/meetings/` - cross-agent meeting records, decisions, action items, and media references
 - `.agents/media/manifest.jsonl` - attachment metadata for images, videos, screenshots, audio, documents, and references
 - `.agents/approvals.jsonl` - brief, architecture, risk, budget, and ship/no-ship approval ledger
@@ -50,6 +51,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/inbox/<role>.md` - per-role routed work queue
 - `.agents/ownership/<role>.paths` - path ownership allowlist for each role
 - `.agents/agent-config/<role>.yaml` - per-role required reads, allowed paths, and checks
+- `.agents/schemas/agent-state.md` - live agent telemetry schema
 - `.agents/skills/<role>.md` - role-specific capability, rules, and done criteria
 - `.agents/memory/<role>.md` - durable project-specific lessons and preferences
 - `.agents/memory-policy.md` - governance rules for durable memory

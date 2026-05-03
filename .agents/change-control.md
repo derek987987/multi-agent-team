@@ -294,8 +294,8 @@ Handoff example:
 ```md
 ### H002 - Frontend needs task status label
 Status: open
-From: frontend-agent
-To: backend-agent
+From: frontend
+To: backend
 Date:
 Related task: T014
 Files / modules:

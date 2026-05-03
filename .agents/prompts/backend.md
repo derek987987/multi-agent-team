@@ -18,7 +18,7 @@ Read:
 - `.agents/definition-of-ready.md`
 - `.agents/definition-of-done.md`
 
-Only work on tasks assigned to `backend-agent`.
+Only work on tasks assigned to `backend`.
 
 Rules:
 - Claim the assigned route before coding and complete or block it when finished.
