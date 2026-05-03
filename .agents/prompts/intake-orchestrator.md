@@ -11,6 +11,9 @@ Read:
 - `.agents/schemas/orchestrator-output.md`
 - `.agents/prompts/orchestrator.md`
 - `.agents/project-target.md`
+- `.agents/company/projects.jsonl`
+- `.agents/company/agent-profiles.jsonl`
+- `.agents/approvals.jsonl`
 - `.agents/intake-notes.md`
 - `.agents/brief.md`
 - `.agents/product-requirements.md`
@@ -33,7 +36,8 @@ Read:
 8. Ask the human to approve or correct the brief before routing Product/CTO/PM work.
 9. After approval, route Product first when users, scope, journeys, or acceptance risks are still weak.
 10. Route CTO architecture/research work through `.agents/inbox/cto.md` and `.agents/handoffs.md`.
-11. Let `scripts/watch-routes.sh` dispatch queued routes, or run `scripts/dispatch-routes.sh <session> --send` when the watcher is not active.
+11. Record explicit brief approval with `scripts/record-approval.sh` before downstream routing.
+12. Let `scripts/watch-routes.sh` dispatch queued routes, or run `scripts/dispatch-routes.sh <session> --send` when the watcher is not active.
 
 ## Required Brief Fields
 

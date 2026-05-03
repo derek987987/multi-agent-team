@@ -8,8 +8,8 @@ json_escape() {
 }
 
 usage() {
-  printf "Usage: %s <route-id> <to-role> <title> [related-task]\n" "$(basename "$0")" >&2
-  printf "Example: %s R003 backend \"Implement task API\" T012\n" "$(basename "$0")" >&2
+  printf "Usage: %s <route-id> <to-role> <title> [related-task] [--meeting <meeting-id>] [--decision <decision-id>]\n" "$(basename "$0")" >&2
+  printf "Example: %s R003 backend \"Implement task API\" T012 --meeting M001 --decision D001\n" "$(basename "$0")" >&2
 }
 
 if [ "$#" -lt 3 ]; then
@@ -20,7 +20,43 @@ fi
 ROUTE_ID="$1"
 TO_ROLE="$2"
 TITLE="$3"
-RELATED_TASK="${4:-}"
+RELATED_TASK=""
+MEETING_ID=""
+DECISION_ID=""
+
+if [ "$#" -gt 3 ]; then
+  shift 3
+  if [ "${1:-}" != "--meeting" ] && [ "${1:-}" != "--decision" ]; then
+    RELATED_TASK="$1"
+    shift
+  fi
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --meeting)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--meeting requires a value." >&2
+          exit 1
+        fi
+        MEETING_ID="$2"
+        shift 2
+        ;;
+      --decision)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--decision requires a value." >&2
+          exit 1
+        fi
+        DECISION_ID="$2"
+        shift 2
+        ;;
+      *)
+        printf "Unexpected argument: %s\n" "$1" >&2
+        usage
+        exit 1
+        ;;
+    esac
+  done
+fi
+
 INBOX="$ROOT/.agents/inbox/$TO_ROLE.md"
 HANDOFFS="$ROOT/.agents/handoffs.md"
 STATE="$ROOT/.agents/workflow-state.md"
@@ -46,6 +82,8 @@ Status: queued
 From: orchestrator
 To: $TO_ROLE
 Related task: $RELATED_TASK
+Meeting ID: $MEETING_ID
+Decision ID: $DECISION_ID
 Created:
 $CREATED
 
@@ -70,6 +108,8 @@ To: $TO_ROLE
 Date:
 $CREATED
 Related task: $RELATED_TASK
+Meeting ID: $MEETING_ID
+Decision ID: $DECISION_ID
 Files / modules:
 
 Request:
@@ -103,8 +143,8 @@ awk -v id="$ROUTE_ID" -v to="$TO_ROLE" -v task="$RELATED_TASK" -v title="$TITLE"
 ' "$STATE" > "$tmp"
 mv "$tmp" "$STATE"
 
-printf '{"route_id":"%s","to":"%s","status":"queued","related_task":"%s","title":"%s","created":"%s"}\n' \
-  "$(json_escape "$ROUTE_ID")" "$(json_escape "$TO_ROLE")" "$(json_escape "$RELATED_TASK")" "$(json_escape "$TITLE")" "$(json_escape "$CREATED")" >> "$ROUTES_JSONL"
+printf '{"route_id":"%s","to":"%s","status":"queued","related_task":"%s","meeting_id":"%s","decision_id":"%s","title":"%s","created":"%s"}\n' \
+  "$(json_escape "$ROUTE_ID")" "$(json_escape "$TO_ROLE")" "$(json_escape "$RELATED_TASK")" "$(json_escape "$MEETING_ID")" "$(json_escape "$DECISION_ID")" "$(json_escape "$TITLE")" "$(json_escape "$CREATED")" >> "$ROUTES_JSONL"
 
 "$ROOT/scripts/log-event.sh" route-created route-agent "Created route $ROUTE_ID for $TO_ROLE" "$TITLE" "$ROUTE_ID"
 "$ROOT/scripts/check-route-budget.sh" >/dev/null

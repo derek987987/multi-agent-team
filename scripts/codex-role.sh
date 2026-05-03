@@ -143,7 +143,7 @@ CONFIG_PATH=".agents/agent-config/$ROLE.yaml"
 PROMPT_TEXT="$(cat <<EOF
 $(role_focus "$ROLE")
 
-You are running in --full-auto inside the agent-team tmux session.
+You are running sandboxed with command approval prompts disabled inside the agent-team tmux session.
 
 Agent team control plane:
 $ROOT
@@ -185,7 +185,7 @@ If relative .agents paths are not present in the working directory, use the cont
 EOF
 )"
 
-cmd=(codex --full-auto --no-alt-screen --cd "$WORKDIR")
+cmd=(codex --ask-for-approval never --sandbox workspace-write --no-alt-screen --cd "$WORKDIR")
 
 root_real="$(cd "$ROOT" && pwd -P)"
 workdir_real="$(cd "$WORKDIR" && pwd -P)"

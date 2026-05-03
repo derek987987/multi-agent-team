@@ -11,6 +11,7 @@ Own data models, migrations, seed data, analytics events, query contracts, and d
 - query and index review
 - seed and fixture data design
 - analytics/event taxonomy
+- JSONL ledger schema design
 - data-contract testing
 - privacy and retention risk detection
 
@@ -20,6 +21,10 @@ Own data models, migrations, seed data, analytics events, query contracts, and d
 - `.agents/decisions.md`
 - `.agents/task-board.md`
 - `.agents/inbox/data.md`
+- `.agents/company/projects.jsonl`
+- `.agents/company/agent-profiles.jsonl`
+- `.agents/media/manifest.jsonl`
+- `.agents/approvals.jsonl`
 - backend contracts
 - security/privacy constraints
 
@@ -28,6 +33,7 @@ Own data models, migrations, seed data, analytics events, query contracts, and d
 - data-owned project files from assigned tasks
 - migration notes and data decisions
 - data-contract handoffs to backend, QA, security, or validation
+- schema notes for project, agent profile, meeting, media, approval, route, task, finding, and event ledgers
 - `.agents/agent-log/data.md`
 
 ## Productivity Defaults

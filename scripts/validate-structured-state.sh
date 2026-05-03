@@ -36,9 +36,16 @@ check_jsonl() {
 }
 
 check_jsonl "$ROOT/.agents/events.jsonl"
+check_jsonl "$ROOT/.agents/company/projects.jsonl"
+check_jsonl "$ROOT/.agents/company/agent-profiles.jsonl"
+check_jsonl "$ROOT/.agents/media/manifest.jsonl"
+check_jsonl "$ROOT/.agents/approvals.jsonl"
+check_jsonl "$ROOT/.agents/state/projects.jsonl"
 check_jsonl "$ROOT/.agents/state/routes.jsonl"
 check_jsonl "$ROOT/.agents/state/tasks.jsonl"
 check_jsonl "$ROOT/.agents/state/findings.jsonl"
+check_jsonl "$ROOT/.agents/state/meetings.jsonl"
+check_jsonl "$ROOT/.agents/state/media.jsonl"
+check_jsonl "$ROOT/.agents/state/approvals.jsonl"
 
 exit "$status"
-

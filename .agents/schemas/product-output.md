@@ -15,5 +15,9 @@ Non-goals:
 
 Acceptance risks:
 
+Functional-before-visual scope:
+
+Meeting decisions applied:
+
 Follow-up routes:
 ```

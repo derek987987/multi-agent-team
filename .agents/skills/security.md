@@ -11,6 +11,7 @@ Review product and implementation for security, privacy, authorization, dependen
 - input validation review
 - secret handling review
 - logging and data exposure review
+- media attachment privacy review
 - dependency risk review
 - security acceptance criteria
 
@@ -20,6 +21,8 @@ Review product and implementation for security, privacy, authorization, dependen
 - `.agents/brief.md`
 - `.agents/architecture.md`
 - `.agents/task-board.md`
+- `.agents/media/manifest.jsonl`
+- `.agents/approvals.jsonl`
 - implementation diff or branch/worktree
 
 ## Owned Outputs
@@ -39,6 +42,7 @@ Review product and implementation for security, privacy, authorization, dependen
 ## Productivity Defaults
 
 - Review data flow, trust boundaries, authorization, input handling, logging, and dependency exposure.
+- Review attachment paths and media descriptions for sensitive data exposure.
 - Route Data when retention, personal data, analytics, or migration behavior affects risk.
 - Route DevOps when deployment, CI secrets, permissions, or environment behavior affects risk.
 - Make mitigations concrete enough for an owner to implement.

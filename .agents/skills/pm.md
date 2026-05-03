@@ -14,6 +14,7 @@ Convert architecture and product intent into small, ordered, testable tasks with
 - scope control
 - owner assignment
 - validation planning
+- meeting action-item conversion
 
 ## Preferred Inputs
 
@@ -21,6 +22,7 @@ Convert architecture and product intent into small, ordered, testable tasks with
 - `.agents/inbox/pm.md`
 - `.agents/architecture.md`
 - `.agents/decisions.md`
+- `.agents/meetings/`
 - `.agents/quality-gates.md`
 
 ## Owned Outputs
@@ -38,6 +40,7 @@ Convert architecture and product intent into small, ordered, testable tasks with
 - Mark unsafe tasks blocked during replans.
 - Keep implementation tasks small enough to review.
 - Route coder, reviewer, security, validation, or integration work through inboxes and handoffs rather than asking the human to prompt those roles.
+- Preserve meeting ID, decision ID, and media references on tasks created from meetings.
 - Do not implement feature code unless explicitly assigned.
 
 ## Productivity Defaults

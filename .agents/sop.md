@@ -4,7 +4,7 @@ This workflow borrows the best practical ideas from role-based multi-agent syste
 
 ## Company Operating Model
 
-The human normally prompts only the Orchestrator. The Orchestrator creates routes and handoffs in `.agents/*`, and the route watcher dispatches those routes to auto-launched Codex agents running with `--full-auto`. Agents communicate through markdown control-plane files, not by asking the human to relay messages.
+The human normally prompts only the Orchestrator. The Orchestrator creates routes and handoffs in `.agents/*`, and the route watcher dispatches those routes to auto-launched Codex agents running sandboxed without shell-command approval prompts. Agents communicate through markdown control-plane files, not by asking the human to relay messages.
 
 Production controls:
 - `.agents/context-map.md` controls what context each role should load.

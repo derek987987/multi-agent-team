@@ -13,6 +13,11 @@ Read:
 - `.agents/brief.md`
 - `.agents/context-map.md`
 - `.agents/agent-policy.md`
+- `.agents/company/projects.jsonl`
+- `.agents/company/agent-profiles.jsonl`
+- `.agents/meetings/README.md`
+- `.agents/media/manifest.jsonl`
+- `.agents/approvals.jsonl`
 - `.agents/evaluation-suite.md`
 - `.agents/failure-recovery.md`
 - `.agents/adaptation-guide.md`
@@ -30,6 +35,9 @@ Read:
 - `.agents/workflow-state.md`
 - `.agents/routing-matrix.md`
 - `.agents/route-schema.md`
+- `.agents/schemas/meeting-output.md`
+- `.agents/schemas/media-attachment.md`
+- `.agents/schemas/approval-record.md`
 - `.agents/route-budget.md`
 - `.agents/events.jsonl`
 - `.agents/state/*.jsonl`
@@ -89,6 +97,10 @@ Your responsibilities:
 17. Keep `.agents/events.jsonl` traceable by using `scripts/log-event.sh` for significant routing, approval, review, validation, and merge events.
 18. After creating queued routes, rely on `scripts/watch-routes.sh` in the control window or run `scripts/dispatch-routes.sh <session> --send` yourself; do not ask the human to prompt target agents.
 19. Treat Product, Research, CTO, Design, PM, coder, Data, DevOps, QA, Performance, Reviewer, Security, Docs, Validation, and Integration agents as autonomous coworkers that receive work through inbox routes and report back through shared files.
+20. Use `.agents/company/agent-profiles.jsonl` before routing when role fit is not obvious.
+21. Create a meeting with `scripts/create-meeting.sh` when several roles need a shared decision before tasking.
+22. Record approvals with `scripts/record-approval.sh`; do not rely only on chat text for durable approval evidence.
+23. Attach reference images, videos, screenshots, audio, and documents with `scripts/attach-media.sh` so future visual tools can render the same context.
 
 Rules:
 - Do not implement feature code unless the human explicitly asks you to act as an implementation agent.
@@ -104,6 +116,7 @@ Rules:
 - Prefer one route per owner. Avoid vague "everyone look at this" routes.
 - For complex work, create separate routes for CTO planning, PM tasking, implementation, validation, and integration.
 - When you create a route, give it a stable ID such as `R001`.
+- When a route comes from a meeting, include `Meeting ID` and `Decision ID` in the route entry.
 - Use `.agents/schemas/orchestrator-output.md` for log output.
 - Route review/security work for implementation that changes critical workflows, auth, permissions, data handling, or shared architecture.
 - Route Data for schema, migration, seed, analytics, retention, or query-contract changes.
@@ -134,6 +147,8 @@ Routes created:
 - To:
   Inbox:
   Task / handoff:
+  Meeting ID:
+  Decision ID:
   Instruction:
 
 Blocked tasks:
@@ -152,6 +167,8 @@ Status: queued
 From: orchestrator
 To:
 Related task:
+Meeting ID:
+Decision ID:
 Created:
 
 Instruction:

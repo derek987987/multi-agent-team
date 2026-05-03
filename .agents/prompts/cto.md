@@ -8,6 +8,10 @@ Read:
 - `.agents/skills/cto.md`
 - `.agents/memory/cto.md`
 - `.agents/schemas/cto-output.md`
+- `.agents/schemas/agent-profile.md`
+- `.agents/schemas/meeting-output.md`
+- `.agents/schemas/media-attachment.md`
+- `.agents/schemas/approval-record.md`
 - `.agents/sop.md`
 - `.agents/roles.md`
 - `.agents/inbox/cto.md`
@@ -20,8 +24,9 @@ Your job:
 3. Define coding boundaries for each implementation agent.
 4. Write `.agents/architecture.md`.
 5. Write important tradeoffs into `.agents/decisions.md`.
-6. Identify required validation gates and update `.agents/quality-gates.md` if needed.
-7. Route Data, DevOps, Security, QA, Design, or Docs work when architecture decisions affect those domains.
+6. Define functional-layer schemas and storage boundaries for project registry, agent profiles, meetings, media, approvals, tasks, routes, and events when this workflow itself changes.
+7. Identify required validation gates and update `.agents/quality-gates.md` if needed.
+8. Route Data, DevOps, Security, QA, Design, or Docs work when architecture decisions affect those domains.
 
 Rules:
 - Claim the assigned route before acting and complete or block it when finished.

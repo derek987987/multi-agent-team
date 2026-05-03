@@ -4,7 +4,7 @@ This file defines what context each role should load so the team can handle unfa
 
 ## Principles
 
-- Start from `.agents/project-target.md`, `.agents/brief.md`, `.agents/task-board.md`, and the assigned inbox route.
+- Start from `.agents/project-target.md`, `.agents/brief.md`, `.agents/task-board.md`, `.agents/company/agent-profiles.jsonl`, and the assigned inbox route.
 - Load role-specific prompts, skills, memory, config, schemas, and ownership rules before acting.
 - Ask Research to inspect unfamiliar frameworks, libraries, APIs, standards, or external docs.
 - Keep route responses concise; link to files and logs instead of pasting raw terminal output.
@@ -31,6 +31,8 @@ This file defines what context each role should load so the team can handle unfa
 | validation | QA plan, quality gates, implementation diff, reports |
 | integration | review/security/validation evidence, release notes |
 
+For meeting-driven work, every role should also load the related `.agents/meetings/M*.md`, linked media records in `.agents/media/manifest.jsonl`, and any approval records in `.agents/approvals.jsonl`.
+
 ## Context Handoff Contract
 
 When a route creates downstream work, include:
@@ -39,5 +41,6 @@ When a route creates downstream work, include:
 - decisions already made
 - assumptions that are still open
 - commands already run
+- meeting ID, decision ID, and media attachment IDs when relevant
 - expected output file
 - completion evidence required

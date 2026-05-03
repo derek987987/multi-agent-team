@@ -96,7 +96,7 @@ Local integration:
 
 - Added `scripts/agent-roles.sh` as the central role registry.
 - Added Product, Design, Data, DevOps, QA, and Docs prompts, skills, memory, inboxes, logs, configs, schemas, and ownership rules.
-- Updated startup scripts to launch every role from the registry with Codex `--full-auto`.
+- Updated startup scripts to launch every role from the registry sandboxed with command approval prompts disabled.
 - Updated worktree mode so project-editing specialists get role-specific worktrees.
 - Updated routing matrix and quality gates so specialist review is part of production readiness.
 - Updated existing skill packs with productivity defaults and cross-role routing rules.

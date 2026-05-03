@@ -12,6 +12,11 @@ Modules:
   Files/modules:
   Responsibility:
 
+Functional-layer schemas:
+- Name:
+  Source:
+  Owner:
+
 Key decisions:
 - 
 
@@ -23,4 +28,3 @@ Validation implications:
 
 PM handoff:
 ```
-

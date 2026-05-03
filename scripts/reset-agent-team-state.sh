@@ -3,6 +3,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+source "$ROOT/scripts/agent-roles.sh"
+
+mkdir -p "$ROOT/.agents/company" "$ROOT/.agents/meetings" "$ROOT/.agents/media" "$ROOT/.agents/state"
 
 cat > "$ROOT/.agents/brief.md" <<'EOF'
 # Product Brief
@@ -382,7 +385,7 @@ cat > "$ROOT/.agents/final-acceptance.md" <<'EOF'
 Pending.
 EOF
 
-for role in orchestrator cto pm frontend backend validation reviewer security; do
+for role in "${AGENT_ROLES[@]}"; do
   title="$(printf '%s' "$role" | awk '{ print toupper(substr($0,1,1)) substr($0,2) }')"
   cat > "$ROOT/.agents/agent-log/$role.md" <<EOF
 # $title Agent Log
@@ -390,12 +393,22 @@ for role in orchestrator cto pm frontend backend validation reviewer security; d
 EOF
 done
 
+find "$ROOT/.agents/meetings" -maxdepth 1 -type f -name 'M*.md' -delete
+cat > "$ROOT/.agents/company/projects.jsonl" <<EOF
+{"project_id":"template","name":"agent-teams","path":"$ROOT","mode":"template","status":"template","updated":"$UPDATED","source":"reset-agent-team-state"}
+EOF
+cat > "$ROOT/.agents/media/manifest.jsonl" </dev/null
+cat > "$ROOT/.agents/approvals.jsonl" </dev/null
+cat > "$ROOT/.agents/state/projects.jsonl" </dev/null
 cat > "$ROOT/.agents/state/routes.jsonl" </dev/null
 cat > "$ROOT/.agents/state/tasks.jsonl" </dev/null
 cat > "$ROOT/.agents/state/findings.jsonl" </dev/null
+cat > "$ROOT/.agents/state/meetings.jsonl" </dev/null
+cat > "$ROOT/.agents/state/media.jsonl" </dev/null
+cat > "$ROOT/.agents/state/approvals.jsonl" </dev/null
 cat > "$ROOT/.agents/events.jsonl" </dev/null
 
-for inbox in orchestrator cto pm frontend backend validation reviewer security integration; do
+for inbox in "${AGENT_ROLES[@]}"; do
   title="$(printf '%s' "$inbox" | awk '{ print toupper(substr($0,1,1)) substr($0,2) }')"
   cat > "$ROOT/.agents/inbox/$inbox.md" <<EOF
 # $title Inbox
@@ -407,4 +420,3 @@ done
 
 "$ROOT/scripts/log-event.sh" reset reset-agent-team-state "Reset agent-team runtime state" "$UPDATED"
 printf "Agent-team runtime state reset in %s\n" "$ROOT"
-

@@ -13,6 +13,11 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/intake-notes.md` - rough ideas, clarifying questions, assumptions, and brief readiness
 - `.agents/context-map.md` - role context loading rules and handoff context contract
 - `.agents/agent-policy.md` - autonomy, guardrails, stop conditions, and output discipline
+- `.agents/company/projects.jsonl` - coding company project registry
+- `.agents/company/agent-profiles.jsonl` - machine-readable agent skill cards and current status
+- `.agents/meetings/` - cross-agent meeting records, decisions, action items, and media references
+- `.agents/media/manifest.jsonl` - attachment metadata for images, videos, screenshots, audio, documents, and references
+- `.agents/approvals.jsonl` - brief, architecture, risk, budget, and ship/no-ship approval ledger
 - `.agents/evaluation-suite.md` - scaffold and project evals for repeatable workflow assessment
 - `.agents/failure-recovery.md` - blocked-route recovery owners, retry rules, and evidence requirements
 - `.agents/adaptation-guide.md` - project-type routing guide for adaptable teams
@@ -40,7 +45,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/route-budget.md` - max open routes, retries, and escalation rules
 - `.agents/milestone-budget.md` - active task, retry, and branch budget limits
 - `.agents/events.jsonl` - append-only workflow event trace
-- `.agents/state/*.jsonl` - structured state mirrors for routes, tasks, and findings
+- `.agents/state/*.jsonl` - structured state mirrors for projects, routes, tasks, findings, meetings, media, and approvals
 - `.agents/inbox/<role>.md` - per-role routed work queue
 - `.agents/ownership/<role>.paths` - path ownership allowlist for each role
 - `.agents/agent-config/<role>.yaml` - per-role required reads, allowed paths, and checks
@@ -52,7 +57,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/validation-report.md` - validation results and findings
 - `.agents/review-report.md` - reviewer findings
 - `.agents/security-report.md` - security findings
-- `scripts/codex-role.sh` - launches each role-specific Codex agent with `--full-auto`
+- `scripts/codex-role.sh` - launches each role-specific Codex agent sandboxed with command approval prompts disabled
 - `scripts/watch-routes.sh` - watches queued routes and dispatches them to tmux agent windows
 
 ## Core Rules
@@ -65,7 +70,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 6. Read your role memory in `.agents/memory/<role>.md`.
 7. Use the relevant schema in `.agents/schemas/` for role outputs.
 8. Follow `.agents/memory-policy.md` before adding durable memory.
-9. Record major technical or product choices in `.agents/decisions.md`.
+9. Record major technical or product choices in `.agents/decisions.md`; record human approvals or accepted risks in `.agents/approvals.jsonl`.
 10. Do not start implementation until `.agents/definition-of-ready.md` is satisfied.
 11. Do not mark a task done until `.agents/definition-of-done.md` is satisfied.
 12. Run the relevant checks from `.agents/quality-gates.md` before handing off.
@@ -78,7 +83,9 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 19. For new projects, send rough ideas to the orchestrator using `.agents/prompts/intake-orchestrator.md`; the orchestrator drafts `.agents/brief.md`.
 20. For minimal prompting, route mid-workflow scope changes, feature changes, bugs, or status questions through the orchestrator prompt in `.agents/prompts/orchestrator.md`.
 21. Do not ask the human to prompt another role during normal work; write a route or handoff and let the route watcher dispatch it.
-22. Auto-launched role agents run with `--full-auto`; they must still respect ownership, approval gates, and required checks.
+22. Auto-launched role agents run sandboxed without shell-command approval prompts; they must still respect ownership, approval gates, and required checks.
+23. Use `.agents/company/agent-profiles.jsonl` to choose the right role before routing; use meetings when several roles need a shared decision before tasking.
+24. Attach media through `scripts/attach-media.sh` so future visual tools can render the same references without changing workflow files.
 
 ## Recommended Flow
 

@@ -7,6 +7,10 @@ Read:
 - `.agents/skills/data.md`
 - `.agents/memory/data.md`
 - `.agents/schemas/data-output.md`
+- `.agents/schemas/agent-profile.md`
+- `.agents/schemas/meeting-output.md`
+- `.agents/schemas/media-attachment.md`
+- `.agents/schemas/approval-record.md`
 - `.agents/project-target.md`
 - `.agents/inbox/data.md`
 - `.agents/brief.md`
@@ -17,9 +21,10 @@ Read:
 
 Your job:
 1. Design and review data models, migrations, seed data, analytics events, and query contracts.
-2. Implement assigned data tasks inside owned paths.
-3. Keep backend, security, QA, and validation informed of data-contract changes.
-4. Record data decisions and migration risks.
+2. Own functional-layer JSONL shape for company projects, agent profiles, meetings, media, approvals, routes, tasks, findings, and events.
+3. Implement assigned data tasks inside owned paths.
+4. Keep backend, security, QA, and validation informed of data-contract changes.
+5. Record data decisions and migration risks.
 
 Rules:
 - Claim the assigned route before data work and complete or block it when finished.

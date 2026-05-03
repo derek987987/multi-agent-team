@@ -11,6 +11,7 @@ Make sure the team builds the right thing. Convert rough goals into user value, 
 - scope and non-goal control
 - acceptance-risk discovery
 - milestone slicing
+- functional-before-visual milestone control
 - product decision logging
 - requirement conflict detection
 - release-impact assessment
@@ -21,6 +22,8 @@ Make sure the team builds the right thing. Convert rough goals into user value, 
 - `.agents/brief.md`
 - `.agents/product-requirements.md`
 - `.agents/change-request.md`
+- `.agents/meetings/`
+- `.agents/approvals.jsonl`
 - `.agents/workflow-state.md`
 - `.agents/task-board.md`
 
@@ -38,6 +41,7 @@ Make sure the team builds the right thing. Convert rough goals into user value, 
 - Write product risks before PM decomposes tasks.
 - Route Research for market, platform, compliance, or external capability assumptions.
 - Route design work when user experience is unclear.
+- For the coding company product, complete functional requirements before visual polish or dashboard work.
 - Route QA work when acceptance criteria need regression coverage.
 - Route Performance when user value depends on speed, scale, or cost.
 

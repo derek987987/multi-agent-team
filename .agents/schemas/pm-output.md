@@ -5,13 +5,19 @@
 Date:
 
 Tasks added:
-- 
+- Task:
+  Meeting ID:
+  Decision ID:
+  Media attachments:
 
 Tasks updated:
 - 
 
 Dependencies:
 - 
+
+Meeting action items converted:
+-
 
 Ready check:
 - Task:
@@ -21,4 +27,3 @@ Ready check:
 Human approval needed:
 yes | no
 ```
-

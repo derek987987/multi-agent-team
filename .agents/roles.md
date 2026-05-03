@@ -23,6 +23,9 @@ Responsibilities:
 - Classifies requests and updates the right workflow files.
 - Routes work to CTO, PM, implementation, or validation agents through `.agents/handoffs.md` and agent logs.
 - Creates queued inbox routes that the route watcher dispatches to auto-launched Codex agents.
+- Uses `.agents/company/agent-profiles.jsonl` to select the right agent for work.
+- Creates and closes meeting records for cross-role discussion before tasking.
+- Records human approvals and accepted risks in `.agents/approvals.jsonl`.
 - Creates simple bug/feature tasks directly when ownership is obvious.
 - Blocks unsafe tasks when a new change invalidates current work.
 - Keeps the human's required prompting minimal.
@@ -32,6 +35,8 @@ Default ownership:
 - `.agents/handoffs.md`
 - `.agents/inbox/<role>.md`
 - `.agents/agent-log/orchestrator.md`
+- `.agents/meetings/`
+- `.agents/approvals.jsonl`
 
 Can edit:
 - `.agents/brief.md` for clear product/spec updates
@@ -112,6 +117,7 @@ Must not:
 Responsibilities:
 - Converts architecture into a task board.
 - Defines dependencies, owners, acceptance criteria, and validation method.
+- Converts closed meeting action items into tasks and route recommendations.
 - Tracks status and blockers.
 - Performs final acceptance review.
 
@@ -152,6 +158,7 @@ Must not:
 
 Responsibilities:
 - Owns schema, migrations, seed data, analytics events, and data contracts.
+- Owns functional-layer JSONL shape for project, meeting, media, approval, and route metadata when schema changes are needed.
 - Coordinates with backend, security, QA, and validation.
 
 Default ownership:
@@ -237,6 +244,7 @@ Must not:
 
 Responsibilities:
 - Reviews security/privacy risks, auth/authz, secrets, input validation, logging, and data exposure.
+- Reviews media attachment handling, local file path exposure, and sensitive content risk.
 - Writes `.agents/security-report.md`.
 - Routes blocking security findings to the owning agent.
 

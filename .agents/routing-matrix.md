@@ -26,6 +26,9 @@ The orchestrator uses this matrix to decide where a human request should go.
 | emergency replan | CTO and PM | `decisions`, `task-board`, `workflow-state`, `handoffs` | yes |
 | status request | orchestrator | `workflow-state` if stale | no |
 | implementation request | PM if no task exists, otherwise owner agent | `task-board`, `handoffs`, `workflow-state` | no |
+| cross-agent meeting / decision | orchestrator, then invited roles, then PM | `meetings`, `decisions`, `approvals`, `task-board`, `handoffs`, `workflow-state` | yes if scope/risk/architecture changes |
+| media attachment / visual reference | orchestrator, then security/design/QA as needed | `media/manifest`, `meetings`, `task-board`, `handoffs` | yes if sensitive data may be exposed |
+| coding company functional layer | product, cto, data, backend, PM, QA, security, validation | `company`, `schemas`, `meetings`, `media`, `approvals`, `quality-gates`, `task-board` | yes before visual phase starts |
 
 ## Route Status Values
 
@@ -52,3 +55,6 @@ The orchestrator uses this matrix to decide where a human request should go.
 12. If implementation could affect latency, memory, bundle size, query speed, throughput, startup, or runtime cost, route Performance.
 13. If implementation changes user-facing behavior, setup, API behavior, or release notes, route docs work.
 14. If implementation is ready for merge, route reviewer, security when relevant, QA/validation, then integration.
+15. If multiple agents need to align before tasking, create or update a meeting instead of broadcasting vague routes.
+16. If a route comes from a meeting decision, include `Meeting ID` and `Decision ID`.
+17. If media is attached, add it through `scripts/attach-media.sh` and route security review when content may be sensitive.

@@ -12,6 +12,7 @@ Use this guide to adapt the team to different coding projects without creating a
 | CLI/tooling | product, cto, backend, qa, docs, devops |
 | Data/analytics | product, data, backend, security, performance, qa |
 | AI/agent app | product, research, cto, backend, qa, security, performance |
+| Coding company / agent OS | product, research, cto, pm, data, backend, qa, security, docs, validation |
 | Library/SDK | product, cto, qa, docs, performance, integration |
 | Infrastructure | cto, devops, security, qa, docs, validation |
 

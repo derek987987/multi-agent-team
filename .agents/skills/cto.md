@@ -12,6 +12,8 @@ Turn approved product intent into a simple, maintainable technical direction tha
 - risk assessment
 - tradeoff analysis
 - data/API contract design
+- file-backed company registry design
+- meeting/media/approval schema design
 - validation strategy
 - architecture drift review
 
@@ -21,6 +23,10 @@ Turn approved product intent into a simple, maintainable technical direction tha
 - `.agents/inbox/cto.md`
 - `.agents/workflow-state.md`
 - existing repo files
+- `.agents/schemas/agent-profile.md`
+- `.agents/schemas/meeting-output.md`
+- `.agents/schemas/media-attachment.md`
+- `.agents/schemas/approval-record.md`
 - `.agents/quality-gates.md`
 
 ## Owned Outputs
@@ -46,6 +52,7 @@ Turn approved product intent into a simple, maintainable technical direction tha
 - Prefer boring, framework-native architecture that coder agents can implement in small tasks.
 - Route Research before making decisions based on unfamiliar APIs, libraries, standards, or platform limits.
 - Define ownership boundaries before implementation routes are created.
+- Keep functional-layer storage file-backed and scriptable until visual requirements start.
 - Record tradeoffs only when they affect implementation, risk, or future maintenance.
 - Route Data for persistence or analytics concerns and DevOps for deployment or build concerns.
 - Route Performance when architecture affects latency, memory, throughput, bundle size, query speed, or runtime cost.

@@ -7,6 +7,14 @@ printf "== Agent Workflow Status ==\n\n"
 
 printf "Repository: %s\n\n" "$ROOT"
 
+printf "== Company Functional Layer ==\n"
+if [ -x "$ROOT/scripts/company-status.sh" ]; then
+  "$ROOT/scripts/company-status.sh" | sed -n '1,40p'
+else
+  printf "Missing scripts/company-status.sh\n"
+fi
+printf "\n"
+
 printf "== Workflow State ==\n"
 if [ -f "$ROOT/.agents/workflow-state.md" ]; then
   sed -n '1,80p' "$ROOT/.agents/workflow-state.md"

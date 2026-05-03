@@ -35,6 +35,8 @@ Add project-specific commands as the repo takes shape.
 - Routes are in the right `.agents/inbox/<role>.md` files.
 - Route lifecycle changes are reflected in `.agents/events.jsonl`.
 - `.agents/state/routes.jsonl` mirrors created routes.
+- Meeting-driven routes include `Meeting ID` and `Decision ID` when applicable.
+- Human approvals and accepted risks are mirrored in `.agents/approvals.jsonl`.
 - `scripts/check-route-budget.sh` passes.
 - `scripts/check-stale-routes.sh` passes or stale routes are escalated.
 - `scripts/watch-routes.sh <session> --send` is active in the control window or routes are manually dispatched.
@@ -99,6 +101,7 @@ Add project-specific commands as the repo takes shape.
 - Reversibility or rollback risk is explicit.
 - Data-contract tests or validation commands are recorded when relevant.
 - Security/privacy review is routed for personal, sensitive, retained, or externally shared data.
+- Functional-layer JSONL schema changes are reflected in `.agents/schemas/` and validation scripts.
 
 ### DevOps
 
@@ -131,6 +134,7 @@ Add project-specific commands as the repo takes shape.
 ### Security
 
 - Auth/authz, secrets, input validation, logging, data exposure, and dependency risks are checked when relevant.
+- Media attachment paths and sensitive content risk are checked when attachments are added.
 - Critical risks block merge unless human explicitly accepts risk.
 - Accepted risk is recorded in `.agents/decisions.md`.
 - `scripts/check-secrets.sh` passes before review/merge.

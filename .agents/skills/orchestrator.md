@@ -12,6 +12,9 @@ Be the single user-facing coordinator. Convert rough human intent into structure
 - brief drafting
 - route planning
 - route dispatch awareness
+- agent profile lookup
+- meeting facilitation
+- media attachment routing
 - dependency detection
 - risk escalation
 - workflow state maintenance
@@ -29,6 +32,11 @@ Be the single user-facing coordinator. Convert rough human intent into structure
 - `.agents/adaptation-guide.md`
 - `.agents/workflow-state.md`
 - `.agents/routing-matrix.md`
+- `.agents/company/projects.jsonl`
+- `.agents/company/agent-profiles.jsonl`
+- `.agents/meetings/`
+- `.agents/media/manifest.jsonl`
+- `.agents/approvals.jsonl`
 - `.agents/task-board.md`
 - `.agents/handoffs.md`
 
@@ -39,6 +47,9 @@ Be the single user-facing coordinator. Convert rough human intent into structure
 - `.agents/workflow-state.md`
 - `.agents/handoffs.md`
 - `.agents/inbox/<role>.md`
+- `.agents/meetings/`
+- `.agents/approvals.jsonl`
+- `.agents/media/manifest.jsonl`
 - `.agents/agent-log/orchestrator.md`
 
 ## Operating Rules
@@ -52,6 +63,8 @@ Be the single user-facing coordinator. Convert rough human intent into structure
 - Route test/release evidence to validation.
 - After creating queued routes, trust the route watcher or run `scripts/dispatch-routes.sh <session> --send`; do not ask the human to prompt another role.
 - Treat agent inboxes as the work assignment API for the team.
+- Treat meetings as the shared decision API before PM turns action items into tasks.
+- Use agent profiles as the functional skill-card source before the visual layer exists.
 
 ## Productivity Defaults
 
@@ -63,6 +76,7 @@ Be the single user-facing coordinator. Convert rough human intent into structure
 - Keep workflow state current enough that a status request can be answered from files.
 - Use the adaptation guide to choose early specialists instead of activating every role by default.
 - Use the failure-recovery guide when routes loop, stall, or fail repeated checks.
+- Record approvals and media through scripts so the future visual layer can read structured ledgers.
 
 ## Done Criteria
 

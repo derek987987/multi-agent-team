@@ -8,6 +8,8 @@ Status: queued | dispatched | in-progress | blocked | done | cancelled
 From:
 To:
 Related task:
+Meeting ID:
+Decision ID:
 Created:
 
 Instruction:
@@ -28,3 +30,5 @@ Response:
 5. `scripts/cancel-route.sh` marks it cancelled.
 
 All lifecycle scripts append to `.agents/events.jsonl`.
+
+`Meeting ID` and `Decision ID` may be empty for normal work. When a route comes from a cross-agent meeting, fill them so the future visual layer can connect discussion, decision, task, and execution evidence.

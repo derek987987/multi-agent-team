@@ -43,7 +43,9 @@ cd /Users/hay/Documents/agent-team-instances/my-app-team
 ./scripts/start-agent-team.sh
 ```
 
-Startup launches Codex in every agent window with `--full-auto`. The `control` window runs the route watcher, and the `orchestrator` window is the normal place where you talk to the team.
+Startup launches Codex in every agent window with `--ask-for-approval never --sandbox workspace-write` so role agents stay sandboxed and do not stop for shell-command approval prompts. The `control` window runs the route watcher, and the `orchestrator` window is the normal place where you talk to the team.
+
+Security note: `workspace-write` limits writes to the launched workspace plus any `--add-dir` paths, normally the agent-team copy and the target project. Keep secrets out of those writable paths when possible.
 
 If this is the first time Codex has opened the generated agent-team copy or target project, Codex may ask whether you trust the directory. Choose `Yes, continue` for local projects you created and trust.
 
@@ -71,6 +73,21 @@ Approve:
 ```text
 Approved. Proceed with Product/CTO planning and routing.
 ```
+
+## Daily Usage
+
+Use this workflow as a small coding company, not as a set of separate chat windows.
+
+1. Improve the reusable team in this repo: `cd /Users/hay/Documents/agent-teams`.
+2. Create one agent-team copy per coding project with `new-coding-project.sh`.
+3. Talk to the `orchestrator` window only during normal work.
+4. Let the Orchestrator route Product, Research, CTO, Design, PM, implementation, QA, Security, Validation, Docs, and Integration through `.agents/inbox/<role>.md`.
+5. Check status with `./scripts/agent-status.sh` or the lighter functional view with `./scripts/company-status.sh`.
+6. Use meetings when several roles need one shared decision before PM writes tasks.
+7. Convert closed meeting action items into PM tasks and route implementation from those tasks.
+8. Run `./scripts/run-quality-gates.sh` before review, merge, or push.
+
+The source of truth is the files under `.agents/`. Tmux windows run agents and watchers; they are not the durable state.
 
 ## Template And Project Copies
 
@@ -135,7 +152,7 @@ Agents treat the target directory as the codebase and the copied agent-team dire
 All agent windows run:
 
 ```bash
-codex --full-auto --no-alt-screen
+codex --ask-for-approval never --sandbox workspace-write --no-alt-screen
 ```
 
 via `scripts/codex-role.sh`. The server window remains a plain terminal for dev servers and logs.
@@ -158,6 +175,68 @@ via `scripts/codex-role.sh`. The server window remains a plain terminal for dev 
 - `docs`: user docs, developer docs, runbooks, release notes.
 - `validation`: independent command execution and acceptance evidence.
 - `integration`: reviewed merges, conflict resolution, final validation routing.
+
+## Functional Company Layer
+
+Build and use the functional layer before visual dashboards. The visual app should read these files later instead of inventing a second source of truth.
+
+Company files:
+
+- `.agents/company/projects.jsonl` - project registry updated by `set-project-target.sh`.
+- `.agents/company/agent-profiles.jsonl` - machine-readable agent skill cards.
+- `.agents/meetings/M*.md` - cross-agent meeting records, decisions, and action items.
+- `.agents/media/manifest.jsonl` - image, video, screenshot, audio, and document attachment metadata.
+- `.agents/approvals.jsonl` - approval and accepted-risk ledger.
+- `.agents/state/projects.jsonl`, `meetings.jsonl`, `media.jsonl`, and `approvals.jsonl` - structured mirrors for scripts and future UI.
+
+Functional commands:
+
+```bash
+./scripts/company-status.sh
+./scripts/create-meeting.sh M001 "Plan first milestone" orchestrator product cto pm
+./scripts/attach-media.sh M001 meeting M001 /path/to/reference.png screenshot "Reference UI"
+./scripts/record-approval.sh AP001 human "brief" approved "Proceed with functional layer" M001
+./scripts/close-meeting.sh M001 "Functional scope approved" "PM converts actions into tasks"
+./scripts/route-agent.sh R001 pm "Plan meeting actions" T001 --meeting M001 --decision D001
+```
+
+Use meetings when multiple roles need to discuss a cross-project or cross-domain decision. Close the meeting before PM creates tasks unless the meeting is deliberately left open for ongoing discovery.
+
+Typical functional-first sequence:
+
+```bash
+# 1. Confirm the active target and company registry.
+./scripts/company-status.sh
+
+# 2. Create a shared planning meeting.
+./scripts/create-meeting.sh M001 "Plan functional requirements" orchestrator product cto pm data security
+
+# 3. Attach any reference screenshot, video, audio, document, or local file.
+./scripts/attach-media.sh M001 meeting M001 /path/to/reference.png screenshot "Reference from product discussion"
+
+# 4. Record human approval or risk acceptance when the workflow needs it.
+./scripts/record-approval.sh AP001 human "functional requirements" approved "Build functional layer before visual UI" M001
+
+# 5. Close the meeting with a decision and action items.
+./scripts/close-meeting.sh M001 "Functional scope approved" "PM creates tasks; CTO checks schemas; Security checks attachments"
+
+# 6. Route the next owner with meeting and decision metadata.
+./scripts/route-agent.sh R001 pm "Turn meeting actions into task board" T001 --meeting M001 --decision D001
+```
+
+Functional records map like this:
+
+| Need | File / command |
+| --- | --- |
+| Current projects | `.agents/company/projects.jsonl`, `scripts/set-project-target.sh` |
+| Agent skill cards | `.agents/company/agent-profiles.jsonl` |
+| Cross-agent decisions | `.agents/meetings/M*.md` |
+| Media references | `.agents/media/manifest.jsonl`, `scripts/attach-media.sh` |
+| Human approvals | `.agents/approvals.jsonl`, `scripts/record-approval.sh` |
+| Execution routes | `.agents/inbox/<role>.md`, `scripts/route-agent.sh` |
+| Future dashboard input | `.agents/state/*.jsonl` |
+
+Do not start the visual dashboard until the functional records above can carry the whole workflow.
 
 ## Real Coding Mode
 
