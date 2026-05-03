@@ -4,7 +4,7 @@ This workflow borrows the best practical ideas from role-based multi-agent syste
 
 ## Company Operating Model
 
-The human normally prompts only the Orchestrator. The Orchestrator creates routes and handoffs in `.agents/*`, and the route watcher dispatches those routes to auto-launched Codex agents running sandboxed without shell-command approval prompts. Agents communicate through markdown control-plane files, not by asking the human to relay messages.
+The human normally prompts only the Orchestrator. The Orchestrator creates routes and handoffs in `.agents/*`, and the route watcher dispatches those routes to auto-launched Codex agents running sandboxed without shell-command approval prompts. Agents communicate through markdown control-plane files and per-route reports, not by asking the human to relay messages.
 
 Production controls:
 - `.agents/context-map.md` controls what context each role should load.
@@ -85,8 +85,8 @@ Inputs:
 - current decisions
 
 Rules:
-- Orchestrator routes planning work through `.agents/inbox/cto.md` and `.agents/inbox/pm.md`.
-- Auto-launched agents claim assigned routes before acting and complete or block routes when finished.
+- Orchestrator routes planning work through `.agents/inbox/cto.md`, `.agents/inbox/pm.md`, and `.agents/routes/R000.md` reports.
+- Auto-launched agents claim assigned routes before acting and complete or block routes with route-report evidence when finished.
 - Work in a branch or worktree when possible.
 - Keep edits inside assigned ownership.
 - Update `.agents/agent-log/<role>.md`.

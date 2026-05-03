@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 source "$ROOT/scripts/agent-roles.sh"
 
-mkdir -p "$ROOT/.agents/company" "$ROOT/.agents/meetings" "$ROOT/.agents/media" "$ROOT/.agents/state"
+mkdir -p "$ROOT/.agents/company" "$ROOT/.agents/meetings" "$ROOT/.agents/media" "$ROOT/.agents/state" "$ROOT/.agents/routes"
 
 cat > "$ROOT/.agents/brief.md" <<'EOF'
 # Product Brief
@@ -394,6 +394,7 @@ EOF
 done
 
 find "$ROOT/.agents/meetings" -maxdepth 1 -type f -name 'M*.md' -delete
+find "$ROOT/.agents/routes" -maxdepth 1 -type f -name 'R*.md' -delete
 cat > "$ROOT/.agents/company/projects.jsonl" <<EOF
 {"project_id":"template","name":"agent-teams","path":"$ROOT","mode":"template","status":"template","updated":"$UPDATED","source":"reset-agent-team-state"}
 EOF

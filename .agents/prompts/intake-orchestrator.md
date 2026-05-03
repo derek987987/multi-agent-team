@@ -74,8 +74,16 @@ When product scope still needs detail, create a Product route first. When the ap
 Status: queued
 From: orchestrator
 To: cto
+Priority: P1
 Related task:
 Created:
+Last updated:
+Attempt: 0
+Route depth: 1
+Target project:
+Files / modules:
+Context refs: `.agents/brief.md`, repo docs, `.agents/quality-gates.md`, `.agents/routing-matrix.md`
+Completion report: `.agents/routes/R000.md`
 
 Instruction:
 Read `.agents/brief.md`, repo files, `.agents/quality-gates.md`, and `.agents/routing-matrix.md`.
@@ -96,6 +104,6 @@ Validation / done criteria:
 Response:
 ```
 
-Also add the corresponding entry to `.agents/handoffs.md` and `.agents/workflow-state.md`.
+Also add the corresponding entry to `.agents/handoffs.md`, `.agents/workflow-state.md`, and `.agents/routes/R000.md`. Prefer `scripts/route-agent.sh` with `--instruction`, `--expected-output`, and `--validation` so non-draft routes cannot dispatch with placeholder fields.
 
 Do not ask the human to prompt Product, CTO, or PM. The route is the handoff.

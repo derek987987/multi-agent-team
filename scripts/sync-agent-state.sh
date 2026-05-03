@@ -38,6 +38,7 @@ while IFS= read -r line; do
       rsync -a "$ROOT/.agents/ownership/" "$wt/.agents/ownership/"
       rsync -a "$ROOT/.agents/agent-config/" "$wt/.agents/agent-config/"
       rsync -a "$ROOT/.agents/state/" "$wt/.agents/state/"
+      rsync -a "$ROOT/.agents/routes/" "$wt/.agents/routes/"
       for file in \
         brief.md context-map.md agent-policy.md evaluation-suite.md \
         failure-recovery.md adaptation-guide.md product-requirements.md \

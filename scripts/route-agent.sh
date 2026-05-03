@@ -8,8 +8,9 @@ json_escape() {
 }
 
 usage() {
-  printf "Usage: %s <route-id> <to-role> <title> [related-task] [--meeting <meeting-id>] [--decision <decision-id>]\n" "$(basename "$0")" >&2
-  printf "Example: %s R003 backend \"Implement task API\" T012 --meeting M001 --decision D001\n" "$(basename "$0")" >&2
+  printf "Usage: %s <route-id> <to-role> <title> [related-task] [options]\n" "$(basename "$0")" >&2
+  printf "Required unless --draft: --instruction, --expected-output, --validation\n" >&2
+  printf "Example: %s R003 backend \"Implement task API\" T012 --instruction \"Build API\" --expected-output \"implementation report\" --validation \"npm test\"\n" "$(basename "$0")" >&2
 }
 
 if [ "$#" -lt 3 ]; then
@@ -23,13 +24,33 @@ TITLE="$3"
 RELATED_TASK=""
 MEETING_ID=""
 DECISION_ID=""
+PRIORITY="P2"
+ATTEMPT="0"
+ROUTE_DEPTH="1"
+TARGET_PROJECT=""
+WORKTREE_OR_BRANCH=""
+FILES_OR_MODULES="none"
+CONTEXT_REFS="none"
+DEPENDS_ON_ROUTES="none"
+BLOCKS_TASKS="none"
+OUTPUT_SCHEMA="none"
+RISK_FLAGS="none"
+NEXT_OWNER=""
+HUMAN_APPROVAL_REQUIRED="no"
+INSTRUCTION=""
+EXPECTED_OUTPUT=""
+VALIDATION=""
+DRAFT=0
 
 if [ "$#" -gt 3 ]; then
   shift 3
-  if [ "${1:-}" != "--meeting" ] && [ "${1:-}" != "--decision" ]; then
+  case "${1:-}" in
+    --*) ;;
+    *)
     RELATED_TASK="$1"
     shift
-  fi
+      ;;
+  esac
   while [ "$#" -gt 0 ]; do
     case "$1" in
       --meeting)
@@ -48,20 +69,182 @@ if [ "$#" -gt 3 ]; then
         DECISION_ID="$2"
         shift 2
         ;;
+      --priority)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--priority requires a value." >&2
+          exit 1
+        fi
+        PRIORITY="$2"
+        shift 2
+        ;;
+      --attempt)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--attempt requires a value." >&2
+          exit 1
+        fi
+        ATTEMPT="$2"
+        shift 2
+        ;;
+      --route-depth)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--route-depth requires a value." >&2
+          exit 1
+        fi
+        ROUTE_DEPTH="$2"
+        shift 2
+        ;;
+      --target-project)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--target-project requires a value." >&2
+          exit 1
+        fi
+        TARGET_PROJECT="$2"
+        shift 2
+        ;;
+      --worktree|--branch)
+        if [ -z "${2:-}" ]; then
+          printf '%s requires a value.\n' "$1" >&2
+          exit 1
+        fi
+        WORKTREE_OR_BRANCH="$2"
+        shift 2
+        ;;
+      --files|--files-or-modules)
+        if [ -z "${2:-}" ]; then
+          printf '%s requires a value.\n' "$1" >&2
+          exit 1
+        fi
+        FILES_OR_MODULES="$2"
+        shift 2
+        ;;
+      --context|--context-refs)
+        if [ -z "${2:-}" ]; then
+          printf '%s requires a value.\n' "$1" >&2
+          exit 1
+        fi
+        CONTEXT_REFS="$2"
+        shift 2
+        ;;
+      --depends-on)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--depends-on requires a value." >&2
+          exit 1
+        fi
+        DEPENDS_ON_ROUTES="$2"
+        shift 2
+        ;;
+      --blocks)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--blocks requires a value." >&2
+          exit 1
+        fi
+        BLOCKS_TASKS="$2"
+        shift 2
+        ;;
+      --output-schema)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--output-schema requires a value." >&2
+          exit 1
+        fi
+        OUTPUT_SCHEMA="$2"
+        shift 2
+        ;;
+      --risk-flags)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--risk-flags requires a value." >&2
+          exit 1
+        fi
+        RISK_FLAGS="$2"
+        shift 2
+        ;;
+      --next-owner)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--next-owner requires a value." >&2
+          exit 1
+        fi
+        NEXT_OWNER="$2"
+        shift 2
+        ;;
+      --approval-required|--human-approval-required)
+        HUMAN_APPROVAL_REQUIRED="yes"
+        shift
+        ;;
+      --instruction)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--instruction requires a value." >&2
+          exit 1
+        fi
+        INSTRUCTION="$2"
+        shift 2
+        ;;
+      --instruction-file)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--instruction-file requires a value." >&2
+          exit 1
+        fi
+        if [ ! -f "$2" ]; then
+          printf "Instruction file not found: %s\n" "$2" >&2
+          exit 1
+        fi
+        INSTRUCTION="$(sed -n '1,200p' "$2")"
+        shift 2
+        ;;
+      --expected-output)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--expected-output requires a value." >&2
+          exit 1
+        fi
+        EXPECTED_OUTPUT="$2"
+        shift 2
+        ;;
+      --validation)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--validation requires a value." >&2
+          exit 1
+        fi
+        VALIDATION="$2"
+        shift 2
+        ;;
+      --draft)
+        DRAFT=1
+        shift
+        ;;
       *)
         printf "Unexpected argument: %s\n" "$1" >&2
         usage
         exit 1
         ;;
     esac
-  done
+done
 fi
 
 INBOX="$ROOT/.agents/inbox/$TO_ROLE.md"
 HANDOFFS="$ROOT/.agents/handoffs.md"
 STATE="$ROOT/.agents/workflow-state.md"
 ROUTES_JSONL="$ROOT/.agents/state/routes.jsonl"
+ROUTE_DIR="$ROOT/.agents/routes"
+ROUTE_REPORT="$ROUTE_DIR/$ROUTE_ID.md"
 CREATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+UPDATED="$CREATED"
+TARGET_PROJECT="${TARGET_PROJECT:-$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)}"
+TARGET_PROJECT="${TARGET_PROJECT:-$ROOT}"
+NEXT_OWNER="${NEXT_OWNER:-$TO_ROLE}"
+
+if [ "$DRAFT" -eq 0 ]; then
+  missing=()
+  [ -z "$INSTRUCTION" ] && missing+=("--instruction")
+  [ -z "$EXPECTED_OUTPUT" ] && missing+=("--expected-output")
+  [ -z "$VALIDATION" ] && missing+=("--validation")
+  if [ "${#missing[@]}" -gt 0 ]; then
+    printf "Non-draft routes require: %s\n" "${missing[*]}" >&2
+    usage
+    exit 1
+  fi
+else
+  INSTRUCTION="${INSTRUCTION:-Draft route. Fill instruction before dispatch.}"
+  EXPECTED_OUTPUT="${EXPECTED_OUTPUT:-Draft route. Fill expected output before dispatch.}"
+  VALIDATION="${VALIDATION:-Draft route. Fill validation before dispatch.}"
+fi
 
 if [ ! -f "$INBOX" ]; then
   printf "Unknown role inbox: %s\n" "$INBOX" >&2
@@ -75,26 +258,92 @@ if grep -R -qE "^(##|###)[[:space:]]+$ROUTE_ID([[:space:]-]|$)|^[|][[:space:]]*$
   exit 1
 fi
 
+mkdir -p "$ROUTE_DIR"
+if [ -e "$ROUTE_REPORT" ]; then
+  printf "Route report already exists: .agents/routes/%s.md\n" "$ROUTE_ID" >&2
+  exit 1
+fi
+
+cat > "$ROUTE_REPORT" <<ROUTE
+# $ROUTE_ID - $TITLE
+
+Route ID: $ROUTE_ID
+Status: queued
+From: orchestrator
+To: $TO_ROLE
+Priority: $PRIORITY
+Created: $CREATED
+Last updated: $UPDATED
+Attempt: $ATTEMPT
+Route depth: $ROUTE_DEPTH
+Related task: $RELATED_TASK
+Depends on routes: $DEPENDS_ON_ROUTES
+Blocks tasks: $BLOCKS_TASKS
+Meeting ID: $MEETING_ID
+Decision ID: $DECISION_ID
+Target project: $TARGET_PROJECT
+Worktree or branch: ${WORKTREE_OR_BRANCH:-none}
+Files or modules: $FILES_OR_MODULES
+Context refs: $CONTEXT_REFS
+Output schema: $OUTPUT_SCHEMA
+Risk flags: $RISK_FLAGS
+Human approval required: $HUMAN_APPROVAL_REQUIRED
+Next owner: $NEXT_OWNER
+
+## Instruction
+
+$INSTRUCTION
+
+## Expected Output
+
+$EXPECTED_OUTPUT
+
+## Validation / Done Criteria
+
+$VALIDATION
+
+## Dispatch Evidence
+
+No dispatch yet.
+
+## Completion
+
+No completion yet.
+ROUTE
+
 cat >> "$INBOX" <<ROUTE
 
 ## $ROUTE_ID - $TITLE
 Status: queued
 From: orchestrator
 To: $TO_ROLE
+Priority: $PRIORITY
 Related task: $RELATED_TASK
 Meeting ID: $MEETING_ID
 Decision ID: $DECISION_ID
 Created:
 $CREATED
+Last updated:
+$UPDATED
+Attempt: $ATTEMPT
+Route depth: $ROUTE_DEPTH
+Target project: $TARGET_PROJECT
+Worktree or branch: ${WORKTREE_OR_BRANCH:-none}
+Files / modules: $FILES_OR_MODULES
+Context refs: $CONTEXT_REFS
+Output schema: $OUTPUT_SCHEMA
+Risk flags: $RISK_FLAGS
+Human approval required: $HUMAN_APPROVAL_REQUIRED
+Completion report: .agents/routes/$ROUTE_ID.md
 
 Instruction:
-TBD
+$INSTRUCTION
 
 Expected output:
-TBD
+$EXPECTED_OUTPUT
 
 Validation / done criteria:
-TBD
+$VALIDATION
 
 Response:
 ROUTE
@@ -111,15 +360,16 @@ Related task: $RELATED_TASK
 Meeting ID: $MEETING_ID
 Decision ID: $DECISION_ID
 Files / modules:
+$FILES_OR_MODULES
 
 Request:
 See .agents/inbox/$TO_ROLE.md.
 
 Context:
-TBD
+$CONTEXT_REFS
 
 Acceptance criteria:
-- TBD
+- $VALIDATION
 
 Response:
 ROUTE
@@ -143,8 +393,8 @@ awk -v id="$ROUTE_ID" -v to="$TO_ROLE" -v task="$RELATED_TASK" -v title="$TITLE"
 ' "$STATE" > "$tmp"
 mv "$tmp" "$STATE"
 
-printf '{"route_id":"%s","to":"%s","status":"queued","related_task":"%s","meeting_id":"%s","decision_id":"%s","title":"%s","created":"%s"}\n' \
-  "$(json_escape "$ROUTE_ID")" "$(json_escape "$TO_ROLE")" "$(json_escape "$RELATED_TASK")" "$(json_escape "$MEETING_ID")" "$(json_escape "$DECISION_ID")" "$(json_escape "$TITLE")" "$(json_escape "$CREATED")" >> "$ROUTES_JSONL"
+printf '{"route_id":"%s","to":"%s","status":"queued","priority":"%s","attempt":%s,"route_depth":%s,"related_task":"%s","meeting_id":"%s","decision_id":"%s","title":"%s","target_project":"%s","report":"%s","created":"%s","updated":"%s"}\n' \
+  "$(json_escape "$ROUTE_ID")" "$(json_escape "$TO_ROLE")" "$(json_escape "$PRIORITY")" "$ATTEMPT" "$ROUTE_DEPTH" "$(json_escape "$RELATED_TASK")" "$(json_escape "$MEETING_ID")" "$(json_escape "$DECISION_ID")" "$(json_escape "$TITLE")" "$(json_escape "$TARGET_PROJECT")" ".agents/routes/$ROUTE_ID.md" "$(json_escape "$CREATED")" "$(json_escape "$UPDATED")" >> "$ROUTES_JSONL"
 
 "$ROOT/scripts/log-event.sh" route-created route-agent "Created route $ROUTE_ID for $TO_ROLE" "$TITLE" "$ROUTE_ID"
 "$ROOT/scripts/check-route-budget.sh" >/dev/null

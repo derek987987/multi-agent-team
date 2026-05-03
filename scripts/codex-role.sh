@@ -179,7 +179,8 @@ Operating loop:
 4. Do your role-specific work without asking the human to prompt another agent.
 5. If another role is needed, write a concrete handoff or route through .agents/handoffs.md and the target .agents/inbox/<role>.md.
 6. If blocked, record the blocker in your inbox response, .agents/handoffs.md, and .agents/workflow-state.md.
-7. When finished, update your owned outputs and run ./scripts/complete-route.sh <route-id> $ROLE "<short summary>".
+7. When finished, update your owned outputs and the route report, then run ./scripts/complete-route.sh <route-id> $ROLE "<short summary>" --report .agents/routes/<route-id>.md.
+8. If blocked, run ./scripts/block-route.sh <route-id> $ROLE "<reason>" --report .agents/routes/<route-id>.md and name the next owner.
 
 If relative .agents paths are not present in the working directory, use the control-plane directory above.
 EOF

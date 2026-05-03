@@ -43,6 +43,7 @@ required_files=(
   ".agents/workflow-state.md"
   ".agents/routing-matrix.md"
   ".agents/route-schema.md"
+  ".agents/routes/README.md"
   ".agents/events.jsonl"
   ".agents/memory-policy.md"
   ".agents/sync-policy.md"
@@ -153,6 +154,7 @@ required_files=(
   "scripts/sync-agent-state.sh"
   "scripts/claim-route.sh"
   "scripts/complete-route.sh"
+  "scripts/block-route.sh"
   "scripts/cancel-route.sh"
   "scripts/dispatch-routes.sh"
   "scripts/check-ownership.sh"
@@ -163,6 +165,7 @@ required_files=(
   "scripts/check-secrets.sh"
   "scripts/check-milestone-budget.sh"
   "scripts/validate-structured-state.sh"
+  "scripts/validate-route-state.sh"
 )
 
 for file in "${required_files[@]}"; do
@@ -200,6 +203,7 @@ bash -n "$ROOT/scripts/log-event.sh"
 bash -n "$ROOT/scripts/sync-agent-state.sh"
 bash -n "$ROOT/scripts/claim-route.sh"
 bash -n "$ROOT/scripts/complete-route.sh"
+bash -n "$ROOT/scripts/block-route.sh"
 bash -n "$ROOT/scripts/cancel-route.sh"
 bash -n "$ROOT/scripts/dispatch-routes.sh"
 bash -n "$ROOT/scripts/check-ownership.sh"
@@ -210,9 +214,11 @@ bash -n "$ROOT/scripts/check-agent-config.sh"
 bash -n "$ROOT/scripts/check-secrets.sh"
 bash -n "$ROOT/scripts/check-milestone-budget.sh"
 bash -n "$ROOT/scripts/validate-structured-state.sh"
+bash -n "$ROOT/scripts/validate-route-state.sh"
 
 bash "$ROOT/tests/test-auto-codex-agent-team.sh"
 bash "$ROOT/tests/test-coding-company-functional-layer.sh"
+bash "$ROOT/tests/test-routing-reliability.sh"
 
 for role in "${AGENT_ROLES[@]}"; do
   for role_file in \

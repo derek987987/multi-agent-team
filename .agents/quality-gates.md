@@ -15,6 +15,7 @@ Every implementation task should satisfy:
 - validation findings are resolved or explicitly accepted
 - reviewer/security findings are resolved or explicitly accepted when applicable
 - auto-launch workflow changes pass `bash tests/test-auto-codex-agent-team.sh`
+- routing reliability changes pass `bash tests/test-routing-reliability.sh`
 - context, policy, evaluation, failure recovery, and adaptation guidance are current when workflow behavior changes
 
 ## Command Matrix
@@ -35,6 +36,9 @@ Add project-specific commands as the repo takes shape.
 - Routes are in the right `.agents/inbox/<role>.md` files.
 - Route lifecycle changes are reflected in `.agents/events.jsonl`.
 - `.agents/state/routes.jsonl` mirrors created routes.
+- `.agents/routes/R000.md` exists for each created route and is used as the durable route contract.
+- Non-draft routes have concrete instruction, expected output, and validation fields.
+- `scripts/validate-route-state.sh` passes.
 - Meeting-driven routes include `Meeting ID` and `Decision ID` when applicable.
 - Human approvals and accepted risks are mirrored in `.agents/approvals.jsonl`.
 - `scripts/check-route-budget.sh` passes.
@@ -159,6 +163,7 @@ Add project-specific commands as the repo takes shape.
 - Review, security, and validation reports are checked.
 - Worktree control-plane files are synced before review/merge when worktrees are active.
 - `scripts/validate-structured-state.sh` passes.
+- `scripts/validate-route-state.sh` passes.
 - `scripts/check-memory.sh` passes.
 - `scripts/check-milestone-budget.sh` passes.
 - `scripts/check-secrets.sh` passes.

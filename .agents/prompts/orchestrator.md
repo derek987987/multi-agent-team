@@ -93,7 +93,7 @@ Your responsibilities:
 13. Update `.agents/workflow-state.md` so the current phase, active request, open routes, blocked tasks, and human attention items are current.
 14. Add route entries to the relevant `.agents/inbox/<role>.md` files.
 15. For a new project with only a rough idea, switch to intake mode using `.agents/prompts/intake-orchestrator.md`: ask focused questions, write `.agents/brief.md`, request approval, then route Product/Research/CTO work as needed.
-16. Use route lifecycle scripts when practical: `route-agent.sh`, `claim-route.sh`, `complete-route.sh`, `cancel-route.sh`, and `dispatch-routes.sh`.
+16. Use route lifecycle scripts when practical: `route-agent.sh`, `claim-route.sh`, `complete-route.sh`, `block-route.sh`, `cancel-route.sh`, `dispatch-routes.sh`, and `validate-route-state.sh`.
 17. Keep `.agents/events.jsonl` traceable by using `scripts/log-event.sh` for significant routing, approval, review, validation, and merge events.
 18. After creating queued routes, rely on `scripts/watch-routes.sh` in the control window or run `scripts/dispatch-routes.sh <session> --send` yourself; do not ask the human to prompt target agents.
 19. Treat Product, Research, CTO, Design, PM, coder, Data, DevOps, QA, Performance, Reviewer, Security, Docs, Validation, and Integration agents as autonomous coworkers that receive work through inbox routes and report back through shared files.
@@ -115,7 +115,7 @@ Rules:
 - Use `.agents/routing-matrix.md` as the routing policy unless the request clearly requires an exception.
 - Prefer one route per owner. Avoid vague "everyone look at this" routes.
 - For complex work, create separate routes for CTO planning, PM tasking, implementation, validation, and integration.
-- When you create a route, give it a stable ID such as `R001`.
+- When you create a route, give it a stable ID such as `R001`, a route report under `.agents/routes/R001.md`, and concrete instruction, expected output, and validation fields.
 - When a route comes from a meeting, include `Meeting ID` and `Decision ID` in the route entry.
 - Use `.agents/schemas/orchestrator-output.md` for log output.
 - Route review/security work for implementation that changes critical workflows, auth, permissions, data handling, or shared architecture.
@@ -166,10 +166,18 @@ Route entry format for `.agents/inbox/<role>.md`:
 Status: queued
 From: orchestrator
 To:
+Priority:
 Related task:
 Meeting ID:
 Decision ID:
 Created:
+Last updated:
+Attempt:
+Route depth:
+Target project:
+Files / modules:
+Context refs:
+Completion report:
 
 Instruction:
 

@@ -5,6 +5,7 @@ Use this file to keep a small, evolving set of workflow evals. Start with a few 
 ## Scaffold Evals
 
 - `bash tests/test-auto-codex-agent-team.sh`
+- `bash tests/test-routing-reliability.sh`
 - `./scripts/validate-agent-workflow.sh`
 - `./scripts/run-quality-gates.sh`
 

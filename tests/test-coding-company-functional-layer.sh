@@ -107,9 +107,14 @@ assert_contains "$(cat "$test_root/.agents/state/media.jsonl")" "\"attachment_ty
 assert_contains "$(cat "$test_root/.agents/approvals.jsonl")" "\"approval_id\":\"AP900\"" "approval ledger"
 assert_contains "$(cat "$test_root/.agents/state/approvals.jsonl")" "\"status\":\"approved\"" "approval state"
 
-"$test_root/scripts/route-agent.sh" R900 pm "Plan meeting actions" T900 --meeting M900 --decision D900 >/dev/null
+"$test_root/scripts/route-agent.sh" R900 pm "Plan meeting actions" T900 \
+  --meeting M900 --decision D900 \
+  --instruction "Convert the closed meeting action items into PM task-board updates." \
+  --expected-output ".agents/task-board.md updates and .agents/routes/R900.md route report" \
+  --validation "Run ./scripts/check-ready.sh and ./scripts/validate-route-state.sh." >/dev/null
 assert_contains "$(cat "$test_root/.agents/inbox/pm.md")" "Meeting ID: M900" "route meeting metadata"
 assert_contains "$(cat "$test_root/.agents/inbox/pm.md")" "Decision ID: D900" "route decision metadata"
+assert_contains "$(cat "$test_root/.agents/routes/R900.md")" "Route ID: R900" "route report"
 assert_contains "$(cat "$test_root/.agents/state/routes.jsonl")" "\"meeting_id\":\"M900\"" "route state metadata"
 
 structured_output="$("$test_root/scripts/validate-structured-state.sh")"

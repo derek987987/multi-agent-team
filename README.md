@@ -197,7 +197,11 @@ Functional commands:
 ./scripts/attach-media.sh M001 meeting M001 /path/to/reference.png screenshot "Reference UI"
 ./scripts/record-approval.sh AP001 human "brief" approved "Proceed with functional layer" M001
 ./scripts/close-meeting.sh M001 "Functional scope approved" "PM converts actions into tasks"
-./scripts/route-agent.sh R001 pm "Plan meeting actions" T001 --meeting M001 --decision D001
+./scripts/route-agent.sh R001 pm "Plan meeting actions" T001 \
+  --meeting M001 --decision D001 \
+  --instruction "Convert the closed meeting action items into PM task-board updates." \
+  --expected-output ".agents/task-board.md updates and .agents/routes/R001.md report" \
+  --validation "Run ./scripts/check-ready.sh and ./scripts/validate-route-state.sh."
 ```
 
 Use meetings when multiple roles need to discuss a cross-project or cross-domain decision. Close the meeting before PM creates tasks unless the meeting is deliberately left open for ongoing discovery.
@@ -221,7 +225,11 @@ Typical functional-first sequence:
 ./scripts/close-meeting.sh M001 "Functional scope approved" "PM creates tasks; CTO checks schemas; Security checks attachments"
 
 # 6. Route the next owner with meeting and decision metadata.
-./scripts/route-agent.sh R001 pm "Turn meeting actions into task board" T001 --meeting M001 --decision D001
+./scripts/route-agent.sh R001 pm "Turn meeting actions into task board" T001 \
+  --meeting M001 --decision D001 \
+  --instruction "Turn meeting decisions into ordered tasks with owners and validation commands." \
+  --expected-output ".agents/task-board.md updates and .agents/routes/R001.md report" \
+  --validation "Run ./scripts/check-ready.sh and ./scripts/validate-route-state.sh."
 ```
 
 Functional records map like this:
@@ -311,7 +319,8 @@ Claim and complete a route:
 
 ```bash
 ./scripts/claim-route.sh R001 frontend
-./scripts/complete-route.sh R001 frontend "Implemented assigned UI task"
+./scripts/complete-route.sh R001 frontend "Implemented assigned UI task" --report .agents/routes/R001.md
+./scripts/block-route.sh R001 frontend "Missing API contract" --report .agents/routes/R001.md
 ```
 
 Cancel a route:
@@ -329,11 +338,15 @@ Routes live in:
 - `.agents/workflow-state.md`
 - `.agents/state/routes.jsonl`
 - `.agents/events.jsonl`
+- `.agents/routes/R000.md`
 
 Create a route:
 
 ```bash
-./scripts/route-agent.sh R001 cto "Research architecture" T001
+./scripts/route-agent.sh R001 cto "Research architecture" T001 \
+  --instruction "Read the approved brief and produce architecture, decisions, ownership, and validation implications." \
+  --expected-output ".agents/architecture.md, .agents/decisions.md, and .agents/routes/R001.md report" \
+  --validation "Run ./scripts/validate-route-state.sh and relevant workflow checks."
 ```
 
 Dispatch queued routes to tmux windows:
@@ -356,6 +369,7 @@ Check route health:
 ```bash
 ./scripts/check-route-budget.sh
 ./scripts/check-stale-routes.sh
+./scripts/validate-route-state.sh
 ```
 
 ## Quality Gates
@@ -373,6 +387,7 @@ Useful targeted checks:
 ```bash
 ./scripts/validate-agent-workflow.sh
 ./scripts/validate-structured-state.sh
+./scripts/validate-route-state.sh
 ./scripts/check-ready.sh
 ./scripts/check-done.sh
 ./scripts/check-memory.sh

@@ -10,6 +10,7 @@ scripts/*
 .agents/schemas/*
 .agents/ownership/*
 .agents/state/*
+.agents/routes/*
 .agents/agent-config/*
 .agents/brief.md
 .agents/context-map.md
