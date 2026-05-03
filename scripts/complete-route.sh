@@ -8,7 +8,7 @@ json_escape() {
 }
 
 if [ "$#" -lt 1 ]; then
-  printf "Usage: %s <route-id> [actor] [summary] --report <route-report>\n" "$(basename "$0")" >&2
+  printf "Usage: %s <route-id> [actor] [summary] --report <route-report> [--output-ref <path> ...]\n" "$(basename "$0")" >&2
   exit 1
 fi
 
@@ -17,6 +17,7 @@ shift
 ACTOR="unknown"
 SUMMARY="Completed route $ROUTE_ID"
 REPORT=""
+OUTPUT_REFS=()
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 if [ "$#" -gt 0 ] && [ "${1:-}" != "--report" ]; then
@@ -39,9 +40,17 @@ while [ "$#" -gt 0 ]; do
       REPORT="$2"
       shift 2
       ;;
+    --output-ref)
+      if [ -z "${2:-}" ]; then
+        printf '%s\n' "--output-ref requires a value." >&2
+        exit 1
+      fi
+      OUTPUT_REFS+=("$2")
+      shift 2
+      ;;
     *)
       printf "Unexpected argument: %s\n" "$1" >&2
-      printf "Usage: %s <route-id> [actor] [summary] --report <route-report>\n" "$(basename "$0")" >&2
+      printf "Usage: %s <route-id> [actor] [summary] --report <route-report> [--output-ref <path> ...]\n" "$(basename "$0")" >&2
       exit 1
       ;;
   esac
@@ -114,8 +123,25 @@ esac
 
 update_status "$route_file" "##" "done"
 
+update_response() {
+  local file="$1"
+  local heading_prefix="$2"
+  local tmp
+  tmp="$(mktemp)"
+  awk -v id="$ROUTE_ID" -v prefix="$heading_prefix" -v report="$REPORT" '
+    $0 ~ "^" prefix " " id "([[:space:]-]|$)" { in_route = 1; response_done = 0; print; next }
+    in_route && $0 ~ "^" prefix " " { in_route = 0 }
+    in_route && /^Response:/ && !response_done { print "Response:"; print "See " report; response_done = 1; next }
+    { print }
+  ' "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
+update_response "$route_file" "##"
+
 if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/.agents/handoffs.md"; then
   update_status "$ROOT/.agents/handoffs.md" "###" "done"
+  update_response "$ROOT/.agents/handoffs.md" "###"
 fi
 
 tmp="$(mktemp)"
@@ -140,8 +166,18 @@ Completed by: $ACTOR
 Completion summary: $SUMMARY
 REPORT
 
+if [ "${#OUTPUT_REFS[@]}" -gt 0 ]; then
+  {
+    printf '\nOutput refs:\n'
+    for output_ref in "${OUTPUT_REFS[@]}"; do
+      printf -- '- %s\n' "$output_ref"
+    done
+  } >> "$report_path"
+fi
+
 "$ROOT/scripts/log-event.sh" route-completed "$ACTOR" "$SUMMARY" "" "$ROUTE_ID"
 "$ROOT/scripts/update-agent-state.sh" "$ACTOR" --status available --active-route none --blocked-reason none
-printf '{"route_id":"%s","status":"done","actor":"%s","summary":"%s","report":"%s","updated":"%s"}\n' \
-  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$SUMMARY")" "$(json_escape "$REPORT")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
+output_refs_json="$(printf '%s' "${OUTPUT_REFS[*]:-}" | sed 's/ /,/g')"
+printf '{"route_id":"%s","status":"done","actor":"%s","summary":"%s","report":"%s","output_refs":"%s","updated":"%s"}\n' \
+  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$SUMMARY")" "$(json_escape "$REPORT")" "$(json_escape "$output_refs_json")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
 printf "Completed route %s\n" "$ROUTE_ID"

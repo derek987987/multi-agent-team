@@ -62,6 +62,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/security-report.md` - security findings
 - `scripts/codex-role.sh` - launches each role-specific Codex agent sandboxed with command approval prompts disabled
 - `scripts/watch-routes.sh` - watches queued routes and dispatches them to tmux agent windows
+- `scripts/route-status.sh` - summarizes a route from its canonical report, owner, evidence, output refs, and next action
 - `scripts/block-route.sh` - records blocked route state with reason and report evidence
 - `scripts/validate-route-state.sh` - validates route markdown/report consistency
 

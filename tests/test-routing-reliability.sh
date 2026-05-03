@@ -37,6 +37,7 @@ backup_dir="$(mktemp -d)"
 files_to_restore=(
   ".agents/inbox/cto.md"
   ".agents/inbox/frontend.md"
+  ".agents/inbox/pm.md"
   ".agents/handoffs.md"
   ".agents/workflow-state.md"
   ".agents/state/agents.jsonl"
@@ -51,7 +52,7 @@ restore_files() {
       cp "$backup_dir/$file" "$ROOT/$file"
     fi
   done
-  rm -rf "$ROOT/.agents/routes/R901.md" "$ROOT/.agents/routes/R902.md"
+  rm -rf "$ROOT/.agents/routes/R901.md" "$ROOT/.agents/routes/R902.md" "$ROOT/.agents/routes/R903.md"
   rm -rf "$backup_dir"
 }
 trap restore_files EXIT
@@ -115,5 +116,35 @@ assert_contains "$(cat "$ROOT/.agents/routes/R902.md")" "Dispatch failure" "disp
 
 "$ROOT/scripts/validate-route-state.sh" >/tmp/validate-route-state.out
 assert_contains "$(cat /tmp/validate-route-state.out)" "Route state validation passed" "route state validator"
+
+"$ROOT/scripts/route-agent.sh" R903 pm "Route status reporting" \
+  --instruction "Produce a PM route report for status reporting." \
+  --expected-output ".agents/task-board.md update and .agents/routes/R903.md report" \
+  --validation "Route status shows current owner, evidence, and next action." \
+  --context ".agents/route-schema.md" >/tmp/route-r903.out
+
+"$ROOT/scripts/route-status.sh" R903 >/tmp/route-status-queued.out
+assert_contains "$(cat /tmp/route-status-queued.out)" "Route: R903" "route-status queued"
+assert_contains "$(cat /tmp/route-status-queued.out)" "Status: queued" "route-status queued"
+assert_contains "$(cat /tmp/route-status-queued.out)" "Next action: dispatch route to pm" "route-status queued"
+
+"$ROOT/scripts/claim-route.sh" R903 pm >/tmp/claim-r903.out
+"$ROOT/scripts/complete-route.sh" R903 pm "PM report produced" \
+  --report ".agents/routes/R903.md" \
+  --output-ref ".agents/task-board.md" \
+  --output-ref ".agents/routes/R903.md" >/tmp/complete-r903.out
+
+completed_report="$(cat "$ROOT/.agents/routes/R903.md")"
+assert_contains "$completed_report" "Completion summary: PM report produced" "completion output refs"
+assert_contains "$completed_report" "- .agents/task-board.md" "completion output refs"
+assert_contains "$completed_report" "- .agents/routes/R903.md" "completion output refs"
+assert_contains "$(cat "$ROOT/.agents/inbox/pm.md")" "See .agents/routes/R903.md" "inbox response report pointer"
+assert_contains "$(cat "$ROOT/.agents/handoffs.md")" "See .agents/routes/R903.md" "handoff response report pointer"
+
+"$ROOT/scripts/route-status.sh" R903 >/tmp/route-status-done.out
+assert_contains "$(cat /tmp/route-status-done.out)" "Status: done" "route-status done"
+assert_contains "$(cat /tmp/route-status-done.out)" "Report: .agents/routes/R903.md" "route-status done"
+assert_contains "$(cat /tmp/route-status-done.out)" "Output refs:" "route-status done"
+assert_contains "$(cat /tmp/route-status-done.out)" "Next action: no action; route is done" "route-status done"
 
 printf "Routing reliability tests passed.\n"

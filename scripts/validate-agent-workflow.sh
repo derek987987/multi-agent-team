@@ -170,6 +170,7 @@ required_files=(
   "scripts/check-milestone-budget.sh"
   "scripts/validate-structured-state.sh"
   "scripts/validate-route-state.sh"
+  "scripts/route-status.sh"
 )
 
 for file in "${required_files[@]}"; do
@@ -220,6 +221,7 @@ bash -n "$ROOT/scripts/check-secrets.sh"
 bash -n "$ROOT/scripts/check-milestone-budget.sh"
 bash -n "$ROOT/scripts/validate-structured-state.sh"
 bash -n "$ROOT/scripts/validate-route-state.sh"
+bash -n "$ROOT/scripts/route-status.sh"
 
 bash "$ROOT/tests/test-auto-codex-agent-team.sh"
 bash "$ROOT/tests/test-coding-company-functional-layer.sh"

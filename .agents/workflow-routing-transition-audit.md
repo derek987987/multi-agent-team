@@ -512,6 +512,8 @@ Implementation status: completed in the P1 follow-up. Every `.agents/agent-confi
 3. Add `scripts/route-status.sh R000` to show current owner, status, evidence, and next action.
 4. Update Orchestrator status requests to read route reports first.
 
+Implementation status: completed in the P2 follow-up. Completion now supports repeated `--output-ref` values, writes inbox/handoff response pointers to the route report, `scripts/route-status.sh` prints canonical status and next action from `.agents/routes/R000.md`, and Orchestrator status guidance reads route reports before summarizing secondary files.
+
 ### P3 - Make Recovery Automatic
 
 1. Restore stale-route timestamp regression coverage.

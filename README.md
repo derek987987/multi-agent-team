@@ -323,7 +323,7 @@ Claim and complete a route:
 
 ```bash
 ./scripts/claim-route.sh R001 frontend
-./scripts/complete-route.sh R001 frontend "Implemented assigned UI task" --report .agents/routes/R001.md
+./scripts/complete-route.sh R001 frontend "Implemented assigned UI task" --report .agents/routes/R001.md --output-ref src/frontend/LoginForm.tsx
 ./scripts/block-route.sh R001 frontend "Missing API contract" --report .agents/routes/R001.md
 ```
 
@@ -374,6 +374,7 @@ Check route health:
 ./scripts/check-route-budget.sh
 ./scripts/check-stale-routes.sh
 ./scripts/validate-route-state.sh
+./scripts/route-status.sh R001
 ./scripts/update-agent-state.sh frontend --status busy --active-route R001
 ```
 

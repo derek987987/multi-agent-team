@@ -130,6 +130,7 @@ Rules:
 - Check route fan-out with `scripts/check-route-budget.sh` before creating many routes.
 - Prefer structured mirrors in `.agents/state/*.jsonl` for script-readable state.
 - Include the current project target path in routes that require source-code inspection or edits.
+- For status requests, read `.agents/routes/R000.md` or run `scripts/route-status.sh R000` before summarizing inbox, handoff, or task-board state.
 
 Routing output format in `.agents/agent-log/orchestrator.md`:
 
