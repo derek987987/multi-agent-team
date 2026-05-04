@@ -74,6 +74,154 @@ Approve:
 Approved. Proceed with Product/CTO planning and routing.
 ```
 
+## New Project With Agent Office
+
+Use this flow when you want the visual dashboard while starting a new coding
+project.
+
+1. Start from the reusable template home:
+
+   ```bash
+   cd /Users/hay/Documents/agent-teams
+   ```
+
+2. Create a per-project agent-team copy and start the tmux team:
+
+   ```bash
+   ./scripts/new-coding-project.sh /Users/hay/Documents/my-app --start
+   ```
+
+   This creates `/Users/hay/Documents/agent-team-instances/my-app-team`, resets
+   its `.agents/*` state, writes `.agents/project-target.md` to point at
+   `/Users/hay/Documents/my-app`, validates the scaffold, and launches tmux.
+   The reusable template stays in `/Users/hay/Documents/agent-teams`; normal
+   project work should happen from the generated copy.
+
+3. If the target project is already a git repository and you want role-specific
+   implementation worktrees, use:
+
+   ```bash
+   ./scripts/new-coding-project.sh /Users/hay/Documents/my-app --worktrees
+   ```
+
+   `--worktrees` requires the target project to already be inside a git repo.
+   For a brand-new empty project, use `--start` first; initialize and commit the
+   project before switching to worktree mode later.
+
+4. In the tmux `orchestrator` window, give the first rough idea:
+
+   ```text
+   Use .agents/prompts/intake-orchestrator.md.
+
+   Idea:
+   <describe the coding project in rough words>
+
+   Please interview me if needed, refine my idea, write .agents/brief.md, and ask me to approve the brief before routing Product/CTO work.
+   ```
+
+5. Start Agent Office from the generated copy, either in a second terminal or in
+   the tmux `server` window:
+
+   ```bash
+   cd /Users/hay/Documents/agent-team-instances/my-app-team
+   ./scripts/start-agent-office-dashboard.sh
+   ```
+
+   Open the printed URL, normally:
+
+   ```text
+   http://127.0.0.1:8765/visual-media/
+   ```
+
+6. Use the dashboard to watch workflow state:
+
+   - Agent Office reads `.agents/company/agent-profiles.jsonl`,
+     `.agents/state/agents.jsonl`, `.agents/state/routes.jsonl`,
+     `.agents/events.jsonl`, `.agents/workflow-state.md`, and route reports.
+   - If agents show as offline, the dashboard is telling you that live telemetry
+     is empty or the tmux team is not running.
+   - Clicking an agent opens the inspector with role, status, active route,
+     evidence refs, and recent events.
+
+7. Use the dashboard prompt box for context-aware Orchestrator requests:
+
+   - Select or click an agent.
+   - Write the request in the prompt box.
+   - Submit it.
+
+   The dashboard creates a queued route with `From: human-ui`, `To:
+   orchestrator`, and selected-agent context. The Orchestrator is still the
+   routing authority; the dashboard does not directly task implementation
+   agents.
+
+8. Continue approvals and interactive decisions in the tmux `orchestrator`
+   window. The dashboard is best for visibility, selected-agent context, and
+   quick routed prompts; tmux is still where Codex agents actually run and where
+   longer back-and-forth is easiest.
+
+9. Let the route watcher dispatch work. The normal path is:
+
+   ```text
+   human request -> Orchestrator -> .agents/inbox/<role>.md route -> watcher dispatches -> role tmux window acts -> route report/state updates -> dashboard refresh shows progress
+   ```
+
+10. Before review, merge, or push, run the quality gates from the generated
+    copy:
+
+    ```bash
+    ./scripts/run-quality-gates.sh
+    ```
+
+## Dashboard vs Tmux
+
+Agent Office is a visual control surface over the same file-backed workflow.
+tmux is the execution environment.
+
+| Need | Use Agent Office | Use tmux |
+| --- | --- | --- |
+| See which roles exist and whether they are idle, busy, blocked, or offline | Yes | Possible, but spread across windows and status commands |
+| Inspect selected-agent route/status context | Yes | Yes, by reading `.agents/*` files or running scripts |
+| Send a context-aware prompt about a selected role | Yes, it queues an Orchestrator route with `From: human-ui` | Yes, prompt the `orchestrator` window directly |
+| Run Codex role agents | No | Yes |
+| Dispatch queued routes automatically | No | Yes, the `control` window runs `scripts/watch-routes.sh` |
+| Do long interactive planning, approvals, and clarifying Q&A | Limited | Best in the `orchestrator` tmux window |
+| Run project dev servers and logs | No | Use the tmux `server` window |
+| Attach media through visible options | Yes, Media Builder tab previews `scripts/attach-media.sh` | Yes, run `scripts/attach-media.sh` manually |
+
+The dashboard should never become a second source of truth. If the visual state
+looks wrong, check the underlying `.agents/*` files and the tmux windows; the
+dashboard only reads those files and writes Orchestrator prompt routes.
+
+## When To Use Media Builder
+
+Use Media Builder only when you have a local file that should become durable
+context for the agent team. Typical examples:
+
+- a screenshot of a design you want agents to follow
+- a product reference image
+- a short demo video or screen recording
+- a PDF or document that explains requirements
+- a validation screenshot that proves a bug or UI state
+
+Media Builder does not run agents, does not route work, and does not change the
+target app. It only builds the matching `scripts/attach-media.sh` command. That
+command records the file path, purpose, sensitivity, and owner metadata in
+`.agents/media/manifest.jsonl` and `.agents/state/media.jsonl`.
+
+Example:
+
+```bash
+./scripts/attach-media.sh M001 design homepage /Users/hay/Desktop/homepage-design.png screenshot "Homepage design reference" \
+  --copy \
+  --sensitive no \
+  --review-owner design \
+  --tags "homepage,design,reference"
+```
+
+After that, future agents can find the file as workflow context. For normal
+control and status, use Agent Office and tmux; use Media Builder only when there
+is a file to attach.
+
 ## Daily Usage
 
 Use this workflow as a small coding company, not as a set of separate chat windows.
@@ -178,7 +326,7 @@ via `scripts/codex-role.sh`. The server window remains a plain terminal for dev 
 
 ## Functional Company Layer
 
-Build and use the functional layer before visual dashboards. The visual app should read these files later instead of inventing a second source of truth.
+Build and use the functional layer before visual changes. The Agent Office dashboard reads these files instead of inventing a second source of truth.
 
 Company files:
 
@@ -189,13 +337,16 @@ Company files:
 - `.agents/media/manifest.jsonl` - image, video, screenshot, audio, and document attachment metadata.
 - `.agents/approvals.jsonl` - approval and accepted-risk ledger.
 - `.agents/state/projects.jsonl`, `meetings.jsonl`, `media.jsonl`, and `approvals.jsonl` - structured mirrors for scripts and future UI.
+- `visual-media/` - no-build Agent Office dashboard plus the static option builder for `scripts/attach-media.sh` parameters.
 
 Functional commands:
 
 ```bash
 ./scripts/company-status.sh
 ./scripts/create-meeting.sh M001 "Plan first milestone" orchestrator product cto pm
-./scripts/attach-media.sh M001 meeting M001 /path/to/reference.png screenshot "Reference UI"
+./scripts/attach-media.sh M001 meeting M001 /path/to/reference.png screenshot "Reference UI" \
+  --copy --sensitive no --review-owner security --tags "design,visual,reference"
+./scripts/start-agent-office-dashboard.sh
 ./scripts/record-approval.sh AP001 human "brief" approved "Proceed with functional layer" M001
 ./scripts/close-meeting.sh M001 "Functional scope approved" "PM converts actions into tasks"
 ./scripts/route-agent.sh R001 pm "Plan meeting actions" T001 \
@@ -217,7 +368,12 @@ Typical functional-first sequence:
 ./scripts/create-meeting.sh M001 "Plan functional requirements" orchestrator product cto pm data security
 
 # 3. Attach any reference screenshot, video, audio, document, or local file.
-./scripts/attach-media.sh M001 meeting M001 /path/to/reference.png screenshot "Reference from product discussion"
+./scripts/attach-media.sh M001 meeting M001 /path/to/reference.png screenshot "Reference from product discussion" \
+  --copy \
+  --sensitive no \
+  --review-owner security \
+  --attribution "Product discussion reference" \
+  --tags "design,visual,reference"
 
 # 4. Record human approval or risk acceptance when the workflow needs it.
 ./scripts/record-approval.sh AP001 human "functional requirements" approved "Build functional layer before visual UI" M001
@@ -245,8 +401,22 @@ Functional records map like this:
 | Human approvals | `.agents/approvals.jsonl`, `scripts/record-approval.sh` |
 | Execution routes | `.agents/inbox/<role>.md`, `scripts/route-agent.sh` |
 | Future dashboard input | `.agents/state/*.jsonl` |
+| Agent Office dashboard | `visual-media/`, `scripts/start-agent-office-dashboard.sh` |
+| Visual media option builder | `visual-media/`, `scripts/start-visual-media-dashboard.sh` |
 
-Do not start the visual dashboard until the functional records above can carry the whole workflow.
+Do not build visual dashboards that create their own source of truth. The
+`visual-media/` dashboard is allowed because Agent Office reads `.agents/*`
+state through a local snapshot API, and the Media Builder tab only displays the
+options for the functional media command and previews the matching
+`scripts/attach-media.sh` invocation.
+
+Agent Office APIs:
+
+- `GET /api/snapshot` returns profiles, latest live telemetry, route state,
+  workflow summary, route reports, and recent events from the control-plane
+  files.
+- `POST /api/orchestrator-prompt` validates the selected role and prompt, then
+  queues an Orchestrator route with `From: human-ui`.
 
 ## Real Coding Mode
 

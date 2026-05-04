@@ -395,6 +395,8 @@ done
 
 find "$ROOT/.agents/meetings" -maxdepth 1 -type f -name 'M*.md' -delete
 find "$ROOT/.agents/routes" -maxdepth 1 -type f -name 'R*.md' -delete
+mkdir -p "$ROOT/.agents/media/files"
+find "$ROOT/.agents/media/files" -type f -delete
 cat > "$ROOT/.agents/company/projects.jsonl" <<EOF
 {"project_id":"template","name":"agent-teams","path":"$ROOT","mode":"template","status":"template","updated":"$UPDATED","source":"reset-agent-team-state"}
 EOF

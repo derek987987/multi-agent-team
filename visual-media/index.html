@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Office Dashboard</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <section class="brand-block" aria-label="Dashboard identity">
+        <h1>Agent Office</h1>
+        <p>No-build local visualizer for the tmux-based coding team.</p>
+      </section>
+
+      <section class="status-strip" aria-label="Workflow status">
+        <div class="status-cell">
+          <span>Open Routes</span>
+          <strong id="openRouteCount">0</strong>
+        </div>
+        <div class="status-cell">
+          <span>Blockers</span>
+          <strong id="blockerCount">0</strong>
+        </div>
+        <div class="status-cell">
+          <span>Workflow Phase</span>
+          <strong id="workflowPhase">-</strong>
+        </div>
+        <div class="status-cell refresh-cell">
+          <span>Last Refresh</span>
+          <strong id="lastRefresh">-</strong>
+          <button id="refreshSnapshot" class="icon-button" type="button" aria-label="Refresh snapshot" title="Refresh snapshot">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M19 7v5h-5"></path>
+              <path d="M5 17v-5h5"></path>
+              <path d="M18 12a6 6 0 0 0-10.3-4.2L5 10"></path>
+              <path d="M6 12a6 6 0 0 0 10.3 4.2L19 14"></path>
+            </svg>
+          </button>
+        </div>
+      </section>
+    </header>
+
+    <nav class="tab-bar" aria-label="Visual media views">
+      <button class="tab-button is-active" type="button" data-tab="office">Agent Office</button>
+      <button class="tab-button" type="button" data-tab="media">Media Builder</button>
+    </nav>
+
+    <section id="officeView" class="tab-panel is-active" aria-label="Agent Office">
+      <section class="office-layout">
+        <section class="office-stage" aria-label="Pixel office canvas">
+          <canvas id="officeCanvas" width="1180" height="760"></canvas>
+          <div id="officeEmptyState" class="empty-state" hidden>
+            <strong>No live agent telemetry</strong>
+            <span>Roles are shown as offline until `.agents/state/agents.jsonl` has records.</span>
+          </div>
+          <div class="legend-row" aria-label="Agent status legend">
+            <span><i class="legend-dot status-idle"></i>Idle</span>
+            <span><i class="legend-dot status-launching"></i>Launching</span>
+            <span><i class="legend-dot status-dispatching"></i>Dispatching</span>
+            <span><i class="legend-dot status-busy"></i>Busy</span>
+            <span><i class="legend-dot status-blocked"></i>Blocked</span>
+            <span><i class="legend-dot status-offline"></i>Offline</span>
+          </div>
+        </section>
+
+        <aside class="agent-drawer" aria-label="Agent inspector">
+          <div class="drawer-heading">
+            <div>
+              <h2 id="drawerAgentName">Agent Inspector</h2>
+              <p id="drawerAgentMeta">Select an agent in the office.</p>
+            </div>
+            <span id="drawerStatusPill" class="status-pill status-offline">offline</span>
+          </div>
+
+          <dl class="detail-grid">
+            <div>
+              <dt>Role</dt>
+              <dd id="drawerRole">-</dd>
+            </div>
+            <div>
+              <dt>Window</dt>
+              <dd id="drawerWindow">-</dd>
+            </div>
+            <div>
+              <dt>Active Route</dt>
+              <dd id="drawerRoute">none</dd>
+            </div>
+            <div>
+              <dt>Last Seen</dt>
+              <dd id="drawerLastSeen">-</dd>
+            </div>
+          </dl>
+
+          <section class="drawer-section">
+            <div class="section-title-row">
+              <h3>Evidence</h3>
+              <button id="copyRefs" class="small-button" type="button">Copy refs</button>
+            </div>
+            <pre id="drawerRefs" class="code-block">No selected agent.</pre>
+            <a id="routeReportLink" class="text-link" href="#" hidden>Open route report</a>
+          </section>
+
+          <section class="drawer-section">
+            <h3>Recent Events</h3>
+            <ol id="eventTimeline" class="event-list"></ol>
+          </section>
+
+          <form id="promptForm" class="drawer-section prompt-form">
+            <div class="section-title-row">
+              <h3>Prompt Orchestrator</h3>
+              <select id="recipientSelect" name="role" aria-label="Selected agent role"></select>
+            </div>
+            <textarea id="promptMessage" name="message" rows="5" maxlength="4000" placeholder="Ask Orchestrator to inspect, route, unblock, or summarize this agent context."></textarea>
+            <div class="prompt-actions">
+              <span id="promptResult" aria-live="polite"></span>
+              <button class="primary-button" type="submit">Send to Orchestrator</button>
+            </div>
+          </form>
+        </aside>
+      </section>
+    </section>
+
+    <section id="mediaView" class="tab-panel" aria-label="Media attachment command builder" hidden>
+      <section class="media-layout">
+        <form class="panel form-panel" id="mediaForm">
+          <div class="panel-heading">
+            <h2>Attachment Options</h2>
+            <p>Controls mirror <code>scripts/attach-media.sh</code>.</p>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              <span>Meeting ID</span>
+              <input name="meetingId" value="M001" autocomplete="off">
+            </label>
+            <label>
+              <span>Scope</span>
+              <select name="scope" id="scope"></select>
+            </label>
+            <label>
+              <span>Related ID</span>
+              <input name="relatedId" value="R001" autocomplete="off">
+            </label>
+            <label>
+              <span>File Path</span>
+              <input name="filePath" value="/path/to/reference.png" autocomplete="off">
+            </label>
+            <label>
+              <span>Attachment Type</span>
+              <select name="attachmentType" id="attachmentType"></select>
+            </label>
+            <label>
+              <span>Description</span>
+              <input name="description" value="Reference UI" autocomplete="off">
+            </label>
+          </div>
+
+          <fieldset class="option-group">
+            <legend>Storage And Review</legend>
+            <label class="check-row">
+              <input type="checkbox" name="copy" checked>
+              <span>Copy into <code>.agents/media/files/</code></span>
+            </label>
+            <div class="field-grid compact">
+              <label>
+                <span>Sensitive</span>
+                <select name="sensitive" id="sensitive"></select>
+              </label>
+              <label>
+                <span>Review Owner</span>
+                <select name="reviewOwner" id="reviewOwner"></select>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="option-group">
+            <legend>Metadata</legend>
+            <div class="field-grid compact">
+              <label>
+                <span>Attribution</span>
+                <input name="attribution" value="Product discussion reference" autocomplete="off">
+              </label>
+              <label>
+                <span>Tags</span>
+                <input name="tags" value="design,visual,reference" autocomplete="off">
+              </label>
+              <label>
+                <span>Width</span>
+                <input name="width" value="1200" inputmode="numeric" autocomplete="off">
+              </label>
+              <label>
+                <span>Height</span>
+                <input name="height" value="800" inputmode="numeric" autocomplete="off">
+              </label>
+              <label>
+                <span>MIME Type Override</span>
+                <input name="mimeType" placeholder="image/png" autocomplete="off">
+              </label>
+            </div>
+          </fieldset>
+        </form>
+
+        <aside class="panel preview-panel">
+          <div class="panel-heading">
+            <h2>Command Preview</h2>
+            <p>Run from the agent-team repository root.</p>
+          </div>
+          <pre id="commandPreview" class="command-preview" aria-live="polite"></pre>
+
+          <div class="source-list">
+            <h3>Functional Sources</h3>
+            <ul>
+              <li><code>scripts/attach-media.sh</code></li>
+              <li><a href="../.agents/schemas/media-attachment.md"><code>.agents/schemas/media-attachment.md</code></a></li>
+              <li><a href="../.agents/media/manifest.jsonl"><code>.agents/media/manifest.jsonl</code></a></li>
+              <li><a href="../.agents/state/media.jsonl"><code>.agents/state/media.jsonl</code></a></li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

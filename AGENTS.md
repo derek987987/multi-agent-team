@@ -18,6 +18,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `.agents/state/agents.jsonl` - live role telemetry for session/window/status/active-route routing decisions
 - `.agents/meetings/` - cross-agent meeting records, decisions, action items, and media references
 - `.agents/media/manifest.jsonl` - attachment metadata for images, videos, screenshots, audio, documents, and references
+- `visual-media/` - no-build Agent Office dashboard and visible media attachment option builder
 - `.agents/approvals.jsonl` - brief, architecture, risk, budget, and ship/no-ship approval ledger
 - `.agents/evaluation-suite.md` - scaffold and project evals for repeatable workflow assessment
 - `.agents/failure-recovery.md` - blocked-route recovery owners, retry rules, and evidence requirements
@@ -66,6 +67,8 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `scripts/recover-stale-routes.sh` - requeues stale routes inside retry budget and blocks stale routes after retry budget is exhausted
 - `scripts/block-route.sh` - records blocked route state with reason and report evidence
 - `scripts/validate-route-state.sh` - validates route markdown/report consistency
+- `scripts/start-agent-office-dashboard.sh` - serves the Agent Office dashboard, snapshot API, Orchestrator prompt API, and media builder
+- `scripts/start-visual-media-dashboard.sh` - compatibility launcher for the same dashboard URL
 
 ## Core Rules
 
@@ -94,7 +97,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 23. Do not ask the human to prompt another role during normal work; write a route or handoff and let the route watcher dispatch it.
 24. Auto-launched role agents run sandboxed without shell-command approval prompts; they must still respect ownership, approval gates, and required checks.
 25. Use `.agents/company/agent-profiles.jsonl` to choose the right role before routing; use meetings when several roles need a shared decision before tasking.
-26. Attach media through `scripts/attach-media.sh` so future visual tools can render the same references without changing workflow files.
+26. Attach media through `scripts/attach-media.sh` so future visual tools can render the same references without changing workflow files; use the Media Builder tab in `visual-media/` only as a visible option builder for those same parameters.
 
 ## Recommended Flow
 

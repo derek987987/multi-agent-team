@@ -26,8 +26,9 @@ The orchestrator uses this matrix to decide where a human request should go.
 | emergency replan | CTO and PM | `decisions`, `task-board`, `workflow-state`, `handoffs` | yes |
 | status request | orchestrator | `workflow-state` if stale | no |
 | implementation request | PM if no task exists, otherwise owner agent | `task-board`, `handoffs`, `workflow-state` | no |
+| Agent Office prompt | orchestrator | `inbox/orchestrator`, `routes`, `state/routes`, `events`, then classified follow-up files | no unless the prompt asks for an approval-gated change |
 | cross-agent meeting / decision | orchestrator, then invited roles, then PM | `meetings`, `decisions`, `approvals`, `task-board`, `handoffs`, `workflow-state` | yes if scope/risk/architecture changes |
-| media attachment / visual reference | orchestrator, then security/design/QA as needed | `media/manifest`, `meetings`, `task-board`, `handoffs` | yes if sensitive data may be exposed |
+| media attachment / visual reference | orchestrator, then security/design/QA as needed | `media/manifest`, `visual-media`, `meetings`, `task-board`, `handoffs` | yes if sensitive data may be exposed |
 | coding company functional layer | product, cto, data, backend, PM, QA, security, validation | `company`, `schemas`, `meetings`, `media`, `approvals`, `quality-gates`, `task-board` | yes before visual phase starts |
 
 ## Route Status Values

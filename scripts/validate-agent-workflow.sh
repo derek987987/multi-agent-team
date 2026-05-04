@@ -127,6 +127,11 @@ required_files=(
   ".agents/state/meetings.jsonl"
   ".agents/state/media.jsonl"
   ".agents/state/approvals.jsonl"
+  "visual-media/index.html"
+  "visual-media/styles.css"
+  "visual-media/app.js"
+  "visual-media/agent_office_server.py"
+  "visual-media/README.md"
   ".agents/inbox/orchestrator.md"
   ".agents/inbox/cto.md"
   ".agents/inbox/pm.md"
@@ -172,6 +177,8 @@ required_files=(
   "scripts/validate-structured-state.sh"
   "scripts/validate-route-state.sh"
   "scripts/route-status.sh"
+  "scripts/start-agent-office-dashboard.sh"
+  "scripts/start-visual-media-dashboard.sh"
 )
 
 for file in "${required_files[@]}"; do
@@ -224,10 +231,15 @@ bash -n "$ROOT/scripts/check-milestone-budget.sh"
 bash -n "$ROOT/scripts/validate-structured-state.sh"
 bash -n "$ROOT/scripts/validate-route-state.sh"
 bash -n "$ROOT/scripts/route-status.sh"
+bash -n "$ROOT/scripts/start-agent-office-dashboard.sh"
+bash -n "$ROOT/scripts/start-visual-media-dashboard.sh"
+python3 -m py_compile "$ROOT/visual-media/agent_office_server.py"
 
 bash "$ROOT/tests/test-auto-codex-agent-team.sh"
 bash "$ROOT/tests/test-coding-company-functional-layer.sh"
 bash "$ROOT/tests/test-routing-reliability.sh"
+bash "$ROOT/tests/test-agent-office-dashboard.sh"
+bash "$ROOT/tests/test-visual-media-functional-layer.sh"
 
 for role in "${AGENT_ROLES[@]}"; do
   for role_file in \

@@ -15,6 +15,8 @@ Every implementation task should satisfy:
 - validation findings are resolved or explicitly accepted
 - reviewer/security findings are resolved or explicitly accepted when applicable
 - auto-launch workflow changes pass `bash tests/test-auto-codex-agent-team.sh`
+- Agent Office dashboard changes pass `bash tests/test-agent-office-dashboard.sh`
+- visual media functional-layer changes pass `bash tests/test-visual-media-functional-layer.sh`
 - routing reliability changes pass `bash tests/test-routing-reliability.sh`
 - context, policy, evaluation, failure recovery, and adaptation guidance are current when workflow behavior changes
 

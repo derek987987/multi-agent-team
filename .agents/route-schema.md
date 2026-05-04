@@ -37,7 +37,7 @@ Non-draft routes must not contain `TBD` in `Instruction`, `Expected output`, or 
 
 ## Lifecycle
 
-1. `scripts/route-agent.sh` creates a route envelope and queued route. It requires `--instruction`, `--expected-output`, and `--validation` unless `--draft` is used.
+1. `scripts/route-agent.sh` creates a route envelope and queued route. It requires `--instruction`, `--expected-output`, and `--validation` unless `--draft` is used. Use `--from <actor>` when the route originates outside Orchestrator, for example `--from human-ui` from Agent Office.
 2. `scripts/watch-routes.sh` normally runs in the control window and calls `scripts/dispatch-routes.sh`.
 3. `scripts/dispatch-routes.sh` marks `queued -> dispatching -> dispatched`, sends a tmux notification, then waits for acknowledgement by watching for the target role to claim the route.
 4. `scripts/claim-route.sh` validates the actor matches the route target and marks it `in-progress`.

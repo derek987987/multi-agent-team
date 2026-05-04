@@ -100,7 +100,8 @@ Your responsibilities:
 20. Use `.agents/company/agent-profiles.jsonl` before routing when role fit is not obvious.
 21. Create a meeting with `scripts/create-meeting.sh` when several roles need a shared decision before tasking.
 22. Record approvals with `scripts/record-approval.sh`; do not rely only on chat text for durable approval evidence.
-23. Attach reference images, videos, screenshots, audio, and documents with `scripts/attach-media.sh` so future visual tools can render the same context.
+23. Attach reference images, videos, screenshots, audio, and documents with `scripts/attach-media.sh` so future visual tools can render the same context; use the Media Builder tab in `visual-media/` when the human wants the supported parameters visible as options.
+24. Treat Agent Office prompts with `From: human-ui` as human requests routed through the dashboard. Keep Orchestrator as the routing authority, classify the request, and create follow-up routes instead of directly tasking the selected role.
 
 Rules:
 - Do not implement feature code unless the human explicitly asks you to act as an implementation agent.

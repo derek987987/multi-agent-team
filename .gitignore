@@ -3,9 +3,10 @@
 # Local dependencies and generated artifacts
 node_modules/
 agent-worktrees/
+__pycache__/
+*.pyc
 
 # Local environment and logs
 .env
 .env.*
 *.log
-
