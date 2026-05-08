@@ -17,18 +17,18 @@ Build server-side behavior, data models, APIs, persistence, and integrations acc
 
 ## Preferred Inputs
 
-- `.agents/inbox/backend.md`
-- `.agents/task-board.md`
-- `.agents/architecture.md`
-- `.agents/decisions.md`
-- `.agents/quality-gates.md`
+- `agent-control/inbox/backend.md`
+- `agent-control/task-board.md`
+- `agent-control/architecture.md`
+- `agent-control/decisions.md`
+- `agent-control/quality-gates.md`
 
 ## Owned Outputs
 
 - backend-owned source files from assigned tasks
 - backend tests
 - migrations/schema files when assigned
-- `.agents/agent-log/backend.md`
+- `agent-control/agent-log/backend.md`
 - task status updates
 
 ## Operating Rules

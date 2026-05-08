@@ -21,7 +21,7 @@ json_escape() {
   printf '%s' "$1" | tr '\n' ' ' | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g'
 }
 
-cat > "$ROOT/.agents/project-target.md" <<EOF
+cat > "$ROOT/agent-control/project-target.md" <<EOF
 # Project Target
 
 This file tells the agent team which coding project directory it should work on.
@@ -44,10 +44,10 @@ EOF
 
 "$ROOT/scripts/log-event.sh" project-target set-project-target "Set project target to $TARGET" "mode=$MODE" "$NAME"
 
-mkdir -p "$ROOT/.agents/company" "$ROOT/.agents/state"
+mkdir -p "$ROOT/agent-control/company" "$ROOT/agent-control/state"
 project_record="$(printf '{"project_id":"%s","name":"%s","path":"%s","mode":"%s","status":"active","updated":"%s","source":"set-project-target"}' \
   "$(json_escape "$NAME")" "$(json_escape "$NAME")" "$(json_escape "$TARGET")" "$(json_escape "$MODE")" "$(json_escape "$UPDATED")")"
-printf '%s\n' "$project_record" >> "$ROOT/.agents/company/projects.jsonl"
-printf '%s\n' "$project_record" >> "$ROOT/.agents/state/projects.jsonl"
+printf '%s\n' "$project_record" >> "$ROOT/agent-control/company/projects.jsonl"
+printf '%s\n' "$project_record" >> "$ROOT/agent-control/state/projects.jsonl"
 
 printf "Project target set to %s\n" "$TARGET"

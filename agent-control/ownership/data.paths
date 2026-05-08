@@ -1,4 +1,4 @@
-.agents/agent-log/data.md
+agent-control/agent-log/data.md
 db/*
 migrations/*
 schema/*

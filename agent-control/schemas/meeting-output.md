@@ -1,6 +1,6 @@
 # Meeting Output Schema
 
-Meeting files in `.agents/meetings/` should use this structure.
+Meeting files in `agent-control/meetings/` should use this structure.
 
 ```md
 # M000 - Meeting Title

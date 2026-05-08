@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TASK_BOARD="$ROOT/.agents/task-board.md"
+TASK_BOARD="$ROOT/agent-control/task-board.md"
 MAX_ACTIVE_PER_ROLE="${MAX_ACTIVE_PER_ROLE:-3}"
 status=0
 
@@ -26,7 +26,7 @@ done < <(awk '
 "$ROOT/scripts/check-route-budget.sh"
 
 if [ "$status" -ne 0 ]; then
-  printf "Milestone budget exceeded. See .agents/milestone-budget.md.\n" >&2
+  printf "Milestone budget exceeded. See agent-control/milestone-budget.md.\n" >&2
   exit 1
 fi
 

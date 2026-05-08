@@ -35,18 +35,26 @@ check_jsonl() {
   fi
 }
 
-check_jsonl "$ROOT/.agents/events.jsonl"
-check_jsonl "$ROOT/.agents/company/projects.jsonl"
-check_jsonl "$ROOT/.agents/company/agent-profiles.jsonl"
-check_jsonl "$ROOT/.agents/media/manifest.jsonl"
-check_jsonl "$ROOT/.agents/approvals.jsonl"
-check_jsonl "$ROOT/.agents/state/projects.jsonl"
-check_jsonl "$ROOT/.agents/state/agents.jsonl"
-check_jsonl "$ROOT/.agents/state/routes.jsonl"
-check_jsonl "$ROOT/.agents/state/tasks.jsonl"
-check_jsonl "$ROOT/.agents/state/findings.jsonl"
-check_jsonl "$ROOT/.agents/state/meetings.jsonl"
-check_jsonl "$ROOT/.agents/state/media.jsonl"
-check_jsonl "$ROOT/.agents/state/approvals.jsonl"
+check_jsonl "$ROOT/agent-control/events.jsonl"
+check_jsonl "$ROOT/agent-control/company/projects.jsonl"
+check_jsonl "$ROOT/agent-control/company/agent-profiles.jsonl"
+check_jsonl "$ROOT/agent-control/media/manifest.jsonl"
+check_jsonl "$ROOT/agent-control/approvals.jsonl"
+check_jsonl "$ROOT/agent-control/state/projects.jsonl"
+check_jsonl "$ROOT/agent-control/state/agents.jsonl"
+check_jsonl "$ROOT/agent-control/state/routes.jsonl"
+check_jsonl "$ROOT/agent-control/state/tasks.jsonl"
+check_jsonl "$ROOT/agent-control/state/findings.jsonl"
+check_jsonl "$ROOT/agent-control/state/meetings.jsonl"
+check_jsonl "$ROOT/agent-control/state/media.jsonl"
+check_jsonl "$ROOT/agent-control/state/approvals.jsonl"
+
+if [ -f "$ROOT/agent-control/state/workflow.sqlite3" ]; then
+  if ! "$ROOT/scripts/route-db.sh" check; then
+    status=1
+  fi
+else
+  printf "agent-control/state/workflow.sqlite3 not initialized; ok for scaffold.\n"
+fi
 
 exit "$status"

@@ -1,4 +1,4 @@
-.agents/validation-report.md
-.agents/agent-log/validation.md
+agent-control/validation-report.md
+agent-control/agent-log/validation.md
 tests/*
 

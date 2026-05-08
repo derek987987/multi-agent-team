@@ -1,5 +1,5 @@
-.agents/design-notes.md
-.agents/agent-log/design.md
+agent-control/design-notes.md
+agent-control/agent-log/design.md
 design/*
 assets/*
 public/*

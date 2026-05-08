@@ -17,14 +17,14 @@ Own data models, migrations, seed data, analytics events, query contracts, and d
 
 ## Preferred Inputs
 
-- `.agents/architecture.md`
-- `.agents/decisions.md`
-- `.agents/task-board.md`
-- `.agents/inbox/data.md`
-- `.agents/company/projects.jsonl`
-- `.agents/company/agent-profiles.jsonl`
-- `.agents/media/manifest.jsonl`
-- `.agents/approvals.jsonl`
+- `agent-control/architecture.md`
+- `agent-control/decisions.md`
+- `agent-control/task-board.md`
+- `agent-control/inbox/data.md`
+- `agent-control/company/projects.jsonl`
+- `agent-control/company/agent-profiles.jsonl`
+- `agent-control/media/manifest.jsonl`
+- `agent-control/approvals.jsonl`
 - backend contracts
 - security/privacy constraints
 
@@ -34,7 +34,7 @@ Own data models, migrations, seed data, analytics events, query contracts, and d
 - migration notes and data decisions
 - data-contract handoffs to backend, QA, security, or validation
 - schema notes for project, agent profile, meeting, media, approval, route, task, finding, and event ledgers
-- `.agents/agent-log/data.md`
+- `agent-control/agent-log/data.md`
 
 ## Productivity Defaults
 

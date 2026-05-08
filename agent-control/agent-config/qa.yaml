@@ -1,16 +1,16 @@
 role: qa
-output_schema: .agents/schemas/qa-output.md
+output_schema: agent-control/schemas/qa-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/qa.md
-  - .agents/skills/qa.md
-  - .agents/memory/qa.md
-  - .agents/schemas/qa-output.md
+  - agent-control/prompts/qa.md
+  - agent-control/skills/qa.md
+  - agent-control/memory/qa.md
+  - agent-control/schemas/qa-output.md
 allowed_paths:
-  - .agents/qa-plan.md
-  - .agents/agent-log/qa.md
+  - agent-control/qa-plan.md
+  - agent-control/agent-log/qa.md
   - tests/*
   - e2e/*
   - specs/*
@@ -20,9 +20,9 @@ required_checks:
   - ./scripts/check-ownership.sh qa
   - ./scripts/check-done.sh
 owned_outputs:
-  - .agents/qa-plan.md
-  - .agents/agent-log/qa.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/qa-plan.md
+  - agent-control/agent-log/qa.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - pm
@@ -35,13 +35,13 @@ handoff_targets:
   - reviewer
   - docs
 reads_before_claim:
-  - .agents/inbox/qa.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/qa.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

@@ -1,4 +1,4 @@
-.agents/agent-log/devops.md
+agent-control/agent-log/devops.md
 .github/*
 Dockerfile
 docker-compose.yml

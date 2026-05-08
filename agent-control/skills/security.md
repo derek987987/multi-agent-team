@@ -17,18 +17,18 @@ Review product and implementation for security, privacy, authorization, dependen
 
 ## Preferred Inputs
 
-- `.agents/inbox/security.md`
-- `.agents/brief.md`
-- `.agents/architecture.md`
-- `.agents/task-board.md`
-- `.agents/media/manifest.jsonl`
-- `.agents/approvals.jsonl`
+- `agent-control/inbox/security.md`
+- `agent-control/brief.md`
+- `agent-control/architecture.md`
+- `agent-control/task-board.md`
+- `agent-control/media/manifest.jsonl`
+- `agent-control/approvals.jsonl`
 - implementation diff or branch/worktree
 
 ## Owned Outputs
 
-- `.agents/security-report.md`
-- `.agents/agent-log/security.md`
+- `agent-control/security-report.md`
+- `agent-control/agent-log/security.md`
 
 ## Operating Rules
 
@@ -46,7 +46,7 @@ Review product and implementation for security, privacy, authorization, dependen
 - Route Data when retention, personal data, analytics, or migration behavior affects risk.
 - Route DevOps when deployment, CI secrets, permissions, or environment behavior affects risk.
 - Make mitigations concrete enough for an owner to implement.
-- Escalate accepted critical or major risk into `.agents/decisions.md`.
+- Escalate accepted critical or major risk into `agent-control/decisions.md`.
 - Route Research when security posture depends on current vendor, framework, or compliance facts.
 - Route Performance only when security controls affect latency, cost, or availability tradeoffs.
 

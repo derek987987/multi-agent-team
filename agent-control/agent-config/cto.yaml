@@ -1,26 +1,26 @@
 role: cto
-output_schema: .agents/schemas/cto-output.md
+output_schema: agent-control/schemas/cto-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/cto.md
-  - .agents/skills/cto.md
-  - .agents/memory/cto.md
-  - .agents/schemas/cto-output.md
+  - agent-control/prompts/cto.md
+  - agent-control/skills/cto.md
+  - agent-control/memory/cto.md
+  - agent-control/schemas/cto-output.md
 allowed_paths:
-  - .agents/architecture.md
-  - .agents/decisions.md
-  - .agents/final-cto-review.md
-  - .agents/agent-log/cto.md
+  - agent-control/architecture.md
+  - agent-control/decisions.md
+  - agent-control/final-cto-review.md
+  - agent-control/agent-log/cto.md
 required_checks:
   - ./scripts/validate-agent-workflow.sh
 owned_outputs:
-  - .agents/architecture.md
-  - .agents/decisions.md
-  - .agents/final-cto-review.md
-  - .agents/agent-log/cto.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/architecture.md
+  - agent-control/decisions.md
+  - agent-control/final-cto-review.md
+  - agent-control/agent-log/cto.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - orchestrator
@@ -38,13 +38,13 @@ handoff_targets:
   - security
   - integration
 reads_before_claim:
-  - .agents/inbox/cto.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/cto.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

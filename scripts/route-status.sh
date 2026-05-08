@@ -31,7 +31,7 @@ section_from_file() {
   ' "$file" | sed '/^[[:space:]]*$/d'
 }
 
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   if grep -qE "^## $ROUTE_ID([[:space:]-]|$)" "$inbox"; then
     route_file="$inbox"
     route_role="$(basename "$inbox" .md)"
@@ -48,7 +48,7 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
   fi
 done
 
-report="${report:-.agents/routes/$ROUTE_ID.md}"
+report="${report:-agent-control/routes/$ROUTE_ID.md}"
 report_path="$ROOT/$report"
 
 if [ -z "$route_file" ] && [ ! -f "$report_path" ]; then

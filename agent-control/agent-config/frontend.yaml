@@ -1,25 +1,25 @@
 role: frontend
-output_schema: .agents/schemas/implementation-output.md
+output_schema: agent-control/schemas/implementation-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/frontend.md
-  - .agents/skills/frontend.md
-  - .agents/memory/frontend.md
-  - .agents/schemas/implementation-output.md
+  - agent-control/prompts/frontend.md
+  - agent-control/skills/frontend.md
+  - agent-control/memory/frontend.md
+  - agent-control/schemas/implementation-output.md
 allowed_paths:
   - src/frontend/*
   - frontend/*
   - app/*
   - components/*
   - pages/*
-  - .agents/agent-log/frontend.md
+  - agent-control/agent-log/frontend.md
 required_checks:
   - ./scripts/check-ownership.sh frontend
 owned_outputs:
-  - .agents/agent-log/frontend.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/agent-log/frontend.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - cto
@@ -33,13 +33,13 @@ handoff_targets:
   - docs
   - integration
 reads_before_claim:
-  - .agents/inbox/frontend.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/frontend.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

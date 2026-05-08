@@ -1,28 +1,28 @@
 role: integration
-output_schema: .agents/schemas/integration-output.md
+output_schema: agent-control/schemas/integration-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/integration.md
-  - .agents/skills/integration.md
-  - .agents/memory/integration.md
-  - .agents/schemas/integration-output.md
+  - agent-control/prompts/integration.md
+  - agent-control/skills/integration.md
+  - agent-control/memory/integration.md
+  - agent-control/schemas/integration-output.md
 allowed_paths:
-  - .agents/agent-log/*
-  - .agents/workflow-state.md
-  - .agents/validation-report.md
-  - .agents/review-report.md
-  - .agents/security-report.md
+  - agent-control/agent-log/*
+  - agent-control/workflow-state.md
+  - agent-control/validation-report.md
+  - agent-control/review-report.md
+  - agent-control/security-report.md
 required_checks:
   - ./scripts/run-quality-gates.sh
 owned_outputs:
-  - .agents/agent-log/*
-  - .agents/workflow-state.md
-  - .agents/validation-report.md
-  - .agents/review-report.md
-  - .agents/security-report.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/agent-log/*
+  - agent-control/workflow-state.md
+  - agent-control/validation-report.md
+  - agent-control/review-report.md
+  - agent-control/security-report.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - orchestrator
@@ -39,13 +39,13 @@ handoff_targets:
   - security
   - docs
 reads_before_claim:
-  - .agents/inbox/integration.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/integration.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

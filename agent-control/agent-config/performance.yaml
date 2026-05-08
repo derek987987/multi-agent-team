@@ -1,19 +1,19 @@
 role: performance
-output_schema: .agents/schemas/performance-output.md
+output_schema: agent-control/schemas/performance-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/context-map.md
-  - .agents/agent-policy.md
-  - .agents/failure-recovery.md
-  - .agents/prompts/performance.md
-  - .agents/skills/performance.md
-  - .agents/memory/performance.md
-  - .agents/schemas/performance-output.md
+  - agent-control/context-map.md
+  - agent-control/agent-policy.md
+  - agent-control/failure-recovery.md
+  - agent-control/prompts/performance.md
+  - agent-control/skills/performance.md
+  - agent-control/memory/performance.md
+  - agent-control/schemas/performance-output.md
 allowed_paths:
-  - .agents/performance-report.md
-  - .agents/agent-log/performance.md
+  - agent-control/performance-report.md
+  - agent-control/agent-log/performance.md
   - benchmarks/*
   - perf/*
   - performance/*
@@ -21,9 +21,9 @@ allowed_paths:
 required_checks:
   - ./scripts/check-ownership.sh performance
 owned_outputs:
-  - .agents/performance-report.md
-  - .agents/agent-log/performance.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/performance-report.md
+  - agent-control/agent-log/performance.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - cto
@@ -35,13 +35,13 @@ handoff_targets:
   - validation
   - reviewer
 reads_before_claim:
-  - .agents/inbox/performance.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/performance.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

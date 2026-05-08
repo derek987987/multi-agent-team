@@ -10,11 +10,11 @@ if [ -z "$ROLE" ]; then
   exit 1
 fi
 
-CONFIG="$ROOT/.agents/agent-config/$ROLE.yaml"
-OWNERSHIP="$ROOT/.agents/ownership/$ROLE.paths"
+CONFIG="$ROOT/agent-control/agent-config/$ROLE.yaml"
+OWNERSHIP="$ROOT/agent-control/ownership/$ROLE.paths"
 
 if [ ! -f "$CONFIG" ]; then
-  printf "Missing agent config: .agents/agent-config/%s.yaml\n" "$ROLE" >&2
+  printf "Missing agent config: agent-control/agent-config/%s.yaml\n" "$ROLE" >&2
   exit 1
 fi
 

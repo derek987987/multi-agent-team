@@ -1,6 +1,6 @@
 # Agent State Schema
 
-`.agents/state/agents.jsonl` stores one live telemetry record per role. Scripts update this file when roles launch, receive routes, claim work, complete work, block work, or are cancelled.
+`agent-control/state/agents.jsonl` stores one live telemetry record per role. Scripts update this file when roles launch, receive routes, claim work, complete work, block work, or are cancelled.
 
 Required fields:
 

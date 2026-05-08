@@ -1,8 +1,8 @@
-.agents/intake-notes.md
-.agents/project-target.md
-.agents/brief.md
-.agents/workflow-state.md
-.agents/handoffs.md
-.agents/change-request.md
-.agents/agent-log/orchestrator.md
-.agents/inbox/*
+agent-control/intake-notes.md
+agent-control/project-target.md
+agent-control/brief.md
+agent-control/workflow-state.md
+agent-control/handoffs.md
+agent-control/change-request.md
+agent-control/agent-log/orchestrator.md
+agent-control/inbox/*

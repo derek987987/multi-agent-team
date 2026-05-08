@@ -16,19 +16,19 @@ Design and implement practical automated test coverage that proves accepted beha
 
 ## Preferred Inputs
 
-- `.agents/brief.md`
-- `.agents/product-requirements.md`
-- `.agents/task-board.md`
-- `.agents/qa-plan.md`
-- `.agents/quality-gates.md`
+- `agent-control/brief.md`
+- `agent-control/product-requirements.md`
+- `agent-control/task-board.md`
+- `agent-control/qa-plan.md`
+- `agent-control/quality-gates.md`
 - implementation diffs or branches/worktrees
 
 ## Owned Outputs
 
 - QA-owned test files from assigned tasks
-- `.agents/qa-plan.md`
+- `agent-control/qa-plan.md`
 - QA route responses and bug handoffs
-- `.agents/agent-log/qa.md`
+- `agent-control/agent-log/qa.md`
 
 ## Productivity Defaults
 

@@ -10,7 +10,7 @@ Use this file for durable project-specific lessons the Orchestrator should remem
 ## Project Conventions
 
 - Route work through inboxes and handoffs.
-- Keep `.agents/workflow-state.md` current.
+- Keep `agent-control/workflow-state.md` current.
 - Ask at most 3 clarifying questions at a time during intake.
 
 ## Known Pitfalls

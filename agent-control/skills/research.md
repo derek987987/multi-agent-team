@@ -16,20 +16,20 @@ Reduce uncertainty for unfamiliar projects, stacks, libraries, APIs, standards, 
 
 ## Preferred Inputs
 
-- `.agents/inbox/research.md`
-- `.agents/context-map.md`
-- `.agents/brief.md`
-- `.agents/architecture.md`
-- `.agents/task-board.md`
+- `agent-control/inbox/research.md`
+- `agent-control/context-map.md`
+- `agent-control/brief.md`
+- `agent-control/architecture.md`
+- `agent-control/task-board.md`
 - repo documentation and dependency files
 - official external docs when needed
 
 ## Owned Outputs
 
-- `.agents/research-notes.md`
+- `agent-control/research-notes.md`
 - research route responses
 - handoffs to CTO, PM, DevOps, Security, Data, Performance, QA, Docs, or implementation agents
-- `.agents/agent-log/research.md`
+- `agent-control/agent-log/research.md`
 
 ## Productivity Defaults
 

@@ -15,17 +15,17 @@ Review implementation for correctness, maintainability, simplicity, architecture
 
 ## Preferred Inputs
 
-- `.agents/inbox/reviewer.md`
-- `.agents/task-board.md`
-- `.agents/architecture.md`
-- `.agents/definition-of-ready.md`
-- `.agents/definition-of-done.md`
+- `agent-control/inbox/reviewer.md`
+- `agent-control/task-board.md`
+- `agent-control/architecture.md`
+- `agent-control/definition-of-ready.md`
+- `agent-control/definition-of-done.md`
 - implementation diff or branch/worktree
 
 ## Owned Outputs
 
-- `.agents/review-report.md`
-- `.agents/agent-log/reviewer.md`
+- `agent-control/review-report.md`
+- `agent-control/agent-log/reviewer.md`
 
 ## Operating Rules
 
@@ -43,7 +43,7 @@ Review implementation for correctness, maintainability, simplicity, architecture
 - Keep findings actionable with file/path references and owner routing.
 - Avoid style-only feedback unless it affects readability or consistency.
 - Route systemic design or architecture drift to CTO, not only the coder.
-- Check `.agents/context-map.md` and `.agents/agent-policy.md` when review failures suggest missing context or policy drift.
+- Check `agent-control/context-map.md` and `agent-control/agent-policy.md` when review failures suggest missing context or policy drift.
 - Route Performance, Security, Data, DevOps, or Docs when review findings belong to those domains.
 
 ## Done Criteria

@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 QUEUED_MINUTES="${QUEUED_MINUTES:-30}"
 DISPATCHED_MINUTES="${DISPATCHED_MINUTES:-30}"
 IN_PROGRESS_HOURS="${IN_PROGRESS_HOURS:-4}"
-MAX_ROUTE_RETRIES="${MAX_ROUTE_RETRIES:-$(awk -F':[[:space:]]*' '/Max retries per route:/ { print $2; exit }' "$ROOT/.agents/route-budget.md" 2>/dev/null || true)}"
+MAX_ROUTE_RETRIES="${MAX_ROUTE_RETRIES:-$(awk -F':[[:space:]]*' '/Max retries per route:/ { print $2; exit }' "$ROOT/agent-control/route-budget.md" 2>/dev/null || true)}"
 MAX_ROUTE_RETRIES="${MAX_ROUTE_RETRIES:-2}"
 MODE="--dry-run"
 SESSION=""
@@ -30,10 +30,10 @@ parse_ts() {
     printf "0"
     return
   fi
-  if date -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s >/dev/null 2>&1; then
-    date -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s
-  elif date -d "$ts" +%s >/dev/null 2>&1; then
-    date -d "$ts" +%s
+  if date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s >/dev/null 2>&1; then
+    date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s
+  elif date -u -d "$ts" +%s >/dev/null 2>&1; then
+    date -u -d "$ts" +%s
   else
     printf "0"
   fi
@@ -80,8 +80,8 @@ update_workflow_status() {
   local tmp
   tmp="$(mktemp)"
   awk -v id="$route" -v status="$status" 'BEGIN { FS=OFS="|" } $2 ~ "^[[:space:]]*" id "[[:space:]]*$" { $4 = " " status " " } { print }' \
-    "$ROOT/.agents/workflow-state.md" > "$tmp"
-  mv "$tmp" "$ROOT/.agents/workflow-state.md"
+    "$ROOT/agent-control/workflow-state.md" > "$tmp"
+  mv "$tmp" "$ROOT/agent-control/workflow-state.md"
 }
 
 update_report_field() {
@@ -171,7 +171,7 @@ now="$(date -u +%s)"
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 found=0
 
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   role="$(basename "$inbox" .md)"
   while IFS=$'\t' read -r route route_status created attempt report; do
     case "$route_status" in
@@ -211,7 +211,7 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
         attempt=0
         ;;
     esac
-    report="${report:-.agents/routes/$route.md}"
+    report="${report:-agent-control/routes/$route.md}"
     report_path="$ROOT/$report"
     pane_tail="$(capture_pane_tail "$role")"
 
@@ -227,8 +227,8 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
       update_route_field "$inbox" "##" "$route" "Attempt" "$next_attempt"
       update_route_multiline_field "$inbox" "##" "$route" "Created" "$UPDATED"
       update_route_multiline_field "$inbox" "##" "$route" "Last updated" "$UPDATED"
-      if grep -qE "^### $route([[:space:]-]|$)" "$ROOT/.agents/handoffs.md"; then
-        update_route_field "$ROOT/.agents/handoffs.md" "###" "$route" "Status" "open"
+      if grep -qE "^### $route([[:space:]-]|$)" "$ROOT/agent-control/handoffs.md"; then
+        update_route_field "$ROOT/agent-control/handoffs.md" "###" "$route" "Status" "open"
       fi
       update_workflow_status "$route" "queued"
       update_report_field "$report_path" "Status" "queued"
@@ -238,7 +238,11 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
       "$ROOT/scripts/log-event.sh" route-recovered recover-stale-routes "Recovered stale route $route for $role" "attempt=$next_attempt age_seconds=$age_seconds" "$route"
       "$ROOT/scripts/update-agent-state.sh" "$role" --status available --active-route none --blocked-reason none
       printf '{"route_id":"%s","status":"queued","actor":"recover-stale-routes","attempt":%s,"previous_status":"%s","age_seconds":%s,"report":"%s","updated":"%s"}\n' \
-        "$(json_escape "$route")" "$next_attempt" "$(json_escape "$route_status")" "$age_seconds" "$(json_escape "$report")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
+        "$(json_escape "$route")" "$next_attempt" "$(json_escape "$route_status")" "$age_seconds" "$(json_escape "$report")" "$(json_escape "$UPDATED")" >> "$ROOT/agent-control/state/routes.jsonl"
+      "$ROOT/scripts/route-db.sh" update-status "$route" queued \
+        --actor recover-stale-routes \
+        --note "requeued stale route attempt=$next_attempt age_seconds=$age_seconds" \
+        --updated "$UPDATED" >/dev/null
       printf "Recovered stale route %s for %s: attempt %s -> %s\n" "$route" "$role" "$attempt" "$next_attempt"
     else
       if [ "$MODE" = "--dry-run" ]; then

@@ -13,13 +13,13 @@ Research date: 2026-04-27
 
 | Upgrade | Gap Found | Local Integration |
 | --- | --- | --- |
-| per-agent memory | skills alone do not preserve project lessons | `.agents/memory/<role>.md` |
-| ready/done gates | tasks can start or finish with vague evidence | `.agents/definition-of-ready.md`, `.agents/definition-of-done.md` |
+| per-agent memory | skills alone do not preserve project lessons | `agent-control/memory/<role>.md` |
+| ready/done gates | tasks can start or finish with vague evidence | `agent-control/definition-of-ready.md`, `agent-control/definition-of-done.md` |
 | reviewer/security roles | validation alone checks behavior but misses maintainability/security review | reviewer/security prompts, inboxes, reports, skill packs |
-| quality gates | generic gates are too weak for role-specific work | role-specific sections in `.agents/quality-gates.md` |
-| conflict protocol | handoffs do not define dispute resolution | `.agents/conflict-resolution.md` |
+| quality gates | generic gates are too weak for role-specific work | role-specific sections in `agent-control/quality-gates.md` |
+| conflict protocol | handoffs do not define dispute resolution | `agent-control/conflict-resolution.md` |
 | command scripts | manual status checks are inconsistent | ready/done/quality scripts |
-| structured outputs | free-form agent notes are hard to consume | `.agents/schemas/*.md` |
+| structured outputs | free-form agent notes are hard to consume | `agent-control/schemas/*.md` |
 
 ## Execution-Control Upgrade - 2026-04-27
 
@@ -27,16 +27,16 @@ Additional research patterns integrated:
 
 - Handoff systems benefit from typed metadata and lifecycle status, so local routes now have a schema and lifecycle scripts.
 - Guardrail systems distinguish input/output/tool boundaries, so local ownership checks and ready/done gates now act as file-based guardrails.
-- Tracing systems record spans/events, so `.agents/events.jsonl` now provides an append-only route/state event trace.
+- Tracing systems record spans/events, so `agent-control/events.jsonl` now provides an append-only route/state event trace.
 - Coding-agent cloud workflows isolate work in separate environments, so worktree mode now pushes the shared control plane into each worktree.
-- Subagent systems use tool/permission boundaries, so `.agents/ownership/<role>.paths` now defines path allowlists.
+- Subagent systems use tool/permission boundaries, so `agent-control/ownership/<role>.paths` now defines path allowlists.
 
 Files added or upgraded:
 
-- `.agents/route-schema.md`
-- `.agents/events.jsonl`
-- `.agents/memory-policy.md`
-- `.agents/ownership/<role>.paths`
+- `agent-control/route-schema.md`
+- `agent-control/events.jsonl`
+- `agent-control/memory-policy.md`
+- `agent-control/ownership/<role>.paths`
 - `scripts/log-event.sh`
 - `scripts/sync-agent-state.sh`
 - `scripts/claim-route.sh`
@@ -49,16 +49,16 @@ Files added or upgraded:
 
 Additional gaps addressed after reviewing multi-agent handoff, guardrail, tracing, and subagent permission patterns:
 
-- Worktree sync was changed from destructive `.agents` mirroring to policy-based control-plane sync that preserves local evidence files.
+- Worktree sync was changed from destructive `agent-control` mirroring to policy-based control-plane sync that preserves local evidence files.
 - Route dispatch is now idempotent by moving queued routes to `dispatched`.
 - Route messages are sent to tmux as literal input instead of shell-interpolated strings.
-- Route creation mirrors records into `.agents/state/routes.jsonl`.
+- Route creation mirrors records into `agent-control/state/routes.jsonl`.
 - Event trace records now support `correlation_id`.
-- Ownership checks now include untracked files and can add task-specific allowed paths from `.agents/task-board.md`.
+- Ownership checks now include untracked files and can add task-specific allowed paths from `agent-control/task-board.md`.
 - Memory validation is available through `scripts/check-memory.sh`.
 - Route fan-out and delegation-loop risk is checked through `scripts/check-route-budget.sh`.
-- Per-role agent configuration files were added under `.agents/agent-config/`.
-- Structured JSONL mirrors were added under `.agents/state/`.
+- Per-role agent configuration files were added under `agent-control/agent-config/`.
+- Structured JSONL mirrors were added under `agent-control/state/`.
 
 ## Enforcement Upgrade - 2026-04-27
 
@@ -68,9 +68,9 @@ Additional enforcement added from multi-agent workflow review:
 - `scripts/check-agent-config.sh` validates role configs and checks allowed paths against ownership rules.
 - `scripts/check-secrets.sh` scans changed/untracked files for common credential patterns.
 - `scripts/check-milestone-budget.sh` enforces active task and route budgets.
-- `.agents/secrets-policy.md` defines secret-handling rules.
-- `.agents/milestone-budget.md` defines active task, branch, retry, and escalation budgets.
-- `.agents/ownership/ignored-synced.paths` prevents synced control-plane files from producing false ownership failures in worktrees.
+- `agent-control/secrets-policy.md` defines secret-handling rules.
+- `agent-control/milestone-budget.md` defines active task, branch, retry, and escalation budgets.
+- `agent-control/ownership/ignored-synced.paths` prevents synced control-plane files from producing false ownership failures in worktrees.
 
 ## Production Coding Company Upgrade - 2026-04-28
 
@@ -122,7 +122,7 @@ Gaps found in the local workflow:
 
 Local integration:
 
-- Added `.agents/context-map.md`, `.agents/agent-policy.md`, `.agents/evaluation-suite.md`, `.agents/failure-recovery.md`, and `.agents/adaptation-guide.md`.
+- Added `agent-control/context-map.md`, `agent-control/agent-policy.md`, `agent-control/evaluation-suite.md`, `agent-control/failure-recovery.md`, and `agent-control/adaptation-guide.md`.
 - Added Research and Performance roles with prompts, skill packs, memory, inboxes, logs, schemas, configs, and ownership.
 - Updated Codex role launch prompts so every agent reads context, policy, eval, recovery, and adaptation controls.
 - Updated routing matrix, quality gates, SOP, README, AGENTS, and existing skill packs so Research and Performance are first-class routes.

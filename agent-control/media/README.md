@@ -22,7 +22,7 @@ demo video, audio note, PDF, or validation screenshot.
 
 Media Builder does not run agents or change the target app. It only builds the
 matching `scripts/attach-media.sh` command so the file is recorded in
-`.agents/media/manifest.jsonl` and `.agents/state/media.jsonl`.
+`agent-control/media/manifest.jsonl` and `agent-control/state/media.jsonl`.
 
 For normal agent control, use the tmux Orchestrator window or the Agent Office
 prompt box. Use Media Builder only when there is a file to attach.

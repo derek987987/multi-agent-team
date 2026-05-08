@@ -30,14 +30,14 @@ without starting the server.
 The dashboard server reads the workflow files and normalizes them for the
 browser:
 
-- `GET /api/snapshot` reads `.agents/company/agent-profiles.jsonl`,
-  `.agents/state/agents.jsonl`, `.agents/state/routes.jsonl`,
-  `.agents/events.jsonl`, `.agents/workflow-state.md`, and route reports under
-  `.agents/routes/`.
+- `GET /api/snapshot` reads `agent-control/company/agent-profiles.jsonl`,
+  `agent-control/state/agents.jsonl`, `agent-control/state/routes.jsonl`,
+  `agent-control/events.jsonl`, `agent-control/workflow-state.md`, and route reports under
+  `agent-control/routes/`.
 - `POST /api/orchestrator-prompt` accepts `{ "role": "<role>", "message": "<text>" }`,
-  validates the role against `.agents/company/agent-profiles.jsonl`, creates the
+  validates the role against `agent-control/company/agent-profiles.jsonl`, creates the
   next route with `scripts/route-agent.sh --from human-ui`, and queues it to
-  `.agents/inbox/orchestrator.md`.
+  `agent-control/inbox/orchestrator.md`.
 
 Prompt-created routes always go to Orchestrator. The selected role, status, and
 active route are copied into the route instruction as context; direct role
@@ -62,8 +62,8 @@ Common flow:
 2. Open Media Builder.
 3. Enter the file path, attachment type, scope, related ID, and description.
 4. Run the generated command from the agent-team copy.
-5. Future agents can find the reference through `.agents/media/manifest.jsonl`
-   and `.agents/state/media.jsonl`.
+5. Future agents can find the reference through `agent-control/media/manifest.jsonl`
+   and `agent-control/state/media.jsonl`.
 
 For normal workflow control, use Agent Office and tmux. Use Media Builder only
 when you need to attach a file as durable context.
@@ -88,5 +88,5 @@ Optional command flags:
 - `--height <pixels>`
 - `--mime-type <type/subtype>`
 
-The generated command appends records to `.agents/media/manifest.jsonl` and
-`.agents/state/media.jsonl`.
+The generated command appends records to `agent-control/media/manifest.jsonl` and
+`agent-control/state/media.jsonl`.

@@ -12,7 +12,7 @@ Useful pattern:
 - Intermediate artifacts are verified before downstream agents rely on them.
 
 What this workflow adopts:
-- `.agents/sop.md`
+- `agent-control/sop.md`
 - explicit phase exit criteria
 - durable decision records
 - architecture before task execution
@@ -61,7 +61,7 @@ Useful pattern:
 
 What this workflow adopts:
 - root `AGENTS.md`
-- `.agents/quality-gates.md`
+- `agent-control/quality-gates.md`
 - validation report format with commands and reproduction steps
 
 ## Main Differences From The Previous Local Workflow
@@ -74,10 +74,10 @@ Previous workflow:
 
 Improved workflow:
 - Adds a root `AGENTS.md` so coding agents have repo-level instructions.
-- Adds `.agents/sop.md` with phase entry/exit criteria.
-- Adds `.agents/roles.md` with explicit ownership and restrictions.
-- Adds `.agents/handoffs.md` so agents can request cross-role work without editing each other's files.
-- Adds `.agents/quality-gates.md` so validation is command-driven.
+- Adds `agent-control/sop.md` with phase entry/exit criteria.
+- Adds `agent-control/roles.md` with explicit ownership and restrictions.
+- Adds `agent-control/handoffs.md` so agents can request cross-role work without editing each other's files.
+- Adds `agent-control/quality-gates.md` so validation is command-driven.
 - Upgrades prompts to require SOP, handoffs, validation gates, and branch/worktree discipline.
 - Adds GitHub issue and PR templates for cloud/remote agent workflows.
 - Adds workflow helper scripts for status, validation, and task creation.
@@ -99,9 +99,9 @@ Additional public patterns reflected:
 
 Added locally:
 
-- `.agents/workflow-state.md` for current phase, active request, routes, blockers, and human attention.
-- `.agents/routing-matrix.md` for consistent routing decisions.
-- `.agents/inbox/<role>.md` for per-agent routed work.
+- `agent-control/workflow-state.md` for current phase, active request, routes, blockers, and human attention.
+- `agent-control/routing-matrix.md` for consistent routing decisions.
+- `agent-control/inbox/<role>.md` for per-agent routed work.
 - `scripts/route-agent.sh` to create a route in the inbox, handoff log, and workflow state.
 - `scripts/agent-inbox.sh` to show a role's active queue.
-- `.agents/orchestrator-review.md` to document the gap analysis.
+- `agent-control/orchestrator-review.md` to document the gap analysis.

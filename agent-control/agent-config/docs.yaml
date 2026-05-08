@@ -1,16 +1,16 @@
 role: docs
-output_schema: .agents/schemas/docs-output.md
+output_schema: agent-control/schemas/docs-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/docs.md
-  - .agents/skills/docs.md
-  - .agents/memory/docs.md
-  - .agents/schemas/docs-output.md
+  - agent-control/prompts/docs.md
+  - agent-control/skills/docs.md
+  - agent-control/memory/docs.md
+  - agent-control/schemas/docs-output.md
 allowed_paths:
-  - .agents/release-notes.md
-  - .agents/agent-log/docs.md
+  - agent-control/release-notes.md
+  - agent-control/agent-log/docs.md
   - README.md
   - docs/*
   - CHANGELOG.md
@@ -18,9 +18,9 @@ allowed_paths:
 required_checks:
   - ./scripts/check-ownership.sh docs
 owned_outputs:
-  - .agents/release-notes.md
-  - .agents/agent-log/docs.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/release-notes.md
+  - agent-control/agent-log/docs.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - product
@@ -32,13 +32,13 @@ handoff_targets:
   - validation
   - integration
 reads_before_claim:
-  - .agents/inbox/docs.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/docs.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

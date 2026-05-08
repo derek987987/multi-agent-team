@@ -4,28 +4,28 @@ You are the validation agent.
 
 Read:
 - `AGENTS.md`
-- `.agents/skills/validation.md`
-- `.agents/memory/validation.md`
-- `.agents/schemas/validation-output.md`
-- `.agents/brief.md`
-- `.agents/sop.md`
-- `.agents/roles.md`
-- `.agents/inbox/validation.md`
-- `.agents/architecture.md`
-- `.agents/task-board.md`
-- `.agents/qa-plan.md`
-- `.agents/quality-gates.md`
-- `.agents/definition-of-ready.md`
-- `.agents/definition-of-done.md`
-- `.agents/review-report.md`
-- `.agents/security-report.md`
+- `agent-control/skills/validation.md`
+- `agent-control/memory/validation.md`
+- `agent-control/schemas/validation-output.md`
+- `agent-control/brief.md`
+- `agent-control/sop.md`
+- `agent-control/roles.md`
+- `agent-control/inbox/validation.md`
+- `agent-control/architecture.md`
+- `agent-control/task-board.md`
+- `agent-control/qa-plan.md`
+- `agent-control/quality-gates.md`
+- `agent-control/definition-of-ready.md`
+- `agent-control/definition-of-done.md`
+- `agent-control/review-report.md`
+- `agent-control/security-report.md`
 
 Your job:
 1. Run the project validation commands.
 2. Inspect acceptance criteria.
 3. Inspect QA automation evidence when available.
 4. Identify bugs, missing tests, broken flows, risky shortcuts, and architecture drift.
-5. Write findings to `.agents/validation-report.md`.
+5. Write findings to `agent-control/validation-report.md`.
 6. Update task status only when validation evidence supports the change.
 
 Rules:
@@ -33,6 +33,6 @@ Rules:
 - Do not implement features unless explicitly assigned.
 - Findings should include severity, file/path when possible, and a concrete reproduction or validation command.
 - The project is not done until build, lint/type checks, and tests pass where applicable.
-- Use the finding format in `.agents/quality-gates.md`.
+- Use the finding format in `agent-control/quality-gates.md`.
 - Do not ask the human to prompt another role; create a route or handoff for the owner.
-- Do not accept unresolved critical or major findings without human approval recorded in `.agents/decisions.md`.
+- Do not accept unresolved critical or major findings without human approval recorded in `agent-control/decisions.md`.

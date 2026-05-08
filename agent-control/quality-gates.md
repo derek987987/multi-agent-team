@@ -18,6 +18,7 @@ Every implementation task should satisfy:
 - Agent Office dashboard changes pass `bash tests/test-agent-office-dashboard.sh`
 - visual media functional-layer changes pass `bash tests/test-visual-media-functional-layer.sh`
 - routing reliability changes pass `bash tests/test-routing-reliability.sh`
+- structured runtime, heartbeat, approval, review, and run-cost changes pass `bash tests/test-runtime-priorities.sh`
 - context, policy, evaluation, failure recovery, and adaptation guidance are current when workflow behavior changes
 
 ## Command Matrix
@@ -34,21 +35,24 @@ Add project-specific commands as the repo takes shape.
 
 ### Orchestrator
 
-- `.agents/workflow-state.md` is current.
-- Routes are in the right `.agents/inbox/<role>.md` files.
-- Route lifecycle changes are reflected in `.agents/events.jsonl`.
-- `.agents/state/routes.jsonl` mirrors created routes.
-- `.agents/state/agents.jsonl` reflects live role telemetry when routes are dispatched, claimed, completed, blocked, or cancelled.
-- `.agents/routes/R000.md` exists for each created route and is used as the durable route contract.
+- `agent-control/workflow-state.md` is current.
+- Routes are in the right `agent-control/inbox/<role>.md` files.
+- Route lifecycle changes are reflected in `agent-control/events.jsonl`.
+- `agent-control/state/routes.jsonl` mirrors created routes.
+- `agent-control/state/workflow.sqlite3` validates when initialized.
+- `agent-control/state/agents.jsonl` reflects live role telemetry when routes are dispatched, claimed, completed, blocked, or cancelled.
+- `scripts/wait-for-agent-sessions.sh <session>` confirms `ROLE_READY <role>` markers before startup dispatch begins.
+- `agent-control/routes/R000.md` exists for each created route and is used as the durable route contract.
 - Non-draft routes have concrete instruction, expected output, and validation fields.
 - `scripts/validate-route-state.sh` passes.
 - Meeting-driven routes include `Meeting ID` and `Decision ID` when applicable.
-- Human approvals and accepted risks are mirrored in `.agents/approvals.jsonl`.
+- Human approvals and accepted risks are mirrored in `agent-control/approvals.jsonl`.
 - `scripts/check-route-budget.sh` passes.
 - `scripts/check-stale-routes.sh` passes or stale routes are recovered with `scripts/recover-stale-routes.sh --apply` and then escalated if still blocked.
 - `scripts/watch-routes.sh <session> --send` is active in the control window or routes are manually dispatched.
 - Human approval needs are explicit.
-- Scope/architecture changes are recorded in `.agents/decisions.md`.
+- Approval-required routes use `--approval-ref` at completion, and review-required routes use `--review-ref`.
+- Scope/architecture changes are recorded in `agent-control/decisions.md`.
 
 ### CTO
 
@@ -60,7 +64,7 @@ Add project-specific commands as the repo takes shape.
 ### Product
 
 - Users, goals, non-goals, and acceptance risks are explicit.
-- Scope changes are reflected in `.agents/brief.md` or `.agents/product-requirements.md`.
+- Scope changes are reflected in `agent-control/brief.md` or `agent-control/product-requirements.md`.
 - Product decisions that affect scope or release risk are recorded.
 - Design, PM, QA, or docs follow-up is routed when needed.
 
@@ -81,7 +85,7 @@ Add project-specific commands as the repo takes shape.
 
 ### PM
 
-- Every implementation task satisfies `.agents/definition-of-ready.md`.
+- Every implementation task satisfies `agent-control/definition-of-ready.md`.
 - Dependencies and owners are explicit.
 - Cross-agent dependencies have handoffs.
 - Validation commands are concrete.
@@ -108,20 +112,20 @@ Add project-specific commands as the repo takes shape.
 - Reversibility or rollback risk is explicit.
 - Data-contract tests or validation commands are recorded when relevant.
 - Security/privacy review is routed for personal, sensitive, retained, or externally shared data.
-- Functional-layer JSONL schema changes are reflected in `.agents/schemas/` and validation scripts.
+- Functional-layer JSONL schema changes are reflected in `agent-control/schemas/` and validation scripts.
 
 ### DevOps
 
 - Setup, CI, build, deploy, and rollback steps are reproducible.
 - Project-specific commands are reflected in this file when they become release gates.
-- Environment variables and secrets follow `.agents/secrets-policy.md`.
+- Environment variables and secrets follow `agent-control/secrets-policy.md`.
 - `scripts/check-secrets.sh` passes before review/merge.
 
 ### QA Automation
 
 - Test plan maps to product acceptance criteria.
 - Automated coverage includes high-value smoke/regression paths before broad edge cases.
-- Commands, fixtures, and known flake risks are recorded in `.agents/qa-plan.md`.
+- Commands, fixtures, and known flake risks are recorded in `agent-control/qa-plan.md`.
 - Validation can reuse QA commands as release evidence.
 
 ### Performance
@@ -143,7 +147,7 @@ Add project-specific commands as the repo takes shape.
 - Auth/authz, secrets, input validation, logging, data exposure, and dependency risks are checked when relevant.
 - Media attachment paths and sensitive content risk are checked when attachments are added.
 - Critical risks block merge unless human explicitly accepts risk.
-- Accepted risk is recorded in `.agents/decisions.md`.
+- Accepted risk is recorded in `agent-control/decisions.md`.
 - `scripts/check-secrets.sh` passes before review/merge.
 
 ### Validation
@@ -175,12 +179,12 @@ Add project-specific commands as the repo takes shape.
 
 ## Workflow Control Gates
 
-- `.agents/context-map.md` defines role context and handoff context requirements.
-- `.agents/agent-policy.md` defines autonomy, guardrails, stop conditions, and output discipline.
-- `.agents/agent-config/<role>.yaml` defines output schema, route schema, allowed handoff targets, telemetry fields, capacity, stale timeout, and escalation owner for every canonical role.
-- `.agents/evaluation-suite.md` lists scaffold and project evals.
-- `.agents/failure-recovery.md` defines blocked-route recovery owners and retry policy.
-- `.agents/adaptation-guide.md` maps common project types to early specialist routes.
+- `agent-control/context-map.md` defines role context and handoff context requirements.
+- `agent-control/agent-policy.md` defines autonomy, guardrails, stop conditions, and output discipline.
+- `agent-control/agent-config/<role>.yaml` defines output schema, route schema, allowed handoff targets, telemetry fields, capacity, stale timeout, and escalation owner for every canonical role.
+- `agent-control/evaluation-suite.md` lists scaffold and project evals.
+- `agent-control/failure-recovery.md` defines blocked-route recovery owners and retry policy.
+- `agent-control/adaptation-guide.md` maps common project types to early specialist routes.
 
 ## Validation Report Format
 
@@ -212,5 +216,5 @@ Before merge:
 2. Diff contains only intended files.
 3. Universal gates are satisfied.
 4. Relevant command matrix checks pass.
-5. `.agents/validation-report.md` has no unresolved critical findings.
-6. `.agents/review-report.md` and `.agents/security-report.md` have no unresolved blocking findings when applicable.
+5. `agent-control/validation-report.md` has no unresolved critical findings.
+6. `agent-control/review-report.md` and `agent-control/security-report.md` have no unresolved blocking findings when applicable.

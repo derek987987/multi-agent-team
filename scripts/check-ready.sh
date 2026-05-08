@@ -2,12 +2,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TASK_BOARD="$ROOT/.agents/task-board.md"
+TASK_BOARD="$ROOT/agent-control/task-board.md"
 
 printf "== Definition Of Ready Check ==\n\n"
 
 if [ ! -f "$TASK_BOARD" ]; then
-  printf "Missing .agents/task-board.md\n" >&2
+  printf "Missing agent-control/task-board.md\n" >&2
   exit 1
 fi
 
@@ -17,7 +17,7 @@ if ! grep -qE "^Status: pending$|^Status: in-progress$|^Status: ready-for-review
   exit 0
 fi
 
-printf "Active tasks found. Review against .agents/definition-of-ready.md.\n"
+printf "Active tasks found. Review against agent-control/definition-of-ready.md.\n"
 
 if ! awk '
   function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
@@ -57,7 +57,7 @@ if ! awk '
   section == "handoffs" && /^- / && trim(substr($0, 3)) != "" { handoffs = 1; next }
   END { check(); exit missing ? 1 : 0 }
 ' "$TASK_BOARD"; then
-  printf "\nReady check failed. See .agents/definition-of-ready.md.\n" >&2
+  printf "\nReady check failed. See agent-control/definition-of-ready.md.\n" >&2
   exit 1
 fi
 

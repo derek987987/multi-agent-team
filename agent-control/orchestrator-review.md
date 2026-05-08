@@ -20,9 +20,9 @@ Public orchestration patterns reviewed:
 
 | Gap | Risk | Improvement Added |
 | --- | --- | --- |
-| Orchestrator had no explicit workflow state | routes and phase status could drift | added `.agents/workflow-state.md` |
-| Routing rules lived only in prose | orchestrator could route inconsistently | added `.agents/routing-matrix.md` |
-| Handoffs were centralized but not per-agent | agents had to scan the whole handoff file | added `.agents/inbox/<role>.md` files |
+| Orchestrator had no explicit workflow state | routes and phase status could drift | added `agent-control/workflow-state.md` |
+| Routing rules lived only in prose | orchestrator could route inconsistently | added `agent-control/routing-matrix.md` |
+| Handoffs were centralized but not per-agent | agents had to scan the whole handoff file | added `agent-control/inbox/<role>.md` files |
 | No helper to create route entries | manual route formatting was error-prone | added `scripts/route-agent.sh` |
 | No helper to inspect one role's work queue | each agent had to inspect several docs manually | added `scripts/agent-inbox.sh` |
 | Status helper did not show workflow state | human could not quickly see the control-plane snapshot | updated `scripts/agent-status.sh` |
@@ -36,9 +36,9 @@ This is still a local tmux/file-based workflow, not a true agent runtime. The or
 
 Use the orchestrator as the single human interface. Require it to update:
 
-1. `.agents/workflow-state.md`
-2. relevant `.agents/inbox/<role>.md`
-3. `.agents/handoffs.md` when cross-role work is needed
-4. `.agents/task-board.md` for executable work
-5. `.agents/decisions.md` for material product or technical choices
+1. `agent-control/workflow-state.md`
+2. relevant `agent-control/inbox/<role>.md`
+3. `agent-control/handoffs.md` when cross-role work is needed
+4. `agent-control/task-board.md` for executable work
+5. `agent-control/decisions.md` for material product or technical choices
 

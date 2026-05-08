@@ -38,6 +38,7 @@ OUTPUT_SCHEMA="none"
 RISK_FLAGS="none"
 NEXT_OWNER=""
 HUMAN_APPROVAL_REQUIRED="no"
+REVIEW_REQUIRED="no"
 INSTRUCTION=""
 EXPECTED_OUTPUT=""
 VALIDATION=""
@@ -178,6 +179,14 @@ if [ "$#" -gt 3 ]; then
         HUMAN_APPROVAL_REQUIRED="yes"
         shift
         ;;
+      --review-required)
+        if [ -z "${2:-}" ]; then
+          printf '%s\n' "--review-required requires a reviewer role or 'yes'." >&2
+          exit 1
+        fi
+        REVIEW_REQUIRED="$2"
+        shift 2
+        ;;
       --instruction)
         if [ -z "${2:-}" ]; then
           printf '%s\n' "--instruction requires a value." >&2
@@ -227,18 +236,18 @@ if [ "$#" -gt 3 ]; then
 done
 fi
 
-INBOX="$ROOT/.agents/inbox/$TO_ROLE.md"
-HANDOFFS="$ROOT/.agents/handoffs.md"
-STATE="$ROOT/.agents/workflow-state.md"
-ROUTES_JSONL="$ROOT/.agents/state/routes.jsonl"
-ROUTE_DIR="$ROOT/.agents/routes"
+INBOX="$ROOT/agent-control/inbox/$TO_ROLE.md"
+HANDOFFS="$ROOT/agent-control/handoffs.md"
+STATE="$ROOT/agent-control/workflow-state.md"
+ROUTES_JSONL="$ROOT/agent-control/state/routes.jsonl"
+ROUTE_DIR="$ROOT/agent-control/routes"
 ROUTE_REPORT="$ROUTE_DIR/$ROUTE_ID.md"
 CREATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 UPDATED="$CREATED"
-TARGET_PROJECT="${TARGET_PROJECT:-$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)}"
+TARGET_PROJECT="${TARGET_PROJECT:-$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)}"
 TARGET_PROJECT="${TARGET_PROJECT:-$ROOT}"
 NEXT_OWNER="${NEXT_OWNER:-$TO_ROLE}"
-MAX_ROUTE_DEPTH="${MAX_ROUTE_DEPTH:-$(awk -F':[[:space:]]*' '/Max route depth:/ { print $2; exit }' "$ROOT/.agents/route-budget.md" 2>/dev/null || true)}"
+MAX_ROUTE_DEPTH="${MAX_ROUTE_DEPTH:-$(awk -F':[[:space:]]*' '/Max route depth:/ { print $2; exit }' "$ROOT/agent-control/route-budget.md" 2>/dev/null || true)}"
 MAX_ROUTE_DEPTH="${MAX_ROUTE_DEPTH:-3}"
 
 case "$ROUTE_DEPTH" in
@@ -249,7 +258,7 @@ case "$ROUTE_DEPTH" in
 esac
 
 if [ "$ROUTE_DEPTH" -gt "$MAX_ROUTE_DEPTH" ]; then
-  printf "Route depth %s exceeds max route depth %s. See .agents/route-budget.md.\n" "$ROUTE_DEPTH" "$MAX_ROUTE_DEPTH" >&2
+  printf "Route depth %s exceeds max route depth %s. See agent-control/route-budget.md.\n" "$ROUTE_DEPTH" "$MAX_ROUTE_DEPTH" >&2
   exit 1
 fi
 
@@ -271,19 +280,19 @@ fi
 
 if [ ! -f "$INBOX" ]; then
   printf "Unknown role inbox: %s\n" "$INBOX" >&2
-  printf "Create .agents/inbox/%s.md first or use one of the existing roles.\n" "$TO_ROLE" >&2
+  printf "Create agent-control/inbox/%s.md first or use one of the existing roles.\n" "$TO_ROLE" >&2
   exit 1
 fi
 
 if grep -R -qE "^(##|###)[[:space:]]+$ROUTE_ID([[:space:]-]|$)|^[|][[:space:]]*$ROUTE_ID[[:space:]]*[|]" \
-  "$ROOT/.agents/inbox" "$HANDOFFS" "$STATE"; then
+  "$ROOT/agent-control/inbox" "$HANDOFFS" "$STATE"; then
   printf "Route ID already exists: %s\n" "$ROUTE_ID" >&2
   exit 1
 fi
 
 mkdir -p "$ROUTE_DIR"
 if [ -e "$ROUTE_REPORT" ]; then
-  printf "Route report already exists: .agents/routes/%s.md\n" "$ROUTE_ID" >&2
+  printf "Route report already exists: agent-control/routes/%s.md\n" "$ROUTE_ID" >&2
   exit 1
 fi
 
@@ -311,6 +320,9 @@ Context refs: $CONTEXT_REFS
 Output schema: $OUTPUT_SCHEMA
 Risk flags: $RISK_FLAGS
 Human approval required: $HUMAN_APPROVAL_REQUIRED
+Review required: $REVIEW_REQUIRED
+Approval ref:
+Review ref:
 Next owner: $NEXT_OWNER
 
 ## Instruction
@@ -357,7 +369,10 @@ Context refs: $CONTEXT_REFS
 Output schema: $OUTPUT_SCHEMA
 Risk flags: $RISK_FLAGS
 Human approval required: $HUMAN_APPROVAL_REQUIRED
-Completion report: .agents/routes/$ROUTE_ID.md
+Review required: $REVIEW_REQUIRED
+Approval ref:
+Review ref:
+Completion report: agent-control/routes/$ROUTE_ID.md
 
 Instruction:
 $INSTRUCTION
@@ -386,7 +401,7 @@ Files / modules:
 $FILES_OR_MODULES
 
 Request:
-See .agents/inbox/$TO_ROLE.md.
+See agent-control/inbox/$TO_ROLE.md.
 
 Context:
 $CONTEXT_REFS
@@ -417,7 +432,30 @@ awk -v id="$ROUTE_ID" -v to="$TO_ROLE" -v task="$RELATED_TASK" -v title="$TITLE"
 mv "$tmp" "$STATE"
 
 printf '{"route_id":"%s","from":"%s","to":"%s","status":"queued","priority":"%s","attempt":%s,"route_depth":%s,"related_task":"%s","meeting_id":"%s","decision_id":"%s","title":"%s","target_project":"%s","report":"%s","created":"%s","updated":"%s"}\n' \
-  "$(json_escape "$ROUTE_ID")" "$(json_escape "$FROM_ACTOR")" "$(json_escape "$TO_ROLE")" "$(json_escape "$PRIORITY")" "$ATTEMPT" "$ROUTE_DEPTH" "$(json_escape "$RELATED_TASK")" "$(json_escape "$MEETING_ID")" "$(json_escape "$DECISION_ID")" "$(json_escape "$TITLE")" "$(json_escape "$TARGET_PROJECT")" ".agents/routes/$ROUTE_ID.md" "$(json_escape "$CREATED")" "$(json_escape "$UPDATED")" >> "$ROUTES_JSONL"
+  "$(json_escape "$ROUTE_ID")" "$(json_escape "$FROM_ACTOR")" "$(json_escape "$TO_ROLE")" "$(json_escape "$PRIORITY")" "$ATTEMPT" "$ROUTE_DEPTH" "$(json_escape "$RELATED_TASK")" "$(json_escape "$MEETING_ID")" "$(json_escape "$DECISION_ID")" "$(json_escape "$TITLE")" "$(json_escape "$TARGET_PROJECT")" "agent-control/routes/$ROUTE_ID.md" "$(json_escape "$CREATED")" "$(json_escape "$UPDATED")" >> "$ROUTES_JSONL"
+
+"$ROOT/scripts/route-db.sh" upsert-route "$ROUTE_ID" \
+  --title "$TITLE" \
+  --from "$FROM_ACTOR" \
+  --to "$TO_ROLE" \
+  --status queued \
+  --priority "$PRIORITY" \
+  --related-task "$RELATED_TASK" \
+  --meeting "$MEETING_ID" \
+  --decision "$DECISION_ID" \
+  --attempt "$ATTEMPT" \
+  --route-depth "$ROUTE_DEPTH" \
+  --target-project "$TARGET_PROJECT" \
+  --worktree "${WORKTREE_OR_BRANCH:-none}" \
+  --files "$FILES_OR_MODULES" \
+  --context "$CONTEXT_REFS" \
+  --output-schema "$OUTPUT_SCHEMA" \
+  --risk-flags "$RISK_FLAGS" \
+  --approval-required "$HUMAN_APPROVAL_REQUIRED" \
+  --review-required "$REVIEW_REQUIRED" \
+  --report "agent-control/routes/$ROUTE_ID.md" \
+  --created "$CREATED" \
+  --updated "$UPDATED" >/dev/null
 
 "$ROOT/scripts/log-event.sh" route-created "$FROM_ACTOR" "Created route $ROUTE_ID for $TO_ROLE" "$TITLE" "$ROUTE_ID"
 "$ROOT/scripts/check-route-budget.sh" >/dev/null

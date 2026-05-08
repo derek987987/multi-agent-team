@@ -10,7 +10,7 @@ if [ "$MODE" != "--push" ]; then
   exit 1
 fi
 
-TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)"
+TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)"
 TARGET_PATH="${TARGET_PATH:-$ROOT}"
 TARGET_PATH="$(cd "$TARGET_PATH" && pwd)"
 
@@ -31,14 +31,14 @@ while IFS= read -r line; do
         continue
       fi
 
-      mkdir -p "$wt/.agents" "$wt/scripts"
-      rsync -a "$ROOT/.agents/prompts/" "$wt/.agents/prompts/"
-      rsync -a "$ROOT/.agents/skills/" "$wt/.agents/skills/"
-      rsync -a "$ROOT/.agents/schemas/" "$wt/.agents/schemas/"
-      rsync -a "$ROOT/.agents/ownership/" "$wt/.agents/ownership/"
-      rsync -a "$ROOT/.agents/agent-config/" "$wt/.agents/agent-config/"
-      rsync -a "$ROOT/.agents/state/" "$wt/.agents/state/"
-      rsync -a "$ROOT/.agents/routes/" "$wt/.agents/routes/"
+      mkdir -p "$wt/agent-control" "$wt/scripts"
+      rsync -a "$ROOT/agent-control/prompts/" "$wt/agent-control/prompts/"
+      rsync -a "$ROOT/agent-control/skills/" "$wt/agent-control/skills/"
+      rsync -a "$ROOT/agent-control/schemas/" "$wt/agent-control/schemas/"
+      rsync -a "$ROOT/agent-control/ownership/" "$wt/agent-control/ownership/"
+      rsync -a "$ROOT/agent-control/agent-config/" "$wt/agent-control/agent-config/"
+      rsync -a "$ROOT/agent-control/state/" "$wt/agent-control/state/"
+      rsync -a "$ROOT/agent-control/routes/" "$wt/agent-control/routes/"
       for file in \
         brief.md context-map.md agent-policy.md evaluation-suite.md \
         failure-recovery.md adaptation-guide.md product-requirements.md \
@@ -49,8 +49,8 @@ while IFS= read -r line; do
         change-control.md change-request.md workflow-state.md routing-matrix.md \
         route-schema.md memory-policy.md sync-policy.md route-budget.md \
         project-target.md secrets-policy.md milestone-budget.md; do
-        if [ -f "$ROOT/.agents/$file" ]; then
-          cp "$ROOT/.agents/$file" "$wt/.agents/$file"
+        if [ -f "$ROOT/agent-control/$file" ]; then
+          cp "$ROOT/agent-control/$file" "$wt/agent-control/$file"
         fi
       done
       cp "$ROOT/AGENTS.md" "$wt/AGENTS.md"

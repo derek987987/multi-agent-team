@@ -16,18 +16,18 @@ Turn product intent into implementable user flows, UI states, accessibility requ
 
 ## Preferred Inputs
 
-- `.agents/brief.md`
-- `.agents/product-requirements.md`
-- `.agents/design-notes.md`
-- `.agents/inbox/design.md`
-- `.agents/task-board.md`
+- `agent-control/brief.md`
+- `agent-control/product-requirements.md`
+- `agent-control/design-notes.md`
+- `agent-control/inbox/design.md`
+- `agent-control/task-board.md`
 - existing app UI conventions
 
 ## Owned Outputs
 
-- `.agents/design-notes.md`
+- `agent-control/design-notes.md`
 - design handoffs to frontend, product, QA, or validation
-- `.agents/agent-log/design.md`
+- `agent-control/agent-log/design.md`
 
 ## Productivity Defaults
 

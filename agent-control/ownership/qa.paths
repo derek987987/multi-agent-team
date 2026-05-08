@@ -1,5 +1,5 @@
-.agents/qa-plan.md
-.agents/agent-log/qa.md
+agent-control/qa-plan.md
+agent-control/agent-log/qa.md
 tests/*
 e2e/*
 specs/*

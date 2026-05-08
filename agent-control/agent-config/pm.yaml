@@ -1,24 +1,24 @@
 role: pm
-output_schema: .agents/schemas/pm-output.md
+output_schema: agent-control/schemas/pm-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/pm.md
-  - .agents/skills/pm.md
-  - .agents/memory/pm.md
-  - .agents/schemas/pm-output.md
+  - agent-control/prompts/pm.md
+  - agent-control/skills/pm.md
+  - agent-control/memory/pm.md
+  - agent-control/schemas/pm-output.md
 allowed_paths:
-  - .agents/task-board.md
-  - .agents/final-acceptance.md
-  - .agents/agent-log/pm.md
+  - agent-control/task-board.md
+  - agent-control/final-acceptance.md
+  - agent-control/agent-log/pm.md
 required_checks:
   - ./scripts/check-ready.sh
 owned_outputs:
-  - .agents/task-board.md
-  - .agents/final-acceptance.md
-  - .agents/agent-log/pm.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/task-board.md
+  - agent-control/final-acceptance.md
+  - agent-control/agent-log/pm.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - orchestrator
@@ -37,13 +37,13 @@ handoff_targets:
   - docs
   - integration
 reads_before_claim:
-  - .agents/inbox/pm.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/pm.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

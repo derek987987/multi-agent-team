@@ -64,7 +64,7 @@ update_status() {
 found=0
 route_file=""
 route_role=""
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   if grep -qE "^## $ROUTE_ID([[:space:]-]|$)" "$inbox"; then
     route_file="$inbox"
     route_role="$(basename "$inbox" .md)"
@@ -84,14 +84,14 @@ fi
 
 update_status "$route_file" "##" "blocked"
 
-if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/.agents/handoffs.md"; then
-  update_status "$ROOT/.agents/handoffs.md" "###" "blocked"
+if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/agent-control/handoffs.md"; then
+  update_status "$ROOT/agent-control/handoffs.md" "###" "blocked"
 fi
 
 tmp="$(mktemp)"
 awk -v id="$ROUTE_ID" 'BEGIN { FS=OFS="|" } $2 ~ "^[[:space:]]*" id "[[:space:]]*$" { $4 = " blocked " } { print }' \
-  "$ROOT/.agents/workflow-state.md" > "$tmp"
-mv "$tmp" "$ROOT/.agents/workflow-state.md"
+  "$ROOT/agent-control/workflow-state.md" > "$tmp"
+mv "$tmp" "$ROOT/agent-control/workflow-state.md"
 
 if [ -z "$REPORT" ]; then
   REPORT="$(awk -v id="$ROUTE_ID" '
@@ -99,7 +99,7 @@ if [ -z "$REPORT" ]; then
     in_route && /^Completion report:/ { sub(/^Completion report:[[:space:]]*/, ""); print; exit }
   ' "$route_file")"
 fi
-REPORT="${REPORT:-.agents/routes/$ROUTE_ID.md}"
+REPORT="${REPORT:-agent-control/routes/$ROUTE_ID.md}"
 
 case "$REPORT" in
   /*) report_path="$REPORT" ;;
@@ -126,6 +126,11 @@ fi
 
 "$ROOT/scripts/log-event.sh" route-blocked "$ACTOR" "$REASON" "" "$ROUTE_ID"
 "$ROOT/scripts/update-agent-state.sh" "$route_role" --status blocked --active-route "$ROUTE_ID" --blocked-reason "$REASON"
+"$ROOT/scripts/route-db.sh" update-status "$ROUTE_ID" blocked \
+  --actor "$ACTOR" \
+  --note "$REASON" \
+  --blocked-reason "$REASON" \
+  --updated "$UPDATED" >/dev/null
 printf '{"route_id":"%s","status":"blocked","actor":"%s","reason":"%s","report":"%s","updated":"%s"}\n' \
-  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$REASON")" "$(json_escape "$REPORT")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
+  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$REASON")" "$(json_escape "$REPORT")" "$(json_escape "$UPDATED")" >> "$ROOT/agent-control/state/routes.jsonl"
 printf "Blocked route %s\n" "$ROUTE_ID"

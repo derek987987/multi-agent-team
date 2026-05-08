@@ -33,13 +33,13 @@ case "$STATUS" in
     ;;
 esac
 
-mkdir -p "$ROOT/.agents/state"
+mkdir -p "$ROOT/agent-control/state"
 
 record="$(printf '{"approval_id":"%s","actor":"%s","subject":"%s","status":"%s","decision":"%s","meeting_id":"%s","created":"%s"}' \
   "$(json_escape "$APPROVAL_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$SUBJECT")" "$(json_escape "$STATUS")" "$(json_escape "$DECISION")" "$(json_escape "$MEETING_ID")" "$(json_escape "$CREATED")")"
 
-printf '%s\n' "$record" >> "$ROOT/.agents/approvals.jsonl"
-printf '%s\n' "$record" >> "$ROOT/.agents/state/approvals.jsonl"
+printf '%s\n' "$record" >> "$ROOT/agent-control/approvals.jsonl"
+printf '%s\n' "$record" >> "$ROOT/agent-control/state/approvals.jsonl"
 
 "$ROOT/scripts/log-event.sh" approval-recorded "$ACTOR" "Recorded approval $APPROVAL_ID" "$SUBJECT: $STATUS" "$APPROVAL_ID"
 printf "Recorded approval %s\n" "$APPROVAL_ID"

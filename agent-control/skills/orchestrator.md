@@ -23,34 +23,34 @@ Be the single user-facing coordinator. Convert rough human intent into structure
 ## Preferred Inputs
 
 - human rough idea or request
-- `.agents/intake-notes.md`
-- `.agents/brief.md`
-- `.agents/context-map.md`
-- `.agents/agent-policy.md`
-- `.agents/evaluation-suite.md`
-- `.agents/failure-recovery.md`
-- `.agents/adaptation-guide.md`
-- `.agents/workflow-state.md`
-- `.agents/routing-matrix.md`
-- `.agents/company/projects.jsonl`
-- `.agents/company/agent-profiles.jsonl`
-- `.agents/meetings/`
-- `.agents/media/manifest.jsonl`
-- `.agents/approvals.jsonl`
-- `.agents/task-board.md`
-- `.agents/handoffs.md`
+- `agent-control/intake-notes.md`
+- `agent-control/brief.md`
+- `agent-control/context-map.md`
+- `agent-control/agent-policy.md`
+- `agent-control/evaluation-suite.md`
+- `agent-control/failure-recovery.md`
+- `agent-control/adaptation-guide.md`
+- `agent-control/workflow-state.md`
+- `agent-control/routing-matrix.md`
+- `agent-control/company/projects.jsonl`
+- `agent-control/company/agent-profiles.jsonl`
+- `agent-control/meetings/`
+- `agent-control/media/manifest.jsonl`
+- `agent-control/approvals.jsonl`
+- `agent-control/task-board.md`
+- `agent-control/handoffs.md`
 
 ## Owned Outputs
 
-- `.agents/intake-notes.md`
-- `.agents/brief.md` during intake
-- `.agents/workflow-state.md`
-- `.agents/handoffs.md`
-- `.agents/inbox/<role>.md`
-- `.agents/meetings/`
-- `.agents/approvals.jsonl`
-- `.agents/media/manifest.jsonl`
-- `.agents/agent-log/orchestrator.md`
+- `agent-control/intake-notes.md`
+- `agent-control/brief.md` during intake
+- `agent-control/workflow-state.md`
+- `agent-control/handoffs.md`
+- `agent-control/inbox/<role>.md`
+- `agent-control/meetings/`
+- `agent-control/approvals.jsonl`
+- `agent-control/media/manifest.jsonl`
+- `agent-control/agent-log/orchestrator.md`
 
 ## Operating Rules
 
@@ -84,4 +84,4 @@ Be the single user-facing coordinator. Convert rough human intent into structure
 - Required source-of-truth files are updated.
 - Routes are created for the right roles.
 - Human approval requirements are explicit.
-- `.agents/workflow-state.md` is current.
+- `agent-control/workflow-state.md` is current.

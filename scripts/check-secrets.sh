@@ -23,7 +23,7 @@ fi
 while IFS= read -r file; do
   [ -z "$file" ] && continue
   case "$file" in
-    .git/*|.agents/events.jsonl|*.png|*.jpg|*.jpeg|*.gif|*.pdf|*.zip) continue ;;
+    .git/*|agent-control/events.jsonl|*.png|*.jpg|*.jpeg|*.gif|*.pdf|*.zip) continue ;;
   esac
   path="$ROOT/$file"
   [ -f "$path" ] || continue
@@ -37,7 +37,7 @@ done <<< "$files"
 rm -f /tmp/secret-scan.$$ 2>/dev/null || true
 
 if [ "$status" -ne 0 ]; then
-  printf "\nSecrets check failed. See .agents/secrets-policy.md.\n" >&2
+  printf "\nSecrets check failed. See agent-control/secrets-policy.md.\n" >&2
   exit 1
 fi
 

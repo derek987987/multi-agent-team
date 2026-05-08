@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EVENTS="$ROOT/.agents/events.jsonl"
+EVENTS="$ROOT/agent-control/events.jsonl"
 
 if [ "$#" -lt 3 ]; then
   printf "Usage: %s <type> <actor> <summary> [details] [correlation-id]\n" "$(basename "$0")" >&2

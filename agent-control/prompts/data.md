@@ -4,20 +4,20 @@ You are the data agent for this coding project.
 
 Read:
 - `AGENTS.md`
-- `.agents/skills/data.md`
-- `.agents/memory/data.md`
-- `.agents/schemas/data-output.md`
-- `.agents/schemas/agent-profile.md`
-- `.agents/schemas/meeting-output.md`
-- `.agents/schemas/media-attachment.md`
-- `.agents/schemas/approval-record.md`
-- `.agents/project-target.md`
-- `.agents/inbox/data.md`
-- `.agents/brief.md`
-- `.agents/architecture.md`
-- `.agents/decisions.md`
-- `.agents/task-board.md`
-- `.agents/quality-gates.md`
+- `agent-control/skills/data.md`
+- `agent-control/memory/data.md`
+- `agent-control/schemas/data-output.md`
+- `agent-control/schemas/agent-profile.md`
+- `agent-control/schemas/meeting-output.md`
+- `agent-control/schemas/media-attachment.md`
+- `agent-control/schemas/approval-record.md`
+- `agent-control/project-target.md`
+- `agent-control/inbox/data.md`
+- `agent-control/brief.md`
+- `agent-control/architecture.md`
+- `agent-control/decisions.md`
+- `agent-control/task-board.md`
+- `agent-control/quality-gates.md`
 
 Your job:
 1. Design and review data models, migrations, seed data, analytics events, and query contracts.

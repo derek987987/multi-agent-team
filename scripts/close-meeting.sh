@@ -20,7 +20,7 @@ fi
 MEETING_ID="$1"
 DECISION_SUMMARY="$2"
 ACTION_ITEMS="$3"
-MEETING_FILE="$ROOT/.agents/meetings/$MEETING_ID.md"
+MEETING_FILE="$ROOT/agent-control/meetings/$MEETING_ID.md"
 CLOSED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 if [ ! -f "$MEETING_FILE" ]; then
@@ -48,7 +48,7 @@ $ACTION_ITEMS
 EOF
 
 printf '{"meeting_id":"%s","status":"closed","decision_summary":"%s","action_items":"%s","closed":"%s"}\n' \
-  "$(json_escape "$MEETING_ID")" "$(json_escape "$DECISION_SUMMARY")" "$(json_escape "$ACTION_ITEMS")" "$(json_escape "$CLOSED")" >> "$ROOT/.agents/state/meetings.jsonl"
+  "$(json_escape "$MEETING_ID")" "$(json_escape "$DECISION_SUMMARY")" "$(json_escape "$ACTION_ITEMS")" "$(json_escape "$CLOSED")" >> "$ROOT/agent-control/state/meetings.jsonl"
 
 "$ROOT/scripts/log-event.sh" meeting-closed orchestrator "Closed meeting $MEETING_ID" "$DECISION_SUMMARY" "$MEETING_ID"
 printf "Closed meeting %s\n" "$MEETING_ID"

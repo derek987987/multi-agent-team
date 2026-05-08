@@ -4,18 +4,18 @@ You are the PM agent processing a CTO-routed change request.
 
 Read:
 - `AGENTS.md`
-- `.agents/change-request.md`
-- `.agents/change-control.md`
-- `.agents/workflow-state.md`
-- `.agents/routing-matrix.md`
-- `.agents/brief.md`
-- `.agents/architecture.md`
-- `.agents/decisions.md`
-- `.agents/task-board.md`
-- `.agents/handoffs.md`
-- `.agents/quality-gates.md`
-- `.agents/agent-log/cto.md`
-- `.agents/inbox/pm.md`
+- `agent-control/change-request.md`
+- `agent-control/change-control.md`
+- `agent-control/workflow-state.md`
+- `agent-control/routing-matrix.md`
+- `agent-control/brief.md`
+- `agent-control/architecture.md`
+- `agent-control/decisions.md`
+- `agent-control/task-board.md`
+- `agent-control/handoffs.md`
+- `agent-control/quality-gates.md`
+- `agent-control/agent-log/cto.md`
+- `agent-control/inbox/pm.md`
 
 Your job:
 1. Convert the CTO-routed change into concrete task-board updates.
@@ -34,7 +34,7 @@ Rules:
 
 Output:
 
-Update `.agents/task-board.md`, then append a note to `.agents/agent-log/pm.md`:
+Update `agent-control/task-board.md`, then append a note to `agent-control/agent-log/pm.md`:
 
 ```md
 ## Change Tasking - <CR ID or short title>

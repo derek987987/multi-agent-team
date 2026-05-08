@@ -101,7 +101,7 @@ def parse_markdown_table(lines: list[str], heading: str) -> list[dict[str, str]]
 
 
 def parse_workflow_state(root: Path) -> dict[str, Any]:
-    text = read_text(root / ".agents" / "workflow-state.md")
+    text = read_text(root / "agent-control" / "workflow-state.md")
     lines = text.splitlines()
     workflow: dict[str, Any] = {
         "mode": "",
@@ -149,7 +149,7 @@ def parse_workflow_state(root: Path) -> dict[str, Any]:
 
 def parse_route_reports(root: Path) -> dict[str, dict[str, Any]]:
     reports: dict[str, dict[str, Any]] = {}
-    route_dir = root / ".agents" / "routes"
+    route_dir = root / "agent-control" / "routes"
     if not route_dir.exists():
         return reports
     for path in sorted(route_dir.glob("R*.md")):
@@ -167,7 +167,7 @@ def parse_route_reports(root: Path) -> dict[str, dict[str, Any]]:
             "priority": fields.get("priority", ""),
             "related_task": fields.get("related_task", ""),
             "title": text.splitlines()[0].lstrip("# ").strip() if text else route_id,
-            "report": f".agents/routes/{path.name}",
+            "report": f"agent-control/routes/{path.name}",
             "updated": fields.get("last_updated", ""),
             "context_refs": fields.get("context_refs", ""),
             "source": "route-report",
@@ -176,13 +176,13 @@ def parse_route_reports(root: Path) -> dict[str, dict[str, Any]]:
 
 
 def read_profiles(root: Path) -> list[dict[str, Any]]:
-    profiles = read_jsonl(root / ".agents" / "company" / "agent-profiles.jsonl")
+    profiles = read_jsonl(root / "agent-control" / "company" / "agent-profiles.jsonl")
     return [profile for profile in profiles if profile.get("role")]
 
 
 def build_agents(root: Path) -> list[dict[str, Any]]:
     profiles = read_profiles(root)
-    telemetry = latest_by(read_jsonl(root / ".agents" / "state" / "agents.jsonl"), "role")
+    telemetry = latest_by(read_jsonl(root / "agent-control" / "state" / "agents.jsonl"), "role")
     agents: list[dict[str, Any]] = []
     for profile in profiles:
         role = str(profile.get("role", ""))
@@ -194,7 +194,7 @@ def build_agents(root: Path) -> list[dict[str, Any]]:
             "skills": profile.get("skills", []),
             "profile_path": profile.get("profile_path", ""),
             "memory_path": profile.get("memory_path", ""),
-            "inbox_path": profile.get("inbox_path", f".agents/inbox/{role}.md"),
+            "inbox_path": profile.get("inbox_path", f"agent-control/inbox/{role}.md"),
             "ownership_path": profile.get("ownership_path", ""),
             "profile_status": profile.get("status", ""),
             "load": profile.get("load", ""),
@@ -219,7 +219,7 @@ def build_agents(root: Path) -> list[dict[str, Any]]:
 
 
 def build_routes(root: Path) -> list[dict[str, Any]]:
-    route_records = latest_by(read_jsonl(root / ".agents" / "state" / "routes.jsonl"), "route_id")
+    route_records = latest_by(read_jsonl(root / "agent-control" / "state" / "routes.jsonl"), "route_id")
     reports = parse_route_reports(root)
     merged: dict[str, dict[str, Any]] = {}
     for route_id, report in reports.items():
@@ -227,7 +227,7 @@ def build_routes(root: Path) -> list[dict[str, Any]]:
     for route_id, record in route_records.items():
         merged.setdefault(route_id, {})
         merged[route_id].update(record)
-        merged[route_id].setdefault("report", f".agents/routes/{route_id}.md")
+        merged[route_id].setdefault("report", f"agent-control/routes/{route_id}.md")
         merged[route_id]["source"] = "routes-jsonl"
     return sorted(merged.values(), key=lambda item: str(item.get("route_id", "")))
 
@@ -235,19 +235,19 @@ def build_routes(root: Path) -> list[dict[str, Any]]:
 def build_snapshot(root: Path) -> dict[str, Any]:
     return {
         "generated_at": utc_now(),
-        "project_target": read_text(root / ".agents" / "project-target.md"),
+        "project_target": read_text(root / "agent-control" / "project-target.md"),
         "profiles": read_profiles(root),
         "agents": build_agents(root),
         "routes": build_routes(root),
         "workflow": parse_workflow_state(root),
-        "events": read_jsonl(root / ".agents" / "events.jsonl")[-40:],
+        "events": read_jsonl(root / "agent-control" / "events.jsonl")[-40:],
         "sources": {
-            "profiles": ".agents/company/agent-profiles.jsonl",
-            "agents": ".agents/state/agents.jsonl",
-            "routes": ".agents/state/routes.jsonl",
-            "events": ".agents/events.jsonl",
-            "workflow": ".agents/workflow-state.md",
-            "route_reports": ".agents/routes/*.md",
+            "profiles": "agent-control/company/agent-profiles.jsonl",
+            "agents": "agent-control/state/agents.jsonl",
+            "routes": "agent-control/state/routes.jsonl",
+            "events": "agent-control/events.jsonl",
+            "workflow": "agent-control/workflow-state.md",
+            "route_reports": "agent-control/routes/*.md",
         },
     }
 
@@ -259,10 +259,10 @@ def route_numbers(root: Path) -> set[int]:
         if match:
             numbers.add(int(match.group(1)))
 
-    for record in read_jsonl(root / ".agents" / "state" / "routes.jsonl"):
+    for record in read_jsonl(root / "agent-control" / "state" / "routes.jsonl"):
         add_route_id(record.get("route_id"))
 
-    inbox_dir = root / ".agents" / "inbox"
+    inbox_dir = root / "agent-control" / "inbox"
     if inbox_dir.exists():
         for path in sorted(inbox_dir.glob("*.md")):
             for line in read_text(path).splitlines():
@@ -270,13 +270,13 @@ def route_numbers(root: Path) -> set[int]:
                 if heading:
                     add_route_id(heading.group(1))
 
-    workflow = read_text(root / ".agents" / "workflow-state.md")
+    workflow = read_text(root / "agent-control" / "workflow-state.md")
     for line in workflow.splitlines():
         table_route = re.match(r"^\|\s*(R\d{3,})\s*\|", line)
         if table_route:
             add_route_id(table_route.group(1))
 
-    route_dir = root / ".agents" / "routes"
+    route_dir = root / "agent-control" / "routes"
     if route_dir.exists():
         for path in sorted(route_dir.glob("R*.md")):
             if path.name == "README.md":
@@ -309,7 +309,7 @@ def create_orchestrator_prompt(root: Path, body: dict[str, Any]) -> tuple[int, d
     snapshot = build_snapshot(root)
     agent = selected_agent(snapshot, role)
     if agent is None:
-        return 400, {"error": "role must match .agents/company/agent-profiles.jsonl"}
+        return 400, {"error": "role must match agent-control/company/agent-profiles.jsonl"}
 
     route_id = next_route_id(root)
     display_name = agent.get("display_name") or role
@@ -318,11 +318,11 @@ def create_orchestrator_prompt(root: Path, body: dict[str, Any]) -> tuple[int, d
     blocked_reason = str(agent.get("blocked_reason") or "none")
     title = f"Agent Office prompt for {display_name}"
     context_refs = (
-        ".agents/company/agent-profiles.jsonl; "
-        ".agents/state/agents.jsonl; "
-        ".agents/state/routes.jsonl; "
-        ".agents/events.jsonl; "
-        ".agents/workflow-state.md; "
+        "agent-control/company/agent-profiles.jsonl; "
+        "agent-control/state/agents.jsonl; "
+        "agent-control/state/routes.jsonl; "
+        "agent-control/events.jsonl; "
+        "agent-control/workflow-state.md; "
         f"selected role={role}; "
         f"selected status={selected_status}; "
         f"selected active route={active_route}"
@@ -342,12 +342,12 @@ def create_orchestrator_prompt(root: Path, body: dict[str, Any]) -> tuple[int, d
             "Prompt:",
             message,
             "",
-            "Classify the request, update source-of-truth workflow files if needed, and route follow-up through .agents/* files. Keep Orchestrator as the routing authority.",
+            "Classify the request, update source-of-truth workflow files if needed, and route follow-up through agent-control/* files. Keep Orchestrator as the routing authority.",
         ]
     )
     expected_output = (
-        f".agents/routes/{route_id}.md report, plus any needed .agents/workflow-state.md, "
-        ".agents/handoffs.md, or inbox route updates."
+        f"agent-control/routes/{route_id}.md report, plus any needed agent-control/workflow-state.md, "
+        "agent-control/handoffs.md, or inbox route updates."
     )
     validation = "Run ./scripts/validate-route-state.sh and ./scripts/validate-structured-state.sh."
     command = [
@@ -375,9 +375,9 @@ def create_orchestrator_prompt(root: Path, body: dict[str, Any]) -> tuple[int, d
         "from": "human-ui",
         "to": "orchestrator",
         "title": title,
-        "report": f".agents/routes/{route_id}.md",
-        "inbox": ".agents/inbox/orchestrator.md",
-        "workflow_state": ".agents/workflow-state.md",
+        "report": f"agent-control/routes/{route_id}.md",
+        "inbox": "agent-control/inbox/orchestrator.md",
+        "workflow_state": "agent-control/workflow-state.md",
         "stdout": result.stdout.strip(),
     }
 

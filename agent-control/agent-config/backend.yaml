@@ -1,13 +1,13 @@
 role: backend
-output_schema: .agents/schemas/implementation-output.md
+output_schema: agent-control/schemas/implementation-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/backend.md
-  - .agents/skills/backend.md
-  - .agents/memory/backend.md
-  - .agents/schemas/implementation-output.md
+  - agent-control/prompts/backend.md
+  - agent-control/skills/backend.md
+  - agent-control/memory/backend.md
+  - agent-control/schemas/implementation-output.md
 allowed_paths:
   - src/backend/*
   - src/server/*
@@ -15,12 +15,12 @@ allowed_paths:
   - api/*
   - db/*
   - migrations/*
-  - .agents/agent-log/backend.md
+  - agent-control/agent-log/backend.md
 required_checks:
   - ./scripts/check-ownership.sh backend
 owned_outputs:
-  - .agents/agent-log/backend.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/agent-log/backend.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - cto
@@ -34,13 +34,13 @@ handoff_targets:
   - docs
   - integration
 reads_before_claim:
-  - .agents/inbox/backend.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/backend.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

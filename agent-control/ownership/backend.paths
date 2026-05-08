@@ -1,4 +1,4 @@
-.agents/agent-log/backend.md
+agent-control/agent-log/backend.md
 src/backend/*
 src/server/*
 server/*

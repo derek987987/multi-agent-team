@@ -1,5 +1,5 @@
-.agents/performance-report.md
-.agents/agent-log/performance.md
+agent-control/performance-report.md
+agent-control/agent-log/performance.md
 benchmarks/*
 perf/*
 performance/*

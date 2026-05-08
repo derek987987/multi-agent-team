@@ -1,5 +1,5 @@
-.agents/release-notes.md
-.agents/agent-log/docs.md
+agent-control/release-notes.md
+agent-control/agent-log/docs.md
 README.md
 docs/*
 CHANGELOG.md

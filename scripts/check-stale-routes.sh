@@ -14,10 +14,10 @@ parse_ts() {
     printf "0"
     return
   fi
-  if date -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s >/dev/null 2>&1; then
-    date -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s
-  elif date -d "$ts" +%s >/dev/null 2>&1; then
-    date -d "$ts" +%s
+  if date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s >/dev/null 2>&1; then
+    date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s
+  elif date -u -d "$ts" +%s >/dev/null 2>&1; then
+    date -u -d "$ts" +%s
   else
     printf "0"
   fi
@@ -25,7 +25,7 @@ parse_ts() {
 
 printf "== Stale Route Check ==\n\n"
 
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   role="$(basename "$inbox" .md)"
   while IFS=$'\t' read -r route route_status created; do
     case "$route_status" in

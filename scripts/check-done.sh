@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VALIDATION="$ROOT/.agents/validation-report.md"
-REVIEW="$ROOT/.agents/review-report.md"
-SECURITY="$ROOT/.agents/security-report.md"
+VALIDATION="$ROOT/agent-control/validation-report.md"
+REVIEW="$ROOT/agent-control/review-report.md"
+SECURITY="$ROOT/agent-control/security-report.md"
 
 printf "== Definition Of Done Check ==\n\n"
 
@@ -39,9 +39,9 @@ else
 fi
 
 if grep -qiE "Recommendation: block|^Status: open$" "$REVIEW"; then
-  printf "Review may contain blocking findings. Inspect .agents/review-report.md.\n"
+  printf "Review may contain blocking findings. Inspect agent-control/review-report.md.\n"
   status=1
 fi
 
-printf "\nDone check is advisory. Confirm every item in .agents/definition-of-done.md before marking task done.\n"
+printf "\nDone check is advisory. Confirm every item in agent-control/definition-of-done.md before marking task done.\n"
 exit "$status"

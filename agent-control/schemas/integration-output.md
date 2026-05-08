@@ -1,6 +1,6 @@
 # Integration Output Schema
 
-Use this structure in `.agents/routes/R000.md`, `.agents/agent-log/integration.md`, or an integration note when the Integration role completes a route.
+Use this structure in `agent-control/routes/R000.md`, `agent-control/agent-log/integration.md`, or an integration note when the Integration role completes a route.
 
 ## Required Sections
 

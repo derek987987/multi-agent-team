@@ -5,10 +5,38 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/scripts/agent-roles.sh"
 SESSION="${1:-agent-team}"
 MODE="${2:---dry-run}"
-ROUTES_JSONL="$ROOT/.agents/state/routes.jsonl"
-ACK_TIMEOUT="${ROUTE_DISPATCH_ACK_TIMEOUT:-30}"
-TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)"
+ROUTES_JSONL="$ROOT/agent-control/state/routes.jsonl"
+ACK_TIMEOUT="${ROUTE_DISPATCH_ACK_TIMEOUT:-120}"
+SEND_TIMEOUT="${ROUTE_DISPATCH_SEND_TIMEOUT:-10}"
+SUBMIT_DELAY="${ROUTE_DISPATCH_SUBMIT_DELAY:-1}"
+TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)"
 TARGET_PATH="${TARGET_PATH:-$ROOT}"
+
+case "$ACK_TIMEOUT" in
+  ''|*[!0-9]*)
+    printf "ROUTE_DISPATCH_ACK_TIMEOUT must be a positive integer: %s\n" "$ACK_TIMEOUT" >&2
+    exit 1
+    ;;
+esac
+
+case "$SEND_TIMEOUT" in
+  ''|*[!0-9]*)
+    printf "ROUTE_DISPATCH_SEND_TIMEOUT must be a positive integer: %s\n" "$SEND_TIMEOUT" >&2
+    exit 1
+    ;;
+esac
+
+if [ "$ACK_TIMEOUT" -lt 1 ] || [ "$SEND_TIMEOUT" -lt 1 ]; then
+  printf "Route dispatch timeouts must be at least 1 second.\n" >&2
+  exit 1
+fi
+
+case "$SUBMIT_DELAY" in
+  ''|*[!0-9.]*)
+    printf "ROUTE_DISPATCH_SUBMIT_DELAY must be a non-negative number: %s\n" "$SUBMIT_DELAY" >&2
+    exit 1
+    ;;
+esac
 
 json_escape() {
   printf '%s' "$1" | tr '\n' ' ' | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g'
@@ -16,8 +44,8 @@ json_escape() {
 
 prompt_for_role() {
   local role="$1"
-  if is_agent_role "$role" && [ -f "$ROOT/.agents/prompts/$role.md" ]; then
-    printf ".agents/prompts/%s.md" "$role"
+  if is_agent_role "$role" && [ -f "$ROOT/agent-control/prompts/$role.md" ]; then
+    printf "agent-control/prompts/%s.md" "$role"
   else
     printf ""
   fi
@@ -31,7 +59,7 @@ update_route_status() {
   local updated
   updated="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-  for target in "$ROOT/.agents/inbox/$role.md" "$ROOT/.agents/handoffs.md"; do
+  for target in "$ROOT/agent-control/inbox/$role.md" "$ROOT/agent-control/handoffs.md"; do
     [ -f "$target" ] || continue
     tmp="$(mktemp)"
     awk -v id="$route" -v status="$status" '
@@ -44,8 +72,8 @@ update_route_status() {
 
   tmp="$(mktemp)"
   awk -v id="$route" -v status="$status" 'BEGIN { FS=OFS="|" } $2 ~ "^[[:space:]]*" id "[[:space:]]*$" { $4 = " " status " " } { print }' \
-    "$ROOT/.agents/workflow-state.md" > "$tmp"
-  mv "$tmp" "$ROOT/.agents/workflow-state.md"
+    "$ROOT/agent-control/workflow-state.md" > "$tmp"
+  mv "$tmp" "$ROOT/agent-control/workflow-state.md"
 
   if [ -n "$report" ] && [ -f "$ROOT/$report" ]; then
     tmp="$(mktemp)"
@@ -59,6 +87,10 @@ update_route_status() {
 
   printf '{"route_id":"%s","to":"%s","status":"%s","updated":"%s"}\n' \
     "$(json_escape "$route")" "$(json_escape "$role")" "$(json_escape "$status")" "$(json_escape "$updated")" >> "$ROUTES_JSONL"
+  "$ROOT/scripts/route-db.sh" update-status "$route" "$status" \
+    --actor dispatch-routes \
+    --note "dispatch status update for $role" \
+    --updated "$updated" >/dev/null
 }
 
 route_report_for() {
@@ -67,7 +99,7 @@ route_report_for() {
   awk -v id="$route" '
     /^## / { in_route = ($2 == id) }
     in_route && /^Completion report:/ { sub(/^Completion report:[[:space:]]*/, ""); print; exit }
-  ' "$ROOT/.agents/inbox/$role.md"
+  ' "$ROOT/agent-control/inbox/$role.md"
 }
 
 route_has_tbd_fields() {
@@ -78,7 +110,7 @@ route_has_tbd_fields() {
     in_route && /^## / { in_route = 0 }
     in_route && ($0 == "TBD" || $0 == "- TBD" || $0 ~ /Draft route/) { found = 1 }
     END { exit found ? 0 : 1 }
-  ' "$ROOT/.agents/inbox/$role.md"
+  ' "$ROOT/agent-control/inbox/$role.md"
 }
 
 current_route_status() {
@@ -87,7 +119,7 @@ current_route_status() {
   awk -v id="$route" '
     /^## / { in_route = ($2 == id) }
     in_route && /^Status:/ { print $2; exit }
-  ' "$ROOT/.agents/inbox/$role.md"
+  ' "$ROOT/agent-control/inbox/$role.md"
 }
 
 append_report_note() {
@@ -102,11 +134,84 @@ append_report_note() {
   } >> "$ROOT/$report"
 }
 
-pane_is_ready() {
+run_with_timeout() {
+  local timeout="$1"
+  shift
+  local pid
+  local watcher
+  local status
+  local timeout_flag
+
+  "$@" &
+  pid="$!"
+  timeout_flag="$(mktemp)"
+  rm -f "$timeout_flag"
+  (
+    sleep "$timeout"
+    if kill -0 "$pid" 2>/dev/null; then
+      : > "$timeout_flag"
+      kill "$pid" 2>/dev/null || true
+    fi
+  ) &
+  watcher="$!"
+
+  set +e
+  wait "$pid"
+  status="$?"
+  set -e
+  if [ -f "$timeout_flag" ]; then
+    wait "$watcher" 2>/dev/null || true
+    rm -f "$timeout_flag"
+    return 124
+  fi
+  kill "$watcher" 2>/dev/null || true
+  wait "$watcher" 2>/dev/null || true
+  rm -f "$timeout_flag"
+  return "$status"
+}
+
+send_route_message() {
   local session="$1"
   local role="$2"
-  tmux list-panes -a -F '#S:#W #{pane_current_command} #{pane_dead}' |
-    awk -v target="$session:$role" '$1 == target && $3 == "0" { found = 1 } END { exit found ? 0 : 1 }'
+  local route="$3"
+  local message="$4"
+  local buffer="agent-route-$route-$$"
+  local message_file
+
+  message_file="$(mktemp)"
+  printf '%s' "$message" > "$message_file"
+  if ! run_with_timeout "$SEND_TIMEOUT" tmux load-buffer -b "$buffer" "$message_file"; then
+    rm -f "$message_file"
+    tmux delete-buffer -b "$buffer" 2>/dev/null || true
+    return 124
+  fi
+  rm -f "$message_file"
+
+  if ! run_with_timeout "$SEND_TIMEOUT" tmux paste-buffer -d -b "$buffer" -t "$session:$role"; then
+    tmux delete-buffer -b "$buffer" 2>/dev/null || true
+    return 124
+  fi
+
+  if [ "$SUBMIT_DELAY" != "0" ] && [ "$SUBMIT_DELAY" != "0.0" ]; then
+    sleep "$SUBMIT_DELAY"
+  fi
+
+  if ! run_with_timeout "$SEND_TIMEOUT" tmux send-keys -t "$session:$role" C-m; then
+    return 124
+  fi
+
+  sleep 0.2
+  run_with_timeout "$SEND_TIMEOUT" tmux send-keys -t "$session:$role" Tab
+}
+
+role_session_ready() {
+  local session="$1"
+  local role="$2"
+  "$ROOT/scripts/wait-for-agent-sessions.sh" "$session" \
+    --roles "$role" \
+    --timeout 0 \
+    --interval 1 \
+    --quiet >/dev/null 2>&1
 }
 
 wait_for_ack() {
@@ -120,6 +225,9 @@ wait_for_ack() {
       in-progress|done)
         return 0
         ;;
+      acknowledged)
+        return 0
+        ;;
       blocked|cancelled)
         return 1
         ;;
@@ -130,7 +238,7 @@ wait_for_ack() {
   return 2
 }
 
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   role="$(basename "$inbox" .md)"
   prompt="$(prompt_for_role "$role")"
   awk -v role="$role" -v prompt="$prompt" '
@@ -145,8 +253,8 @@ done | while IFS=$'\t' read -r role route prompt title; do
     continue
   fi
   report="$(route_report_for "$route" "$role")"
-  report="${report:-.agents/routes/$route.md}"
-  message="Route $route queued: $title. Use $prompt, .agents/inbox/$role.md, .agents/handoffs.md, and $report. Read the route report, claim the route with ./scripts/claim-route.sh $route $role, complete role-specific work from shared files, write results to owned outputs and $report, create handoffs when another role is needed, then run ./scripts/complete-route.sh $route $role \"<summary>\" --report $report. If blocked, run ./scripts/block-route.sh $route $role \"<reason>\" --report $report and name the needed owner."
+  report="${report:-agent-control/routes/$route.md}"
+  message="Route $route queued: $title. Use $prompt, agent-control/inbox/$role.md, agent-control/handoffs.md, and $report. Read the route report, claim the route with ./scripts/claim-route.sh $route $role, complete role-specific work from shared files, write results to owned outputs and $report, create handoffs when another role is needed, then run ./scripts/complete-route.sh $route $role \"<summary>\" --report $report. If blocked, run ./scripts/block-route.sh $route $role \"<reason>\" --report $report and name the needed owner."
   if [ "$MODE" = "--send" ]; then
     if route_has_tbd_fields "$route" "$role"; then
       printf "Route %s for %s contains TBD fields; blocking instead of dispatching.\n" "$route" "$role" >&2
@@ -158,9 +266,16 @@ done | while IFS=$'\t' read -r role route prompt title; do
       "$ROOT/scripts/block-route.sh" "$route" dispatch-routes "tmux session not found: $SESSION" --report "$report" >/dev/null
       continue
     fi
-    if ! pane_is_ready "$SESSION" "$role"; then
-      printf "Pane not ready for route %s: %s:%s\n" "$route" "$SESSION" "$role" >&2
-      "$ROOT/scripts/block-route.sh" "$route" dispatch-routes "tmux pane not ready: $SESSION:$role" --report "$report" >/dev/null
+    if ! role_session_ready "$SESSION" "$role"; then
+      printf "Role session not ready for route %s: %s:%s; leaving queued\n" "$route" "$SESSION" "$role" >&2
+      "$ROOT/scripts/update-agent-state.sh" "$role" \
+        --session "$SESSION" \
+        --window "$role" \
+        --status launching \
+        --active-route none \
+        --target-project "$TARGET_PATH" \
+        --pid-or-command "tmux:$SESSION:$role" \
+        --process-status starting
       continue
     fi
     update_route_status "$route" "$role" "dispatching" "$report"
@@ -172,8 +287,22 @@ done | while IFS=$'\t' read -r role route prompt title; do
       --target-project "$TARGET_PATH" \
       --pid-or-command "tmux:$SESSION:$role" \
       --process-status alive
-    tmux send-keys -t "$SESSION:$role" -l "$message"
-    tmux send-keys -t "$SESSION:$role" C-m
+    if ! send_route_message "$SESSION" "$role" "$route" "$message"; then
+      capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -40 2>/dev/null || true)"
+      printf "Route %s tmux delivery timeout for %s after %ss\n" "$route" "$role" "$SEND_TIMEOUT" >&2
+      append_report_note "$report" "Dispatch failure" "tmux message delivery timed out after ${SEND_TIMEOUT}s. Pane tail:\n\n\`\`\`text\n$capture\n\`\`\`"
+      "$ROOT/scripts/update-agent-state.sh" "$role" \
+        --session "$SESSION" \
+        --window "$role" \
+        --status blocked \
+        --active-route "$route" \
+        --blocked-reason "tmux delivery timeout after ${SEND_TIMEOUT}s" \
+        --target-project "$TARGET_PATH" \
+        --pid-or-command "tmux:$SESSION:$role" \
+        --process-status unknown
+      "$ROOT/scripts/block-route.sh" "$route" dispatch-routes "tmux delivery timeout after ${SEND_TIMEOUT}s for $SESSION:$role" --report "$report" >/dev/null
+      continue
+    fi
     "$ROOT/scripts/log-event.sh" route-dispatched dispatch-routes "Dispatched $route to $role" "$message" "$route"
     update_route_status "$route" "$role" "dispatched" "$report"
     ack_status=0
@@ -187,18 +316,18 @@ done | while IFS=$'\t' read -r role route prompt title; do
         ;;
       2)
         capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -40 2>/dev/null || true)"
-        printf "Route %s ack timeout for %s after %ss\n" "$route" "$role" "$ACK_TIMEOUT" >&2
-        append_report_note "$report" "Dispatch failure" "Ack timeout after ${ACK_TIMEOUT}s. Pane tail:\n\n\`\`\`text\n$capture\n\`\`\`"
+        printf "Route %s still awaiting claim by %s after %ss; leaving dispatched for stale recovery\n" "$route" "$role" "$ACK_TIMEOUT" >&2
+        append_report_note "$report" "Dispatch acknowledgement pending" "No route claim after ${ACK_TIMEOUT}s. Route remains dispatched so the role can still claim it; stale-route recovery owns retry/block decisions. Pane tail:\n\n\`\`\`text\n$capture\n\`\`\`"
         "$ROOT/scripts/update-agent-state.sh" "$role" \
           --session "$SESSION" \
           --window "$role" \
-          --status blocked \
+          --status dispatching \
           --active-route "$route" \
-          --blocked-reason "ack timeout after ${ACK_TIMEOUT}s" \
+          --blocked-reason none \
           --target-project "$TARGET_PATH" \
           --pid-or-command "tmux:$SESSION:$role" \
-          --process-status unknown
-        "$ROOT/scripts/block-route.sh" "$route" dispatch-routes "ack timeout after ${ACK_TIMEOUT}s for $SESSION:$role" --report "$report" >/dev/null
+          --process-status alive
+        "$ROOT/scripts/log-event.sh" route-ack-pending dispatch-routes "Route $route not claimed after ${ACK_TIMEOUT}s; left dispatched" "" "$route"
         ;;
     esac
   else

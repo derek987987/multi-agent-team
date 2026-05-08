@@ -103,6 +103,7 @@ rsync -a \
   --exclude ".DS_Store" \
   "$ROOT/" "$test_root/"
 chmod +x "$test_root"/scripts/*.sh
+"$test_root/scripts/reset-agent-team-state.sh" >/tmp/agent-office-reset.out
 
 "$test_root/scripts/update-agent-state.sh" frontend \
   --status busy \
@@ -173,14 +174,14 @@ assert status == 201, status
 assert payload["route_id"] == "R001", payload
 assert payload["to"] == "orchestrator", payload
 assert payload["from"] == "human-ui", payload
-assert payload["report"] == ".agents/routes/R001.md", payload
+assert payload["report"] == "agent-control/routes/R001.md", payload
 with open(out, "w", encoding="utf-8") as handle:
     json.dump(payload, handle)
 
 status, payload = post({"role": "frontend", "message": "Follow-up prompt should use the next sequential route id."})
 assert status == 201, status
 assert payload["route_id"] == "R002", payload
-assert payload["report"] == ".agents/routes/R002.md", payload
+assert payload["report"] == "agent-control/routes/R002.md", payload
 
 for bad_payload in ({"role": "frontend", "message": "   "}, {"role": "not-a-role", "message": "hello"}):
     request = urllib.request.Request(
@@ -197,10 +198,10 @@ for bad_payload in ({"role": "frontend", "message": "   "}, {"role": "not-a-role
         raise AssertionError(f"expected HTTP 400 for {bad_payload!r}")
 PY
 
-report="$(cat "$test_root/.agents/routes/R001.md")"
-inbox="$(cat "$test_root/.agents/inbox/orchestrator.md")"
-routes_state="$(cat "$test_root/.agents/state/routes.jsonl")"
-events_state="$(cat "$test_root/.agents/events.jsonl")"
+report="$(cat "$test_root/agent-control/routes/R001.md")"
+inbox="$(cat "$test_root/agent-control/inbox/orchestrator.md")"
+routes_state="$(cat "$test_root/agent-control/state/routes.jsonl")"
+events_state="$(cat "$test_root/agent-control/events.jsonl")"
 assert_contains "$report" "From: human-ui" "ui route report"
 assert_contains "$report" "To: orchestrator" "ui route report"
 assert_contains "$report" "Selected role: frontend" "ui route report"
@@ -212,7 +213,7 @@ assert_contains "$routes_state" "\"to\":\"orchestrator\"" "routes structured sta
 assert_contains "$events_state" "\"actor\":\"human-ui\"" "events structured state"
 
 structured_output="$("$test_root/scripts/validate-structured-state.sh")"
-assert_contains "$structured_output" ".agents/state/routes.jsonl valid" "agent office structured state"
+assert_contains "$structured_output" "agent-control/state/routes.jsonl valid" "agent office structured state"
 route_output="$("$test_root/scripts/validate-route-state.sh")"
 assert_contains "$route_output" "Route state validation passed." "agent office route state"
 

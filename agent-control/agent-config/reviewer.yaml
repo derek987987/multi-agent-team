@@ -1,22 +1,22 @@
 role: reviewer
-output_schema: .agents/schemas/reviewer-output.md
+output_schema: agent-control/schemas/reviewer-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/reviewer.md
-  - .agents/skills/reviewer.md
-  - .agents/memory/reviewer.md
-  - .agents/schemas/reviewer-output.md
+  - agent-control/prompts/reviewer.md
+  - agent-control/skills/reviewer.md
+  - agent-control/memory/reviewer.md
+  - agent-control/schemas/reviewer-output.md
 allowed_paths:
-  - .agents/review-report.md
-  - .agents/agent-log/reviewer.md
+  - agent-control/review-report.md
+  - agent-control/agent-log/reviewer.md
 required_checks:
   - ./scripts/check-done.sh
 owned_outputs:
-  - .agents/review-report.md
-  - .agents/agent-log/reviewer.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/review-report.md
+  - agent-control/agent-log/reviewer.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - cto
@@ -30,13 +30,13 @@ handoff_targets:
   - docs
   - integration
 reads_before_claim:
-  - .agents/inbox/reviewer.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/reviewer.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

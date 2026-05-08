@@ -17,7 +17,7 @@ No workflow behavior was changed in this pass.
 
 ## Current Strengths
 
-- The workflow already has a clear supervisor-style control plane: Orchestrator receives human work and routes via `.agents/inbox/<role>.md`, `.agents/handoffs.md`, `.agents/workflow-state.md`, and `.agents/state/*.jsonl`.
+- The workflow already has a clear supervisor-style control plane: Orchestrator receives human work and routes via `agent-control/inbox/<role>.md`, `agent-control/handoffs.md`, `agent-control/workflow-state.md`, and `agent-control/state/*.jsonl`.
 - Roles are centralized in `scripts/agent-roles.sh`, and startup scripts auto-launch role-specific Codex sessions.
 - `scripts/dispatch-routes.sh` now sends literal text and `C-m`, which directly addresses the earlier failure where prompt text appeared in the pane but was not submitted.
 - Role prompts, skills, memory files, ownership files, and quality gates exist for 17 roles.
@@ -65,7 +65,7 @@ Add a dispatch acknowledgement loop:
 1. Before send: verify tmux window exists and contains a live Codex process.
 2. Send route prompt plus newline.
 3. Mark route as `dispatching`, not `dispatched`.
-4. Poll `.agents/state/routes.jsonl` or inbox status for `in-progress` from `claim-route.sh`.
+4. Poll `agent-control/state/routes.jsonl` or inbox status for `in-progress` from `claim-route.sh`.
 5. If not claimed within a short timeout, capture the pane tail, write a blocked dispatch event, and requeue/escalate.
 
 ### F002 - Route Schema Is Too Thin For Reliable Handoffs
@@ -74,7 +74,7 @@ Severity: critical
 
 Evidence:
 
-- `.agents/route-schema.md` only defines status, from/to, task, meeting/decision, created, instruction, output, validation, and response.
+- `agent-control/route-schema.md` only defines status, from/to, task, meeting/decision, created, instruction, output, validation, and response.
 - Missing fields include priority, predecessor route, downstream owner, attempt count, route depth, due/stale deadlines, target project path, branch/worktree, files/modules, source artifacts, output schema, report path, validation commands, risk flags, and next owner.
 
 Impact:
@@ -147,7 +147,7 @@ Evidence:
 - It does not require the claiming actor to match the route `To:` role.
 - It can claim from any prior state.
 - `complete-route.sh` marks done without checking done criteria, output files, response content, or role schema usage.
-- Handoff status can become `accepted`, but `.agents/route-schema.md` route statuses do not include that value.
+- Handoff status can become `accepted`, but `agent-control/route-schema.md` route statuses do not include that value.
 
 Impact:
 
@@ -170,7 +170,7 @@ Severity: major
 Evidence:
 
 - `scripts/validate-structured-state.sh` checks whether JSONL files are syntactically valid JSON objects.
-- It does not validate schema, required fields, status consistency, timestamp ordering, route ID uniqueness, or parity between markdown files and `.agents/state/routes.jsonl`.
+- It does not validate schema, required fields, status consistency, timestamp ordering, route ID uniqueness, or parity between markdown files and `agent-control/state/routes.jsonl`.
 
 Impact:
 
@@ -195,7 +195,7 @@ Severity: major
 
 Evidence:
 
-- `.agents/company/agent-profiles.jsonl` contains role, display name, skills, paths, status, and load.
+- `agent-control/company/agent-profiles.jsonl` contains role, display name, skills, paths, status, and load.
 - Status/load are static text, not live telemetry.
 - Missing live fields: tmux session/window, process status, last_seen_at, last_route_id, current_task, active_branch, max_parallel_routes, capabilities by project type, unavailable reason, and recovery owner.
 
@@ -205,7 +205,7 @@ Orchestrator cannot reliably route based on real availability or health.
 
 Recommendation:
 
-Add `.agents/state/agents.jsonl` as live telemetry:
+Add `agent-control/state/agents.jsonl` as live telemetry:
 
 - `role`
 - `session`
@@ -255,7 +255,7 @@ Impact:
 
 Recommendation:
 
-Add these keys to every `.agents/agent-config/<role>.yaml`:
+Add these keys to every `agent-control/agent-config/<role>.yaml`:
 
 - `output_schema`
 - `owned_outputs`
@@ -304,12 +304,12 @@ Evidence:
 Completion evidence may appear in:
 
 - inbox `Response`
-- `.agents/handoffs.md`
+- `agent-control/handoffs.md`
 - role-owned report files
-- `.agents/agent-log/<role>.md`
-- `.agents/events.jsonl`
-- `.agents/state/routes.jsonl`
-- `.agents/task-board.md`
+- `agent-control/agent-log/<role>.md`
+- `agent-control/events.jsonl`
+- `agent-control/state/routes.jsonl`
+- `agent-control/task-board.md`
 
 Impact:
 
@@ -319,7 +319,7 @@ Recommendation:
 
 Add one required route report per completed route:
 
-`.agents/routes/R000.md`
+`agent-control/routes/R000.md`
 
 Schema:
 
@@ -416,14 +416,14 @@ Store canonical route data as JSONL first, then render markdown inbox views from
 
 Recommended canonical file:
 
-`.agents/state/route-events.jsonl`
+`agent-control/state/route-events.jsonl`
 
 Derived views:
 
-- `.agents/inbox/<role>.md`
-- `.agents/handoffs.md`
-- `.agents/workflow-state.md`
-- `.agents/routes/R000.md`
+- `agent-control/inbox/<role>.md`
+- `agent-control/handoffs.md`
+- `agent-control/workflow-state.md`
+- `agent-control/routes/R000.md`
 
 ### Dispatch/Ack Protocol
 
@@ -432,11 +432,11 @@ Dispatcher should send:
 ```text
 Route R000 ready.
 Run: ./scripts/claim-route.sh R000 <role>
-Then read: .agents/routes/R000.md
-When complete: ./scripts/complete-route.sh R000 <role> --report .agents/routes/R000.md
+Then read: agent-control/routes/R000.md
+When complete: ./scripts/complete-route.sh R000 <role> --report agent-control/routes/R000.md
 ```
 
-The route body should live in `.agents/routes/R000.md`, not only in the tmux prompt. Tmux prompt becomes a notification, not the source of truth.
+The route body should live in `agent-control/routes/R000.md`, not only in the tmux prompt. Tmux prompt becomes a notification, not the source of truth.
 
 ### Reporting Protocol
 
@@ -476,7 +476,7 @@ Health should inspect:
 | --- | --- | --- |
 | Typed handoff metadata | Markdown route fields exist | no enforced typed route envelope or local schema validation |
 | Handoff input filtering/history control | Context map exists | no per-route context packet that filters what receiver must read |
-| Tracing spans for agents/tools/handoffs | `.agents/events.jsonl` exists | no trace/span IDs, no parent-child route graph, no ack/complete spans |
+| Tracing spans for agents/tools/handoffs | `agent-control/events.jsonl` exists | no trace/span IDs, no parent-child route graph, no ack/complete spans |
 | Runs and threads | tmux sessions and files exist | no run ID/thread ID for a route execution attempt |
 | Agent introspection schemas | agent profiles and configs exist | no live schemas/capabilities/status endpoint or state file |
 | Termination/stop conditions | policy and stale checker exist | no enforced max turns/actions/retries at route lifecycle level |
@@ -489,7 +489,7 @@ Health should inspect:
 
 ### P0 - Make Routing Reliable
 
-1. Add `.agents/routes/` route report/envelope files.
+1. Add `agent-control/routes/` route report/envelope files.
 2. Extend route schema with typed fields.
 3. Update `route-agent.sh` to require real instruction/output/validation fields unless `--draft`.
 4. Add dispatch ack loop and pane capture on failure.
@@ -500,19 +500,19 @@ Health should inspect:
 
 1. Expand every agent config with output schema, handoff targets, state fields, stale timeout, max active routes, and escalation owner.
 2. Normalize role IDs across docs, prompts, scripts, task examples, and workflow state.
-3. Add `.agents/state/agents.jsonl` live telemetry.
+3. Add `agent-control/state/agents.jsonl` live telemetry.
 4. Add Integration output schema.
 
-Implementation status: completed in the P1 follow-up. Every `.agents/agent-config/<role>.yaml` now carries the required attribute set, active workflow docs use canonical role IDs, `.agents/state/agents.jsonl` plus `scripts/update-agent-state.sh` provide live role telemetry, and `.agents/schemas/integration-output.md` defines Integration completion output.
+Implementation status: completed in the P1 follow-up. Every `agent-control/agent-config/<role>.yaml` now carries the required attribute set, active workflow docs use canonical role IDs, `agent-control/state/agents.jsonl` plus `scripts/update-agent-state.sh` provide live role telemetry, and `agent-control/schemas/integration-output.md` defines Integration completion output.
 
 ### P2 - Make Reporting Smooth
 
-1. Require `.agents/routes/R000.md` completion reports.
+1. Require `agent-control/routes/R000.md` completion reports.
 2. Make `complete-route.sh` append summary and output refs to the route report.
 3. Add `scripts/route-status.sh R000` to show current owner, status, evidence, and next action.
 4. Update Orchestrator status requests to read route reports first.
 
-Implementation status: completed in the P2 follow-up. Completion now supports repeated `--output-ref` values, writes inbox/handoff response pointers to the route report, `scripts/route-status.sh` prints canonical status and next action from `.agents/routes/R000.md`, and Orchestrator status guidance reads route reports before summarizing secondary files.
+Implementation status: completed in the P2 follow-up. Completion now supports repeated `--output-ref` values, writes inbox/handoff response pointers to the route report, `scripts/route-status.sh` prints canonical status and next action from `agent-control/routes/R000.md`, and Orchestrator status guidance reads route reports before summarizing secondary files.
 
 ### P3 - Make Recovery Automatic
 
@@ -530,4 +530,4 @@ The local workflow is strong as a control-plane design, but it still treats rout
 
 Most important change:
 
-Make `.agents/routes/R000.md` plus `.agents/state/route-events.jsonl` the canonical route contract, add dispatch acknowledgements, and enforce claim/complete state transitions.
+Make `agent-control/routes/R000.md` plus `agent-control/state/route-events.jsonl` the canonical route contract, add dispatch acknowledgements, and enforce claim/complete state transitions.

@@ -11,7 +11,7 @@ Production agent work follows these policies in addition to role prompts.
 ## Guardrails
 
 - Stay inside role ownership unless a task or handoff expands scope.
-- Record architecture, product, security, and release-risk decisions in `.agents/decisions.md`.
+- Record architecture, product, security, and release-risk decisions in `agent-control/decisions.md`.
 - Run role checks before marking a route complete.
 - Never commit secrets, credentials, private keys, or environment-specific tokens.
 - Escalate when a route would exceed budget, cross ownership, or require human approval.

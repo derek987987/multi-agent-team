@@ -182,6 +182,11 @@ chmod +x "$TEAM_DIR"/scripts/*.sh
 "$TEAM_DIR/scripts/reset-agent-team-state.sh" >/dev/null
 "$TEAM_DIR/scripts/set-project-target.sh" "$PROJECT_DIR" "$MODE" >/dev/null
 "$TEAM_DIR/scripts/validate-agent-workflow.sh" >/dev/null
+OFFICE_URL="$("$TEAM_DIR/scripts/start-agent-office-dashboard.sh" --print-url "${AGENT_OFFICE_PORT:-8765}")"
+START_COMMAND="./scripts/start-agent-team.sh"
+if [ "$WORKTREES" -eq 1 ]; then
+  START_COMMAND="./scripts/start-agent-team-worktrees.sh"
+fi
 
 cat <<EOF
 Created project agent team.
@@ -200,7 +205,11 @@ Session:
 
 Next:
   cd "$TEAM_DIR"
-  ./scripts/start-agent-team.sh "$SESSION"
+  $START_COMMAND "$SESSION"
+
+Agent Office:
+  Starts automatically in the tmux office window.
+  $OFFICE_URL
 EOF
 
 if [ "$START" -eq 1 ]; then

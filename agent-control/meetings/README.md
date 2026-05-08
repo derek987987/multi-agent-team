@@ -6,7 +6,7 @@ They are the functional layer behind the future visual meeting room.
 ## Lifecycle
 
 1. `scripts/create-meeting.sh M001 "Title" orchestrator product cto`
-2. Agents add notes, decisions, and open questions to `.agents/meetings/M001.md`.
+2. Agents add notes, decisions, and open questions to `agent-control/meetings/M001.md`.
 3. `scripts/close-meeting.sh M001 "Decision summary" "Action items"`
 4. Orchestrator or PM converts action items into task-board entries and routes.
 

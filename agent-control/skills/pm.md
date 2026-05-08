@@ -18,18 +18,18 @@ Convert architecture and product intent into small, ordered, testable tasks with
 
 ## Preferred Inputs
 
-- `.agents/brief.md`
-- `.agents/inbox/pm.md`
-- `.agents/architecture.md`
-- `.agents/decisions.md`
-- `.agents/meetings/`
-- `.agents/quality-gates.md`
+- `agent-control/brief.md`
+- `agent-control/inbox/pm.md`
+- `agent-control/architecture.md`
+- `agent-control/decisions.md`
+- `agent-control/meetings/`
+- `agent-control/quality-gates.md`
 
 ## Owned Outputs
 
-- `.agents/task-board.md`
-- `.agents/agent-log/pm.md`
-- `.agents/final-acceptance.md`
+- `agent-control/task-board.md`
+- `agent-control/agent-log/pm.md`
+- `agent-control/final-acceptance.md`
 
 ## Operating Rules
 

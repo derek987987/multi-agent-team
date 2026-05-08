@@ -19,20 +19,20 @@ Make sure the team builds the right thing. Convert rough goals into user value, 
 ## Preferred Inputs
 
 - human idea or change request
-- `.agents/brief.md`
-- `.agents/product-requirements.md`
-- `.agents/change-request.md`
-- `.agents/meetings/`
-- `.agents/approvals.jsonl`
-- `.agents/workflow-state.md`
-- `.agents/task-board.md`
+- `agent-control/brief.md`
+- `agent-control/product-requirements.md`
+- `agent-control/change-request.md`
+- `agent-control/meetings/`
+- `agent-control/approvals.jsonl`
+- `agent-control/workflow-state.md`
+- `agent-control/task-board.md`
 
 ## Owned Outputs
 
-- `.agents/product-requirements.md`
-- proposed updates to `.agents/brief.md`
-- product decision entries in `.agents/decisions.md`
-- `.agents/agent-log/product.md`
+- `agent-control/product-requirements.md`
+- proposed updates to `agent-control/brief.md`
+- product decision entries in `agent-control/decisions.md`
+- `agent-control/agent-log/product.md`
 
 ## Productivity Defaults
 
@@ -50,4 +50,4 @@ Make sure the team builds the right thing. Convert rough goals into user value, 
 - User value and non-goals are explicit.
 - Acceptance risks are recorded.
 - Required follow-up routes are queued.
-- Human approval needs are visible in `.agents/workflow-state.md`.
+- Human approval needs are visible in `agent-control/workflow-state.md`.

@@ -12,20 +12,20 @@ Use this only when you intentionally want CTO-led routing instead of the orchest
 
 Steps:
 
-1. Add your request to `.agents/change-request.md`.
-2. Ask the CTO agent to run `.agents/prompts/change-router-cto.md`.
-3. Ask the PM agent to run `.agents/prompts/change-router-pm.md` if the CTO notes that task-board updates are needed.
+1. Add your request to `agent-control/change-request.md`.
+2. Ask the CTO agent to run `agent-control/prompts/change-router-cto.md`.
+3. Ask the PM agent to run `agent-control/prompts/change-router-pm.md` if the CTO notes that task-board updates are needed.
 4. Resume implementation agents only after the task board is updated.
 
 Human prompt:
 
 ```text
-I added a change request to .agents/change-request.md.
+I added a change request to agent-control/change-request.md.
 
 Act as CTO change router.
-Use .agents/prompts/change-router-cto.md.
+Use agent-control/prompts/change-router-cto.md.
 
-Classify the change, update the necessary source-of-truth docs, and write the PM instruction in .agents/agent-log/cto.md.
+Classify the change, update the necessary source-of-truth docs, and write the PM instruction in agent-control/agent-log/cto.md.
 Do not implement code.
 ```
 
@@ -35,9 +35,9 @@ PM follow-up prompt:
 The CTO routed a change request.
 
 Act as PM change router.
-Use .agents/prompts/change-router-pm.md.
+Use agent-control/prompts/change-router-pm.md.
 
-Update .agents/task-board.md with concrete tasks, owners, dependencies, acceptance criteria, and validation commands.
+Update agent-control/task-board.md with concrete tasks, owners, dependencies, acceptance criteria, and validation commands.
 Do not implement code.
 ```
 
@@ -50,7 +50,7 @@ If you want to prompt only one agent, use the orchestrator window.
 Human prompt:
 
 ```text
-Use .agents/prompts/orchestrator.md.
+Use agent-control/prompts/orchestrator.md.
 
 Request:
 <describe the change, bug, feature modification, or status question>
@@ -60,12 +60,12 @@ Please classify it, update the suitable workflow files, route the work to the ri
 
 What the orchestrator should do:
 
-- update `.agents/change-request.md` when the request is a change
-- update `.agents/brief.md` when product behavior or scope changes
-- update `.agents/decisions.md` when a tradeoff or approval record is needed
-- update `.agents/task-board.md` for simple obvious task changes
-- create `.agents/handoffs.md` entries when CTO, PM, implementation, or validation agents need to act
-- write a routing summary to `.agents/agent-log/orchestrator.md`
+- update `agent-control/change-request.md` when the request is a change
+- update `agent-control/brief.md` when product behavior or scope changes
+- update `agent-control/decisions.md` when a tradeoff or approval record is needed
+- update `agent-control/task-board.md` for simple obvious task changes
+- create `agent-control/handoffs.md` entries when CTO, PM, implementation, or validation agents need to act
+- write a routing summary to `agent-control/agent-log/orchestrator.md`
 
 Important limitation:
 
@@ -77,12 +77,12 @@ This is the recommended path when you want minimal prompting.
 
 | Situation | Primary File | Supporting Files |
 | --- | --- | --- |
-| Product/spec change | `.agents/brief.md` | `.agents/decisions.md`, `.agents/architecture.md`, `.agents/task-board.md` |
-| Feature addition/removal | `.agents/brief.md` | `.agents/decisions.md`, `.agents/task-board.md` |
-| Architecture change | `.agents/architecture.md` | `.agents/decisions.md`, `.agents/task-board.md` |
-| New bug | `.agents/task-board.md` | `.agents/validation-report.md`, `.agents/agent-log/<role>.md` |
-| Cross-agent dependency | `.agents/handoffs.md` | `.agents/task-board.md` |
-| Validation rule change | `.agents/quality-gates.md` | `.agents/validation-report.md` |
+| Product/spec change | `agent-control/brief.md` | `agent-control/decisions.md`, `agent-control/architecture.md`, `agent-control/task-board.md` |
+| Feature addition/removal | `agent-control/brief.md` | `agent-control/decisions.md`, `agent-control/task-board.md` |
+| Architecture change | `agent-control/architecture.md` | `agent-control/decisions.md`, `agent-control/task-board.md` |
+| New bug | `agent-control/task-board.md` | `agent-control/validation-report.md`, `agent-control/agent-log/<role>.md` |
+| Cross-agent dependency | `agent-control/handoffs.md` | `agent-control/task-board.md` |
+| Validation rule change | `agent-control/quality-gates.md` | `agent-control/validation-report.md` |
 
 ## Scenario 1 - Change The Specification
 
@@ -90,10 +90,10 @@ Use this when the product goal, requirements, user behavior, non-goals, or defin
 
 Steps:
 
-1. Update `.agents/brief.md`.
-2. Add a decision record to `.agents/decisions.md`.
-3. Ask the CTO agent to review impact and update `.agents/architecture.md`.
-4. Ask the PM agent to update `.agents/task-board.md`.
+1. Update `agent-control/brief.md`.
+2. Add a decision record to `agent-control/decisions.md`.
+3. Ask the CTO agent to review impact and update `agent-control/architecture.md`.
+4. Ask the PM agent to update `agent-control/task-board.md`.
 5. Pause affected implementation tasks until ownership and validation are clear.
 6. Resume implementation agents only after the updated task board is reviewed.
 
@@ -122,15 +122,15 @@ The project specification changed.
 
 Read:
 - AGENTS.md
-- .agents/brief.md
-- .agents/sop.md
-- .agents/roles.md
-- .agents/decisions.md
-- .agents/architecture.md
-- .agents/task-board.md
+- agent-control/brief.md
+- agent-control/sop.md
+- agent-control/roles.md
+- agent-control/decisions.md
+- agent-control/architecture.md
+- agent-control/task-board.md
 
-Update .agents/architecture.md if needed.
-Record new tradeoffs in .agents/decisions.md.
+Update agent-control/architecture.md if needed.
+Record new tradeoffs in agent-control/decisions.md.
 Identify affected modules, risks, task ownership changes, and validation changes.
 Do not implement code.
 ```
@@ -142,15 +142,15 @@ The project specification changed.
 
 Read:
 - AGENTS.md
-- .agents/brief.md
-- .agents/sop.md
-- .agents/roles.md
-- .agents/architecture.md
-- .agents/decisions.md
-- .agents/task-board.md
-- .agents/quality-gates.md
+- agent-control/brief.md
+- agent-control/sop.md
+- agent-control/roles.md
+- agent-control/architecture.md
+- agent-control/decisions.md
+- agent-control/task-board.md
+- agent-control/quality-gates.md
 
-Update .agents/task-board.md:
+Update agent-control/task-board.md:
 - add new tasks
 - update affected tasks
 - mark obsolete tasks
@@ -168,11 +168,11 @@ Use this when an existing feature should behave differently, gain a small capabi
 
 Steps:
 
-1. If user-facing behavior changes, update `.agents/brief.md`.
-2. If the change creates a tradeoff or affects architecture, add `.agents/decisions.md`.
-3. Add or update tasks in `.agents/task-board.md`.
+1. If user-facing behavior changes, update `agent-control/brief.md`.
+2. If the change creates a tradeoff or affects architecture, add `agent-control/decisions.md`.
+3. Add or update tasks in `agent-control/task-board.md`.
 4. Check whether the change crosses ownership boundaries.
-5. If yes, create a handoff in `.agents/handoffs.md`.
+5. If yes, create a handoff in `agent-control/handoffs.md`.
 6. Ask the assigned implementation agent to work only on the updated task.
 
 Implementation prompt:
@@ -182,11 +182,11 @@ Feature behavior changed for task <TASK_ID>.
 
 Read:
 - AGENTS.md
-- .agents/brief.md
-- .agents/architecture.md
-- .agents/task-board.md
-- .agents/handoffs.md
-- .agents/quality-gates.md
+- agent-control/brief.md
+- agent-control/architecture.md
+- agent-control/task-board.md
+- agent-control/handoffs.md
+- agent-control/quality-gates.md
 
 Only work on <TASK_ID>.
 Keep edits inside the assigned files/modules.
@@ -200,8 +200,8 @@ Use this when validation, a user, or an agent finds incorrect behavior.
 
 Steps:
 
-1. Add the bug to `.agents/validation-report.md` if it came from validation.
-2. Add a bug-fix task to `.agents/task-board.md`.
+1. Add the bug to `agent-control/validation-report.md` if it came from validation.
+2. Add a bug-fix task to `agent-control/task-board.md`.
 3. Assign an owner and file/module boundaries.
 4. Add reproduction steps and validation commands.
 5. Ask the owner agent to fix only that bug.
@@ -246,9 +246,9 @@ A bug-fix task was added: <TASK_ID>.
 
 Read:
 - AGENTS.md
-- .agents/task-board.md
-- .agents/validation-report.md
-- .agents/quality-gates.md
+- agent-control/task-board.md
+- agent-control/validation-report.md
+- agent-control/quality-gates.md
 
 Only work on <TASK_ID>.
 Reproduce the bug if possible.
@@ -265,9 +265,9 @@ Validate bug fix <TASK_ID>.
 
 Read:
 - AGENTS.md
-- .agents/task-board.md
-- .agents/validation-report.md
-- .agents/quality-gates.md
+- agent-control/task-board.md
+- agent-control/validation-report.md
+- agent-control/quality-gates.md
 
 Check:
 - the bug is fixed
@@ -275,7 +275,7 @@ Check:
 - relevant validation commands pass
 - unrelated behavior was not changed
 
-Update .agents/validation-report.md with evidence and remaining findings.
+Update agent-control/validation-report.md with evidence and remaining findings.
 ```
 
 ## Scenario 4 - Cross-Agent Dependency
@@ -284,10 +284,10 @@ Use this when one agent needs another agent to change its owned files/modules.
 
 Steps:
 
-1. Add a handoff to `.agents/handoffs.md`.
+1. Add a handoff to `agent-control/handoffs.md`.
 2. Do not let the requesting agent edit the receiving agent's files.
 3. Receiving agent marks the handoff `accepted`, `blocked`, `done`, or `declined`.
-4. PM updates `.agents/task-board.md` if the handoff changes dependencies or scope.
+4. PM updates `agent-control/task-board.md` if the handoff changes dependencies or scope.
 
 Handoff example:
 
@@ -320,8 +320,8 @@ Use this when the current direction is wrong, too risky, or causing repeated con
 
 Steps:
 
-1. Mark affected tasks `blocked` in `.agents/task-board.md`.
-2. Add a decision record in `.agents/decisions.md`.
+1. Mark affected tasks `blocked` in `agent-control/task-board.md`.
+2. Add a decision record in `agent-control/decisions.md`.
 3. Ask CTO for a replan.
 4. Ask PM to rebuild the task board.
 5. Resume only after the human approves the new plan.
@@ -336,12 +336,12 @@ Reason:
 
 Read:
 - AGENTS.md
-- .agents/brief.md
-- .agents/sop.md
-- .agents/architecture.md
-- .agents/decisions.md
-- .agents/task-board.md
-- .agents/validation-report.md
+- agent-control/brief.md
+- agent-control/sop.md
+- agent-control/architecture.md
+- agent-control/decisions.md
+- agent-control/task-board.md
+- agent-control/validation-report.md
 
 Identify what should stop, what should continue, and what must change.
 Update architecture/decisions if you are the CTO.

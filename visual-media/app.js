@@ -173,7 +173,7 @@ function statusClass(agent) {
 }
 
 function agentByRole(role) {
-  return state.snapshot?.agents.find((agent) => agent.role === role) || null;
+  return state.snapshot?agent-control.find((agent) => agent.role === role) || null;
 }
 
 function routeById(routeId) {
@@ -360,11 +360,11 @@ function drawOffice(ctx, t) {
 
   ctx.fillStyle = "#202831";
   ctx.fillRect(954, 112, 146, 56);
-  drawPixelText(ctx, ".agents", 976, 125, "#74b37c", 13);
+  drawPixelText(ctx, "agent-control", 976, 125, "#74b37c", 13);
   drawPixelText(ctx, "routes", 976, 143, "#74b37c", 13);
 
   state.hitTargets = [];
-  const agents = state.snapshot?.agents || [];
+  const agents = state.snapshot?agent-control || [];
   agents.forEach((agent, index) => {
     const desk = stableDesk(agent, index);
     const selected = agent.role === state.selectedRole;
@@ -404,7 +404,7 @@ function updateStatusStrip() {
   elements.blockerCount.textContent = String(blockedRows.length + routeBlockers.length);
   elements.workflowPhase.textContent = workflow.phase || "-";
   elements.lastRefresh.textContent = formatRelative(state.snapshot?.generated_at);
-  elements.emptyState.hidden = (state.snapshot?.agents || []).some((agent) => agent.live);
+  elements.emptyState.hidden = (state.snapshot?agent-control || []).some((agent) => agent.live);
 }
 
 function refsForAgent(agent) {
@@ -417,11 +417,11 @@ function refsForAgent(agent) {
     `Profile: ${agent.profile_path || "none"}`,
     `Memory: ${agent.memory_path || "none"}`,
     `Inbox: ${agent.inbox_path || "none"}`,
-    `Telemetry: .agents/state/agents.jsonl`,
-    `Events: .agents/events.jsonl`,
+    `Telemetry: agent-control/state/agents.jsonl`,
+    `Events: agent-control/events.jsonl`,
   ];
   if (agent.active_route && agent.active_route !== "none") {
-    lines.push(`Route report: .agents/routes/${agent.active_route}.md`);
+    lines.push(`Route report: agent-control/routes/${agent.active_route}.md`);
     lines.push(`Status command: ./scripts/route-status.sh ${agent.active_route}`);
   }
   return lines.join("\n");
@@ -441,7 +441,7 @@ function eventsForAgent(agent) {
 }
 
 function updateDrawer() {
-  const agent = agentByRole(state.selectedRole) || state.snapshot?.agents[0] || null;
+  const agent = agentByRole(state.selectedRole) || state.snapshot?agent-control[0] || null;
   if (agent && state.selectedRole !== agent.role) {
     state.selectedRole = agent.role;
   }
@@ -487,7 +487,7 @@ function updateDrawer() {
 function populateRecipientSelect() {
   const current = elements.recipientSelect.value || state.selectedRole;
   elements.recipientSelect.innerHTML = "";
-  for (const agent of state.snapshot?.agents || []) {
+  for (const agent of state.snapshot?agent-control || []) {
     const option = document.createElement("option");
     option.value = agent.role;
     option.textContent = agent.display_name || agent.role;
@@ -505,7 +505,7 @@ async function loadSnapshot() {
     }
     state.snapshot = await response.json();
     if (!agentByRole(state.selectedRole)) {
-      state.selectedRole = state.snapshot.agents[0]?.role || "orchestrator";
+      state.selectedRole = state.snapshotagent-control[0]?.role || "orchestrator";
     }
     populateRecipientSelect();
     updateStatusStrip();

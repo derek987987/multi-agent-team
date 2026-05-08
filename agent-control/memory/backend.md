@@ -4,7 +4,7 @@ Use this file for durable backend conventions, known issues, API decisions, and 
 
 ## Project Conventions
 
-- Keep API contracts aligned with `.agents/architecture.md`.
+- Keep API contracts aligned with `agent-control/architecture.md`.
 - Add regression tests for bug fixes where practical.
 
 ## Known Pitfalls

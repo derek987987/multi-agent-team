@@ -12,5 +12,5 @@ changing the agent workflow.
 ## Rules
 
 - Append new project facts instead of rewriting history when possible.
-- Keep profiles aligned with `scripts/agent-roles.sh`, `.agents/skills/`, and `.agents/ownership/`.
-- Treat this directory as dashboard input, not as a replacement for `.agents/*` planning files.
+- Keep profiles aligned with `scripts/agent-roles.sh`, `agent-control/skills/`, and `agent-control/ownership/`.
+- Treat this directory as dashboard input, not as a replacement for `agent-control/*` planning files.

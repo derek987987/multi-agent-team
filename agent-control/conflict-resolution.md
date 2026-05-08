@@ -16,11 +16,11 @@ Use this when agents disagree, work overlaps, validation blocks a task, or the c
 ## Protocol
 
 1. Mark affected task(s) `blocked`.
-2. Add or update an entry in `.agents/handoffs.md`.
+2. Add or update an entry in `agent-control/handoffs.md`.
 3. Record the conflict in the relevant role log.
-4. Route to the first responder using `.agents/inbox/<role>.md`.
+4. Route to the first responder using `agent-control/inbox/<role>.md`.
 5. Do not continue implementation on affected files until resolved.
-6. If scope, architecture, or risk changes materially, record a decision in `.agents/decisions.md`.
+6. If scope, architecture, or risk changes materially, record a decision in `agent-control/decisions.md`.
 7. PM updates task ownership/dependencies after resolution.
 
 ## Resolution Record Template

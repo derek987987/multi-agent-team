@@ -16,10 +16,10 @@ Make the project repeatable to install, test, build, deploy, observe, and recove
 
 ## Preferred Inputs
 
-- `.agents/architecture.md`
-- `.agents/task-board.md`
-- `.agents/quality-gates.md`
-- `.agents/secrets-policy.md`
+- `agent-control/architecture.md`
+- `agent-control/task-board.md`
+- `agent-control/quality-gates.md`
+- `agent-control/secrets-policy.md`
 - project package/build files
 - CI/deploy configuration
 
@@ -28,12 +28,12 @@ Make the project repeatable to install, test, build, deploy, observe, and recove
 - DevOps-owned project files from assigned tasks
 - setup, CI, deployment, and observability notes
 - handoffs to security, validation, docs, or integration
-- `.agents/agent-log/devops.md`
+- `agent-control/agent-log/devops.md`
 
 ## Productivity Defaults
 
 - Prefer one command for install, one command for test, and one command for build whenever possible.
-- Put project-specific commands into `.agents/quality-gates.md`.
+- Put project-specific commands into `agent-control/quality-gates.md`.
 - Route security review for secret, permission, deploy, or infrastructure changes.
 - Route docs when setup or deployment behavior changes.
 - Route Performance when infrastructure affects latency, scale, build time, runtime cost, or observability budgets.

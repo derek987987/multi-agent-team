@@ -16,8 +16,9 @@ ROUTE_ID="$1"
 ACTOR="${2:-unknown}"
 REASON="${3:-Cancelled route $ROUTE_ID}"
 route_role=""
+UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   if grep -qE "^## $ROUTE_ID([[:space:]-]|$)" "$inbox"; then
     route_role="$(basename "$inbox" .md)"
     tmp="$(mktemp)"
@@ -30,25 +31,29 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
   fi
 done
 
-if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/.agents/handoffs.md"; then
+if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/agent-control/handoffs.md"; then
   tmp="$(mktemp)"
   awk -v id="$ROUTE_ID" '
     /^### / { in_route = ($0 ~ "^### " id "([[:space:]-]|$)") }
     in_route && /^Status:/ { print "Status: cancelled"; next }
     { print }
-  ' "$ROOT/.agents/handoffs.md" > "$tmp"
-  mv "$tmp" "$ROOT/.agents/handoffs.md"
+  ' "$ROOT/agent-control/handoffs.md" > "$tmp"
+  mv "$tmp" "$ROOT/agent-control/handoffs.md"
 fi
 
 tmp="$(mktemp)"
 awk -v id="$ROUTE_ID" 'BEGIN { FS=OFS="|" } $2 ~ "^[[:space:]]*" id "[[:space:]]*$" { $4 = " cancelled " } { print }' \
-  "$ROOT/.agents/workflow-state.md" > "$tmp"
-mv "$tmp" "$ROOT/.agents/workflow-state.md"
+  "$ROOT/agent-control/workflow-state.md" > "$tmp"
+mv "$tmp" "$ROOT/agent-control/workflow-state.md"
 
 "$ROOT/scripts/log-event.sh" route-cancelled "$ACTOR" "$REASON" "" "$ROUTE_ID"
 if [ -n "$route_role" ]; then
   "$ROOT/scripts/update-agent-state.sh" "$route_role" --status available --active-route none --blocked-reason none
 fi
+"$ROOT/scripts/route-db.sh" update-status "$ROUTE_ID" cancelled \
+  --actor "$ACTOR" \
+  --note "$REASON" \
+  --updated "$UPDATED" >/dev/null
 printf '{"route_id":"%s","status":"cancelled","actor":"%s","reason":"%s"}\n' \
-  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$REASON")" >> "$ROOT/.agents/state/routes.jsonl"
+  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$REASON")" >> "$ROOT/agent-control/state/routes.jsonl"
 printf "Cancelled route %s\n" "$ROUTE_ID"

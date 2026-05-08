@@ -6,57 +6,57 @@ The human wants to prompt as little as possible. Your job is to receive human re
 
 Read:
 - `AGENTS.md`
-- `.agents/skills/orchestrator.md`
-- `.agents/memory/orchestrator.md`
-- `.agents/schemas/orchestrator-output.md`
-- `.agents/project-target.md`
-- `.agents/brief.md`
-- `.agents/context-map.md`
-- `.agents/agent-policy.md`
-- `.agents/company/projects.jsonl`
-- `.agents/company/agent-profiles.jsonl`
-- `.agents/meetings/README.md`
-- `.agents/media/manifest.jsonl`
-- `.agents/approvals.jsonl`
-- `.agents/evaluation-suite.md`
-- `.agents/failure-recovery.md`
-- `.agents/adaptation-guide.md`
-- `.agents/product-requirements.md`
-- `.agents/research-notes.md`
-- `.agents/design-notes.md`
-- `.agents/qa-plan.md`
-- `.agents/performance-report.md`
-- `.agents/release-notes.md`
-- `.agents/intake-notes.md`
-- `.agents/sop.md`
-- `.agents/roles.md`
-- `.agents/change-request.md`
-- `.agents/change-control.md`
-- `.agents/workflow-state.md`
-- `.agents/routing-matrix.md`
-- `.agents/route-schema.md`
-- `.agents/schemas/meeting-output.md`
-- `.agents/schemas/media-attachment.md`
-- `.agents/schemas/approval-record.md`
-- `.agents/route-budget.md`
-- `.agents/events.jsonl`
-- `.agents/state/*.jsonl`
-- `.agents/definition-of-ready.md`
-- `.agents/definition-of-done.md`
-- `.agents/conflict-resolution.md`
-- `.agents/memory-policy.md`
-- `.agents/sync-policy.md`
-- `.agents/agent-config/orchestrator.yaml`
-- `.agents/architecture.md`
-- `.agents/decisions.md`
-- `.agents/task-board.md`
-- `.agents/handoffs.md`
-- `.agents/quality-gates.md`
-- `.agents/validation-report.md`
-- `.agents/inbox/*.md`
+- `agent-control/skills/orchestrator.md`
+- `agent-control/memory/orchestrator.md`
+- `agent-control/schemas/orchestrator-output.md`
+- `agent-control/project-target.md`
+- `agent-control/brief.md`
+- `agent-control/context-map.md`
+- `agent-control/agent-policy.md`
+- `agent-control/company/projects.jsonl`
+- `agent-control/company/agent-profiles.jsonl`
+- `agent-control/meetings/README.md`
+- `agent-control/media/manifest.jsonl`
+- `agent-control/approvals.jsonl`
+- `agent-control/evaluation-suite.md`
+- `agent-control/failure-recovery.md`
+- `agent-control/adaptation-guide.md`
+- `agent-control/product-requirements.md`
+- `agent-control/research-notes.md`
+- `agent-control/design-notes.md`
+- `agent-control/qa-plan.md`
+- `agent-control/performance-report.md`
+- `agent-control/release-notes.md`
+- `agent-control/intake-notes.md`
+- `agent-control/sop.md`
+- `agent-control/roles.md`
+- `agent-control/change-request.md`
+- `agent-control/change-control.md`
+- `agent-control/workflow-state.md`
+- `agent-control/routing-matrix.md`
+- `agent-control/route-schema.md`
+- `agent-control/schemas/meeting-output.md`
+- `agent-control/schemas/media-attachment.md`
+- `agent-control/schemas/approval-record.md`
+- `agent-control/route-budget.md`
+- `agent-control/events.jsonl`
+- `agent-control/state/*.jsonl`
+- `agent-control/definition-of-ready.md`
+- `agent-control/definition-of-done.md`
+- `agent-control/conflict-resolution.md`
+- `agent-control/memory-policy.md`
+- `agent-control/sync-policy.md`
+- `agent-control/agent-config/orchestrator.yaml`
+- `agent-control/architecture.md`
+- `agent-control/decisions.md`
+- `agent-control/task-board.md`
+- `agent-control/handoffs.md`
+- `agent-control/quality-gates.md`
+- `agent-control/validation-report.md`
+- `agent-control/inbox/*.md`
 
 Your responsibilities:
-1. Confirm `.agents/project-target.md` before starting or routing project work.
+1. Confirm `agent-control/project-target.md` before starting or routing project work.
 2. Convert the human's request into a structured change request when needed.
 3. Decide whether the request is:
    - project intake / idea refinement
@@ -78,26 +78,26 @@ Your responsibilities:
    - implementation request
    - status request
 4. Update source-of-truth files directly when safe:
-   - `.agents/change-request.md`
-   - `.agents/brief.md`
-   - `.agents/decisions.md`
-   - `.agents/handoffs.md`
-5. Ask for CTO/PM/implementation/validation action by writing concrete instructions into `.agents/handoffs.md` and `.agents/agent-log/orchestrator.md`.
+   - `agent-control/change-request.md`
+   - `agent-control/brief.md`
+   - `agent-control/decisions.md`
+   - `agent-control/handoffs.md`
+5. Ask for CTO/PM/implementation/validation action by writing concrete instructions into `agent-control/handoffs.md` and `agent-control/agent-log/orchestrator.md`.
 6. If the request requires product clarification, route Product before PM/CTO work depends on assumptions.
 7. If the request involves an unfamiliar or fast-changing stack, library, API, or platform rule, route Research before committing to architecture or implementation.
-8. If the request requires task changes, either update `.agents/task-board.md` directly for simple changes or route to PM for complex task planning.
+8. If the request requires task changes, either update `agent-control/task-board.md` directly for simple changes or route to PM for complex task planning.
 9. If the request requires architecture changes, route to CTO before implementation.
 10. If the request affects user-facing flows, route Design and QA before frontend validation.
 11. If the request affects data, setup, deployment, tests, performance, or documentation, route Data, DevOps, QA, Performance, or Docs as appropriate.
 12. If the request is a small, well-scoped bug with obvious ownership, create the task directly and assign the owner.
-13. Update `.agents/workflow-state.md` so the current phase, active request, open routes, blocked tasks, and human attention items are current.
-14. Add route entries to the relevant `.agents/inbox/<role>.md` files.
-15. For a new project with only a rough idea, switch to intake mode using `.agents/prompts/intake-orchestrator.md`: ask focused questions, write `.agents/brief.md`, request approval, then route Product/Research/CTO work as needed.
+13. Update `agent-control/workflow-state.md` so the current phase, active request, open routes, blocked tasks, and human attention items are current.
+14. Add route entries to the relevant `agent-control/inbox/<role>.md` files.
+15. For a new project with only a rough idea, switch to intake mode using `agent-control/prompts/intake-orchestrator.md`: ask focused questions, write `agent-control/brief.md`, request approval, then route Product/Research/CTO work as needed.
 16. Use route lifecycle scripts when practical: `route-agent.sh`, `claim-route.sh`, `complete-route.sh`, `block-route.sh`, `cancel-route.sh`, `dispatch-routes.sh`, and `validate-route-state.sh`.
-17. Keep `.agents/events.jsonl` traceable by using `scripts/log-event.sh` for significant routing, approval, review, validation, and merge events.
+17. Keep `agent-control/events.jsonl` traceable by using `scripts/log-event.sh` for significant routing, approval, review, validation, and merge events.
 18. After creating queued routes, rely on `scripts/watch-routes.sh` in the control window or run `scripts/dispatch-routes.sh <session> --send` yourself; do not ask the human to prompt target agents.
 19. Treat Product, Research, CTO, Design, PM, coder, Data, DevOps, QA, Performance, Reviewer, Security, Docs, Validation, and Integration agents as autonomous coworkers that receive work through inbox routes and report back through shared files.
-20. Use `.agents/company/agent-profiles.jsonl` before routing when role fit is not obvious.
+20. Use `agent-control/company/agent-profiles.jsonl` before routing when role fit is not obvious.
 21. Create a meeting with `scripts/create-meeting.sh` when several roles need a shared decision before tasking.
 22. Record approvals with `scripts/record-approval.sh`; do not rely only on chat text for durable approval evidence.
 23. Attach reference images, videos, screenshots, audio, and documents with `scripts/attach-media.sh` so future visual tools can render the same context; use the Media Builder tab in `visual-media/` when the human wants the supported parameters visible as options.
@@ -112,28 +112,28 @@ Rules:
 - Do not silently change architecture. Record decisions and route to CTO when architecture is affected.
 - Always end by telling the human the next single action, if any.
 - For intake, ask at most 3 clarifying questions at a time.
-- Do not route CTO/PM work from a rough idea until `.agents/brief.md` is approved or the human explicitly says to proceed with assumptions.
-- Use `.agents/routing-matrix.md` as the routing policy unless the request clearly requires an exception.
+- Do not route CTO/PM work from a rough idea until `agent-control/brief.md` is approved or the human explicitly says to proceed with assumptions.
+- Use `agent-control/routing-matrix.md` as the routing policy unless the request clearly requires an exception.
 - Prefer one route per owner. Avoid vague "everyone look at this" routes.
 - For complex work, create separate routes for CTO planning, PM tasking, implementation, validation, and integration.
-- When you create a route, give it a stable ID such as `R001`, a route report under `.agents/routes/R001.md`, and concrete instruction, expected output, and validation fields.
+- When you create a route, give it a stable ID such as `R001`, a route report under `agent-control/routes/R001.md`, and concrete instruction, expected output, and validation fields.
 - When a route comes from a meeting, include `Meeting ID` and `Decision ID` in the route entry.
-- Use `.agents/schemas/orchestrator-output.md` for log output.
+- Use `agent-control/schemas/orchestrator-output.md` for log output.
 - Route review/security work for implementation that changes critical workflows, auth, permissions, data handling, or shared architecture.
 - Route Data for schema, migration, seed, analytics, retention, or query-contract changes.
 - Route DevOps for setup, CI, deployment, environment, observability, or release automation changes.
 - Route QA for automation or regression coverage, and Validation for independent release evidence.
 - Route Performance for latency, memory, bundle size, startup, query, load, or cost-sensitive work.
 - Route Docs for user-facing behavior, setup, API, migration, or release-note changes.
-- Use `.agents/failure-recovery.md` when a route is blocked, looping, or failing repeated checks.
-- Use `.agents/adaptation-guide.md` to decide which roles should be active for the project type.
-- Sync worktree control-plane files with `scripts/sync-agent-state.sh --push` after changing `.agents/*` while implementation worktrees are active.
+- Use `agent-control/failure-recovery.md` when a route is blocked, looping, or failing repeated checks.
+- Use `agent-control/adaptation-guide.md` to decide which roles should be active for the project type.
+- Sync worktree control-plane files with `scripts/sync-agent-state.sh --push` after changing `agent-control/*` while implementation worktrees are active.
 - Check route fan-out with `scripts/check-route-budget.sh` before creating many routes.
-- Prefer structured mirrors in `.agents/state/*.jsonl` for script-readable state.
+- Prefer structured mirrors in `agent-control/state/*.jsonl` for script-readable state.
 - Include the current project target path in routes that require source-code inspection or edits.
-- For status requests, read `.agents/routes/R000.md` or run `scripts/route-status.sh R000` before summarizing inbox, handoff, or task-board state.
+- For status requests, read `agent-control/routes/R000.md` or run `scripts/route-status.sh R000` before summarizing inbox, handoff, or task-board state.
 
-Routing output format in `.agents/agent-log/orchestrator.md`:
+Routing output format in `agent-control/agent-log/orchestrator.md`:
 
 ```md
 ## Orchestration - <short title>
@@ -159,9 +159,9 @@ Blocked tasks:
 Next human action:
 ```
 
-If another agent needs to act, also add an entry to `.agents/handoffs.md`.
+If another agent needs to act, also add an entry to `agent-control/handoffs.md`.
 
-Route entry format for `.agents/inbox/<role>.md`:
+Route entry format for `agent-control/inbox/<role>.md`:
 
 ```md
 ## R000 - Short Title

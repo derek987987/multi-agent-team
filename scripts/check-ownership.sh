@@ -11,10 +11,10 @@ if [ -z "$ROLE" ]; then
   exit 1
 fi
 
-RULES="$ROOT/.agents/ownership/$ROLE.paths"
-IGNORED="$ROOT/.agents/ownership/ignored-synced.paths"
+RULES="$ROOT/agent-control/ownership/$ROLE.paths"
+IGNORED="$ROOT/agent-control/ownership/ignored-synced.paths"
 if [ ! -f "$RULES" ]; then
-  printf "Missing ownership rules: .agents/ownership/%s.paths\n" "$ROLE" >&2
+  printf "Missing ownership rules: agent-control/ownership/%s.paths\n" "$ROLE" >&2
   exit 1
 fi
 
@@ -45,7 +45,7 @@ if [ -n "$TASK_ID" ]; then
     in_task && /^Files \/ modules owned:/ { section = "files"; next }
     in_task && /^[A-Za-z].*:/ { if ($0 !~ /^Files \/ modules owned:/) section = "" }
     in_task && section == "files" && /^- / { print substr($0, 3) }
-  ' "$ROOT/.agents/task-board.md" >> "$tmp_rules"
+  ' "$ROOT/agent-control/task-board.md" >> "$tmp_rules"
 fi
 
 while IFS= read -r file; do

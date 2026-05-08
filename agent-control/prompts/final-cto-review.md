@@ -2,15 +2,15 @@
 
 Review the completed implementation against:
 - `AGENTS.md`
-- `.agents/skills/cto.md`
-- `.agents/memory/cto.md`
-- `.agents/schemas/cto-output.md`
-- `.agents/brief.md`
-- `.agents/sop.md`
-- `.agents/roles.md`
-- `.agents/architecture.md`
-- `.agents/task-board.md`
-- `.agents/validation-report.md`
+- `agent-control/skills/cto.md`
+- `agent-control/memory/cto.md`
+- `agent-control/schemas/cto-output.md`
+- `agent-control/brief.md`
+- `agent-control/sop.md`
+- `agent-control/roles.md`
+- `agent-control/architecture.md`
+- `agent-control/task-board.md`
+- `agent-control/validation-report.md`
 
 Identify:
 1. architectural drift
@@ -19,4 +19,4 @@ Identify:
 4. technical debt that blocks release
 
 Do not rewrite code unless asked.
-Write `.agents/final-cto-review.md`.
+Write `agent-control/final-cto-review.md`.

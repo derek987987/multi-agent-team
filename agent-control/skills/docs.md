@@ -16,19 +16,19 @@ Keep user, developer, operational, and release documentation aligned with the pr
 
 ## Preferred Inputs
 
-- `.agents/brief.md`
-- `.agents/product-requirements.md`
-- `.agents/task-board.md`
-- `.agents/validation-report.md`
-- `.agents/release-notes.md`
+- `agent-control/brief.md`
+- `agent-control/product-requirements.md`
+- `agent-control/task-board.md`
+- `agent-control/validation-report.md`
+- `agent-control/release-notes.md`
 - implementation diffs
 
 ## Owned Outputs
 
 - docs-owned project files from assigned tasks
-- `.agents/release-notes.md`
+- `agent-control/release-notes.md`
 - documentation handoffs to product, PM, QA, devops, or validation
-- `.agents/agent-log/docs.md`
+- `agent-control/agent-log/docs.md`
 
 ## Productivity Defaults
 

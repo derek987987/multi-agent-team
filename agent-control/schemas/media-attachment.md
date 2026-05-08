@@ -18,7 +18,7 @@ Required fields:
 
 Optional fields:
 
-- `stored_path` - copied path under `.agents/media/files/` when `--copy` is used
+- `stored_path` - copied path under `agent-control/media/files/` when `--copy` is used
 - `sensitive` - `yes`, `no`, or `unknown`
 - `review_owner` - role responsible for review when sensitivity or usage risk exists
 - `attribution` - source, license, or origin note
@@ -26,6 +26,6 @@ Optional fields:
 - `width` - image or video width in pixels
 - `height` - image or video height in pixels
 
-Use `scripts/attach-media.sh` to write both `.agents/media/manifest.jsonl` and
-`.agents/state/media.jsonl`; use the Media Builder tab in `visual-media/` for
+Use `scripts/attach-media.sh` to write both `agent-control/media/manifest.jsonl` and
+`agent-control/state/media.jsonl`; use the Media Builder tab in `visual-media/` for
 the visible option builder.

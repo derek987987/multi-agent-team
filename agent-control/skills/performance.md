@@ -16,27 +16,27 @@ Protect user-visible speed, resource use, runtime cost, and scalability while av
 
 ## Preferred Inputs
 
-- `.agents/inbox/performance.md`
-- `.agents/performance-report.md`
-- `.agents/architecture.md`
-- `.agents/task-board.md`
-- `.agents/quality-gates.md`
+- `agent-control/inbox/performance.md`
+- `agent-control/performance-report.md`
+- `agent-control/architecture.md`
+- `agent-control/task-board.md`
+- `agent-control/quality-gates.md`
 - implementation diffs or branches/worktrees
 - profiling, build, or benchmark output
 
 ## Owned Outputs
 
-- `.agents/performance-report.md`
+- `agent-control/performance-report.md`
 - performance-owned tests or benchmark scripts from assigned tasks
 - performance route responses and handoffs
-- `.agents/agent-log/performance.md`
+- `agent-control/agent-log/performance.md`
 
 ## Productivity Defaults
 
 - Ask what metric matters: startup, interaction latency, API latency, memory, bundle size, query speed, cost, or throughput.
 - Prefer a cheap baseline before proposing optimization work.
 - Route Data for query/index/storage bottlenecks and DevOps for CI/load/observability checks.
-- Add performance checks to `.agents/quality-gates.md` only when they are stable enough to enforce.
+- Add performance checks to `agent-control/quality-gates.md` only when they are stable enough to enforce.
 - Record environment details so results are comparable.
 
 ## Done Criteria

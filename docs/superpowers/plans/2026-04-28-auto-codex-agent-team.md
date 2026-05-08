@@ -4,7 +4,7 @@
 
 **Goal:** Start a tmux-based coding-company team where every role launches Codex with `--full-auto`, and only the Orchestrator needs human prompting.
 
-**Architecture:** Add a role launcher that creates a focused Codex prompt for each role and a route watcher that dispatches queued inbox routes into running role windows. Keep coordination file-backed through `.agents/*`; tmux remains process supervision and Codex input delivery.
+**Architecture:** Add a role launcher that creates a focused Codex prompt for each role and a route watcher that dispatches queued inbox routes into running role windows. Keep coordination file-backed through `agent-control/*`; tmux remains process supervision and Codex input delivery.
 
 **Tech Stack:** Bash, tmux, Codex CLI, markdown control-plane files, existing validation scripts.
 
@@ -59,13 +59,13 @@
 **Files:**
 - Modify: `README.md`
 - Modify: `AGENTS.md`
-- Modify: `.agents/prompts/orchestrator.md`
-- Modify: `.agents/prompts/intake-orchestrator.md`
-- Modify: `.agents/sop.md`
-- Modify: `.agents/roles.md`
-- Modify: `.agents/skills/*.md`
-- Modify: `.agents/agent-config/*.yaml`
-- Modify: `.agents/ownership/*.paths`
+- Modify: `agent-control/prompts/orchestrator.md`
+- Modify: `agent-control/prompts/intake-orchestrator.md`
+- Modify: `agent-control/sop.md`
+- Modify: `agent-control/roles.md`
+- Modify: `agent-control/skills/*.md`
+- Modify: `agent-control/agent-config/*.yaml`
+- Modify: `agent-control/ownership/*.paths`
 
 - [ ] Document Orchestrator-only human input and automatic Codex startup.
 - [ ] Make the Orchestrator responsible for routing and dispatching, not asking the user to prompt other agents.

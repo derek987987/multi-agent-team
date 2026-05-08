@@ -16,13 +16,13 @@ fi
 printf "\n"
 
 printf "== Live Agent Telemetry ==\n"
-if [ -s "$ROOT/.agents/state/agents.jsonl" ]; then
+if [ -s "$ROOT/agent-control/state/agents.jsonl" ]; then
   if command -v jq >/dev/null 2>&1; then
-    jq -r '"\(.role)\t\(.status)\t\(.active_route)\t\(.window)\t\(.last_seen_at)\t\((.blocked_reason // "none") | if . == "" then "none" else . end)"' "$ROOT/.agents/state/agents.jsonl" |
+    jq -r '"\(.role)\t\(.status)\t\(.active_route)\t\(.window)\t\(.last_seen_at)\t\((.blocked_reason // "none") | if . == "" then "none" else . end)"' "$ROOT/agent-control/state/agents.jsonl" |
       awk -F '\t' 'BEGIN { printf "%-14s %-12s %-12s %-14s %-22s %s\n", "role", "status", "route", "window", "last_seen_at", "blocked" }
            { printf "%-14s %-12s %-12s %-14s %-22s %s\n", $1, $2, $3, $4, $5, $6 }'
   else
-    sed -n '1,40p' "$ROOT/.agents/state/agents.jsonl"
+    sed -n '1,40p' "$ROOT/agent-control/state/agents.jsonl"
   fi
 else
   printf "No live agent telemetry recorded yet.\n"
@@ -30,10 +30,10 @@ fi
 printf "\n"
 
 printf "== Workflow State ==\n"
-if [ -f "$ROOT/.agents/workflow-state.md" ]; then
-  sed -n '1,80p' "$ROOT/.agents/workflow-state.md"
+if [ -f "$ROOT/agent-control/workflow-state.md" ]; then
+  sed -n '1,80p' "$ROOT/agent-control/workflow-state.md"
 else
-  printf "Missing .agents/workflow-state.md\n"
+  printf "Missing agent-control/workflow-state.md\n"
 fi
 printf "\n"
 
@@ -49,43 +49,43 @@ else
 fi
 
 printf "== Task Status Counts ==\n"
-if [ -f "$ROOT/.agents/task-board.md" ]; then
+if [ -f "$ROOT/agent-control/task-board.md" ]; then
   for status in pending in-progress blocked ready-for-review done; do
-    count="$(grep -cE "^Status: $status$" "$ROOT/.agents/task-board.md" || true)"
+    count="$(grep -cE "^Status: $status$" "$ROOT/agent-control/task-board.md" || true)"
     printf "%s: %s\n" "$status" "$count"
   done
 else
-  printf "Missing .agents/task-board.md\n"
+  printf "Missing agent-control/task-board.md\n"
 fi
 
 printf "\n== Open Handoffs ==\n"
-if [ -f "$ROOT/.agents/handoffs.md" ]; then
+if [ -f "$ROOT/agent-control/handoffs.md" ]; then
   awk '
     /^### H[0-9]+/ { title = $0; title_line = NR }
     /^Status: open$/ { printf "%s:%s\n%d:%s\n", title_line, title, NR, $0; found = 1 }
     END { if (!found) print "None" }
-  ' "$ROOT/.agents/handoffs.md"
+  ' "$ROOT/agent-control/handoffs.md"
 else
-  printf "Missing .agents/handoffs.md\n"
+  printf "Missing agent-control/handoffs.md\n"
 fi
 
 printf "\n== Validation Summary ==\n"
-if [ -f "$ROOT/.agents/validation-report.md" ]; then
-  sed -n '1,80p' "$ROOT/.agents/validation-report.md"
+if [ -f "$ROOT/agent-control/validation-report.md" ]; then
+  sed -n '1,80p' "$ROOT/agent-control/validation-report.md"
 else
-  printf "Missing .agents/validation-report.md\n"
+  printf "Missing agent-control/validation-report.md\n"
 fi
 
 printf "\n== Review Summary ==\n"
-if [ -f "$ROOT/.agents/review-report.md" ]; then
-  sed -n '1,60p' "$ROOT/.agents/review-report.md"
+if [ -f "$ROOT/agent-control/review-report.md" ]; then
+  sed -n '1,60p' "$ROOT/agent-control/review-report.md"
 else
-  printf "Missing .agents/review-report.md\n"
+  printf "Missing agent-control/review-report.md\n"
 fi
 
 printf "\n== Security Summary ==\n"
-if [ -f "$ROOT/.agents/security-report.md" ]; then
-  sed -n '1,60p' "$ROOT/.agents/security-report.md"
+if [ -f "$ROOT/agent-control/security-report.md" ]; then
+  sed -n '1,60p' "$ROOT/agent-control/security-report.md"
 else
-  printf "Missing .agents/security-report.md\n"
+  printf "Missing agent-control/security-report.md\n"
 fi

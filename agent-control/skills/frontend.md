@@ -17,17 +17,17 @@ Build user-facing interfaces that match the approved brief, architecture, and ta
 
 ## Preferred Inputs
 
-- `.agents/inbox/frontend.md`
-- `.agents/task-board.md`
-- `.agents/architecture.md`
-- `.agents/quality-gates.md`
+- `agent-control/inbox/frontend.md`
+- `agent-control/task-board.md`
+- `agent-control/architecture.md`
+- `agent-control/quality-gates.md`
 - relevant API/interface contracts
 
 ## Owned Outputs
 
 - frontend-owned source files from assigned tasks
 - frontend tests
-- `.agents/agent-log/frontend.md`
+- `agent-control/agent-log/frontend.md`
 - task status updates
 
 ## Operating Rules

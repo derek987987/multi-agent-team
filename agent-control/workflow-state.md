@@ -20,7 +20,7 @@ Owner: orchestrator
 
 | Phase | Status | Owner | Exit Criteria |
 | --- | --- | --- | --- |
-| intake | active | human/orchestrator | `.agents/brief.md` is specific enough to plan |
+| intake | active | human/orchestrator | `agent-control/brief.md` is specific enough to plan |
 | architecture | pending | CTO | architecture, decisions, ownership, and risks are documented |
 | planning | pending | PM | tasks have owners, dependencies, acceptance criteria, and validation |
 | implementation | pending | implementation agents | assigned tasks are ready for review |

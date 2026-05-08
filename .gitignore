@@ -5,6 +5,10 @@ node_modules/
 agent-worktrees/
 __pycache__/
 *.pyc
+.agents/state/workflow.sqlite3
+.agents/state/workflow.sqlite3-*
+agent-control/state/workflow.sqlite3
+agent-control/state/workflow.sqlite3-*
 
 # Local environment and logs
 .env

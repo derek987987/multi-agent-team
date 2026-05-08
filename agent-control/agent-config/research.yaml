@@ -1,25 +1,25 @@
 role: research
-output_schema: .agents/schemas/research-output.md
+output_schema: agent-control/schemas/research-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/context-map.md
-  - .agents/agent-policy.md
-  - .agents/adaptation-guide.md
-  - .agents/prompts/research.md
-  - .agents/skills/research.md
-  - .agents/memory/research.md
-  - .agents/schemas/research-output.md
+  - agent-control/context-map.md
+  - agent-control/agent-policy.md
+  - agent-control/adaptation-guide.md
+  - agent-control/prompts/research.md
+  - agent-control/skills/research.md
+  - agent-control/memory/research.md
+  - agent-control/schemas/research-output.md
 allowed_paths:
-  - .agents/research-notes.md
-  - .agents/agent-log/research.md
+  - agent-control/research-notes.md
+  - agent-control/agent-log/research.md
 required_checks:
   - ./scripts/validate-agent-workflow.sh
 owned_outputs:
-  - .agents/research-notes.md
-  - .agents/agent-log/research.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/research-notes.md
+  - agent-control/agent-log/research.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - orchestrator
@@ -33,13 +33,13 @@ handoff_targets:
   - security
   - performance
 reads_before_claim:
-  - .agents/inbox/research.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/research.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

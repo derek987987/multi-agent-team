@@ -6,7 +6,7 @@ This workflow treats failure as a first-class route outcome.
 
 - `blocked`: agent cannot proceed without another owner, decision, missing file, or external dependency.
 - `cancelled`: route no longer matches the current plan.
-- `done-with-risk`: route produced useful output but left accepted risk that must be recorded in `.agents/decisions.md`.
+- `done-with-risk`: route produced useful output but left accepted risk that must be recorded in `agent-control/decisions.md`.
 
 ## Retry Policy
 

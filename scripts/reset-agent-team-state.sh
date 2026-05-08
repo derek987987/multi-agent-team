@@ -5,9 +5,15 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 source "$ROOT/scripts/agent-roles.sh"
 
-mkdir -p "$ROOT/.agents/company" "$ROOT/.agents/meetings" "$ROOT/.agents/media" "$ROOT/.agents/state" "$ROOT/.agents/routes"
+clear_control_plane_hidden_flags() {
+  if command -v chflags >/dev/null 2>&1; then
+    chflags -R nohidden "$ROOT/agent-control" 2>/dev/null || true
+  fi
+}
 
-cat > "$ROOT/.agents/brief.md" <<'EOF'
+mkdir -p "$ROOT/agent-control/company" "$ROOT/agent-control/meetings" "$ROOT/agent-control/media" "$ROOT/agent-control/state" "$ROOT/agent-control/routes"
+
+cat > "$ROOT/agent-control/brief.md" <<'EOF'
 # Product Brief
 
 ## Goal
@@ -40,7 +46,7 @@ List what should not be built in the first pass.
 - No known critical or major validation findings remain.
 EOF
 
-cat > "$ROOT/.agents/intake-notes.md" <<'EOF'
+cat > "$ROOT/agent-control/intake-notes.md" <<'EOF'
 # Intake Notes
 
 The Orchestrator uses this file to capture rough human ideas, clarifying questions, answers, assumptions, and the path toward a finished product brief.
@@ -78,10 +84,10 @@ None yet.
 - [ ] Non-goals are clear
 - [ ] Tech preferences or constraints are clear enough
 - [ ] Definition of done is clear
-- [ ] Human has approved `.agents/brief.md`
+- [ ] Human has approved `agent-control/brief.md`
 EOF
 
-cat > "$ROOT/.agents/architecture.md" <<'EOF'
+cat > "$ROOT/agent-control/architecture.md" <<'EOF'
 # Architecture
 
 This file is owned by the CTO agent.
@@ -110,7 +116,7 @@ TBD
 TBD
 EOF
 
-cat > "$ROOT/.agents/decisions.md" <<'EOF'
+cat > "$ROOT/agent-control/decisions.md" <<'EOF'
 # Decisions
 
 Record architecture and product decisions here.
@@ -128,7 +134,7 @@ Reason:
 Impact:
 EOF
 
-cat > "$ROOT/.agents/task-board.md" <<'EOF'
+cat > "$ROOT/agent-control/task-board.md" <<'EOF'
 # Task Board
 
 This file is owned by the PM agent.
@@ -160,10 +166,10 @@ Validation:
 - Expected:
 
 Ready checklist:
-- See `.agents/definition-of-ready.md`
+- See `agent-control/definition-of-ready.md`
 
 Done checklist:
-- See `.agents/definition-of-done.md`
+- See `agent-control/definition-of-done.md`
 
 Handoffs:
 - none
@@ -171,7 +177,7 @@ Handoffs:
 Notes:
 EOF
 
-cat > "$ROOT/.agents/handoffs.md" <<'EOF'
+cat > "$ROOT/agent-control/handoffs.md" <<'EOF'
 # Handoffs
 
 Use this file when one agent needs another agent to act.
@@ -204,7 +210,7 @@ Acceptance criteria:
 Response:
 EOF
 
-cat > "$ROOT/.agents/workflow-state.md" <<'EOF'
+cat > "$ROOT/agent-control/workflow-state.md" <<'EOF'
 # Workflow State
 
 This file is the current control-plane snapshot for the multi-agent workflow.
@@ -227,7 +233,7 @@ Owner: orchestrator
 
 | Phase | Status | Owner | Exit Criteria |
 | --- | --- | --- | --- |
-| intake | active | human/orchestrator | `.agents/brief.md` is specific enough to plan |
+| intake | active | human/orchestrator | `agent-control/brief.md` is specific enough to plan |
 | architecture | pending | CTO | architecture, decisions, ownership, and risks are documented |
 | planning | pending | PM | tasks have owners, dependencies, acceptance criteria, and validation |
 | implementation | pending | implementation agents | assigned tasks are ready for review |
@@ -250,12 +256,12 @@ Owner: orchestrator
 None.
 EOF
 
-cat > "$ROOT/.agents/change-request.md" <<'EOF'
+cat > "$ROOT/agent-control/change-request.md" <<'EOF'
 # Change Request Intake
 
 Use this file when you want to change something mid-workflow but do not want to manually decide which workflow documents need updates.
 
-Fill in the latest request at the top, then ask the Orchestrator agent to process it using `.agents/prompts/change-router-cto.md`.
+Fill in the latest request at the top, then ask the Orchestrator agent to process it using `agent-control/prompts/change-router-cto.md`.
 
 ## Latest Change Request
 
@@ -290,7 +296,7 @@ Human notes:
 Move completed or superseded requests here after CTO/PM processing.
 EOF
 
-cat > "$ROOT/.agents/validation-report.md" <<'EOF'
+cat > "$ROOT/agent-control/validation-report.md" <<'EOF'
 # Validation Report
 
 This file is owned by the validation agent.
@@ -333,7 +339,7 @@ Actual result:
 Recommendation:
 EOF
 
-cat > "$ROOT/.agents/review-report.md" <<'EOF'
+cat > "$ROOT/agent-control/review-report.md" <<'EOF'
 # Review Report
 
 ## Latest Summary
@@ -351,7 +357,7 @@ None recorded.
 None recorded.
 EOF
 
-cat > "$ROOT/.agents/security-report.md" <<'EOF'
+cat > "$ROOT/agent-control/security-report.md" <<'EOF'
 # Security Report
 
 ## Latest Summary
@@ -373,13 +379,13 @@ None recorded.
 None recorded.
 EOF
 
-cat > "$ROOT/.agents/final-cto-review.md" <<'EOF'
+cat > "$ROOT/agent-control/final-cto-review.md" <<'EOF'
 # Final CTO Review
 
 Pending.
 EOF
 
-cat > "$ROOT/.agents/final-acceptance.md" <<'EOF'
+cat > "$ROOT/agent-control/final-acceptance.md" <<'EOF'
 # Final Acceptance
 
 Pending.
@@ -387,34 +393,35 @@ EOF
 
 for role in "${AGENT_ROLES[@]}"; do
   title="$(printf '%s' "$role" | awk '{ print toupper(substr($0,1,1)) substr($0,2) }')"
-  cat > "$ROOT/.agents/agent-log/$role.md" <<EOF
+  cat > "$ROOT/agent-control/agent-log/$role.md" <<EOF
 # $title Agent Log
 
 EOF
 done
 
-find "$ROOT/.agents/meetings" -maxdepth 1 -type f -name 'M*.md' -delete
-find "$ROOT/.agents/routes" -maxdepth 1 -type f -name 'R*.md' -delete
-mkdir -p "$ROOT/.agents/media/files"
-find "$ROOT/.agents/media/files" -type f -delete
-cat > "$ROOT/.agents/company/projects.jsonl" <<EOF
+find "$ROOT/agent-control/meetings" -maxdepth 1 -type f -name 'M*.md' -delete
+find "$ROOT/agent-control/routes" -maxdepth 1 -type f -name 'R[0-9]*.md' -delete
+mkdir -p "$ROOT/agent-control/media/files"
+find "$ROOT/agent-control/media/files" -type f -delete
+cat > "$ROOT/agent-control/company/projects.jsonl" <<EOF
 {"project_id":"template","name":"agent-teams","path":"$ROOT","mode":"template","status":"template","updated":"$UPDATED","source":"reset-agent-team-state"}
 EOF
-cat > "$ROOT/.agents/media/manifest.jsonl" </dev/null
-cat > "$ROOT/.agents/approvals.jsonl" </dev/null
-cat > "$ROOT/.agents/state/projects.jsonl" </dev/null
-cat > "$ROOT/.agents/state/agents.jsonl" </dev/null
-cat > "$ROOT/.agents/state/routes.jsonl" </dev/null
-cat > "$ROOT/.agents/state/tasks.jsonl" </dev/null
-cat > "$ROOT/.agents/state/findings.jsonl" </dev/null
-cat > "$ROOT/.agents/state/meetings.jsonl" </dev/null
-cat > "$ROOT/.agents/state/media.jsonl" </dev/null
-cat > "$ROOT/.agents/state/approvals.jsonl" </dev/null
-cat > "$ROOT/.agents/events.jsonl" </dev/null
+cat > "$ROOT/agent-control/media/manifest.jsonl" </dev/null
+cat > "$ROOT/agent-control/approvals.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/projects.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/agents.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/routes.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/tasks.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/findings.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/meetings.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/media.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/approvals.jsonl" </dev/null
+cat > "$ROOT/agent-control/events.jsonl" </dev/null
+rm -f "$ROOT/agent-control/state/workflow.sqlite3" "$ROOT/agent-control/state/workflow.sqlite3-shm" "$ROOT/agent-control/state/workflow.sqlite3-wal"
 
 for inbox in "${AGENT_ROLES[@]}"; do
   title="$(printf '%s' "$inbox" | awk '{ print toupper(substr($0,1,1)) substr($0,2) }')"
-  cat > "$ROOT/.agents/inbox/$inbox.md" <<EOF
+  cat > "$ROOT/agent-control/inbox/$inbox.md" <<EOF
 # $title Inbox
 
 Queued, dispatched, in-progress, and blocked routes arrive here.
@@ -432,4 +439,5 @@ for role in "${AGENT_ROLES[@]}"; do
 done
 
 "$ROOT/scripts/log-event.sh" reset reset-agent-team-state "Reset agent-team runtime state" "$UPDATED"
+clear_control_plane_hidden_flags
 printf "Agent-team runtime state reset in %s\n" "$ROOT"

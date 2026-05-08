@@ -39,8 +39,8 @@ for participant in "$@"; do
 done
 [ -n "$participants" ] || participants="orchestrator"
 
-MEETINGS_DIR="$ROOT/.agents/meetings"
-STATE_FILE="$ROOT/.agents/state/meetings.jsonl"
+MEETINGS_DIR="$ROOT/agent-control/meetings"
+STATE_FILE="$ROOT/agent-control/state/meetings.jsonl"
 CREATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 MEETING_FILE="$MEETINGS_DIR/$MEETING_ID.md"
 

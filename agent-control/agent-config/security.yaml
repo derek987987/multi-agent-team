@@ -1,22 +1,22 @@
 role: security
-output_schema: .agents/schemas/security-output.md
+output_schema: agent-control/schemas/security-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
-  - .agents/prompts/security.md
-  - .agents/skills/security.md
-  - .agents/memory/security.md
-  - .agents/schemas/security-output.md
+  - agent-control/prompts/security.md
+  - agent-control/skills/security.md
+  - agent-control/memory/security.md
+  - agent-control/schemas/security-output.md
 allowed_paths:
-  - .agents/security-report.md
-  - .agents/agent-log/security.md
+  - agent-control/security-report.md
+  - agent-control/agent-log/security.md
 required_checks:
   - ./scripts/check-done.sh
 owned_outputs:
-  - .agents/security-report.md
-  - .agents/agent-log/security.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/security-report.md
+  - agent-control/agent-log/security.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - cto
@@ -29,13 +29,13 @@ handoff_targets:
   - validation
   - integration
 reads_before_claim:
-  - .agents/inbox/security.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/security.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

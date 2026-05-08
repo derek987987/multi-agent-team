@@ -35,7 +35,7 @@ found=0
 route_file=""
 route_role=""
 route_status=""
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   if grep -qE "^## $ROUTE_ID([[:space:]-]|$)" "$inbox"; then
     route_file="$inbox"
     route_role="$(basename "$inbox" .md)"
@@ -66,22 +66,24 @@ case "$route_status" in
     ;;
 esac
 
+"$ROOT/scripts/route-db.sh" claim-route "$ROUTE_ID" "$ACTOR" >/dev/null
+
 update_status "$route_file" "##" "in-progress"
 
-if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/.agents/handoffs.md"; then
-  update_status "$ROOT/.agents/handoffs.md" "###" "accepted"
+if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/agent-control/handoffs.md"; then
+  update_status "$ROOT/agent-control/handoffs.md" "###" "accepted"
 fi
 
 tmp="$(mktemp)"
 awk -v id="$ROUTE_ID" 'BEGIN { FS=OFS="|" } $2 ~ "^[[:space:]]*" id "[[:space:]]*$" { $4 = " in-progress " } { print }' \
-  "$ROOT/.agents/workflow-state.md" > "$tmp"
-mv "$tmp" "$ROOT/.agents/workflow-state.md"
+  "$ROOT/agent-control/workflow-state.md" > "$tmp"
+mv "$tmp" "$ROOT/agent-control/workflow-state.md"
 
 report="$(awk -v id="$ROUTE_ID" '
   /^## / { in_route = ($2 == id) }
   in_route && /^Completion report:/ { sub(/^Completion report:[[:space:]]*/, ""); print; exit }
 ' "$route_file")"
-report="${report:-.agents/routes/$ROUTE_ID.md}"
+report="${report:-agent-control/routes/$ROUTE_ID.md}"
 if [ -f "$ROOT/$report" ]; then
   tmp="$(mktemp)"
   awk -v status="Status: in-progress" -v updated="Last updated: $UPDATED" '
@@ -95,5 +97,5 @@ fi
 "$ROOT/scripts/log-event.sh" route-claimed "$ACTOR" "Claimed route $ROUTE_ID" "" "$ROUTE_ID"
 "$ROOT/scripts/update-agent-state.sh" "$ACTOR" --status busy --active-route "$ROUTE_ID"
 printf '{"route_id":"%s","status":"in-progress","actor":"%s","updated":"%s"}\n' \
-  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$UPDATED")" >> "$ROOT/.agents/state/routes.jsonl"
+  "$(json_escape "$ROUTE_ID")" "$(json_escape "$ACTOR")" "$(json_escape "$UPDATED")" >> "$ROOT/agent-control/state/routes.jsonl"
 printf "Claimed route %s\n" "$ROUTE_ID"

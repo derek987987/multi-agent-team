@@ -10,7 +10,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 ROLE="$1"
-INBOX="$ROOT/.agents/inbox/$ROLE.md"
+INBOX="$ROOT/agent-control/inbox/$ROLE.md"
 
 if [ ! -f "$INBOX" ]; then
   printf "Unknown role inbox: %s\n" "$INBOX" >&2

@@ -48,7 +48,7 @@ The orchestrator uses this matrix to decide where a human request should go.
 4. If the request crosses file ownership boundaries, create a handoff.
 5. If the request is a bug with clear ownership, create a bug task and route directly to the owner and validation.
 6. If a route blocks active implementation, mark affected tasks `blocked`.
-7. If a route requires human approval, record that in `.agents/workflow-state.md`.
+7. If a route requires human approval, record that in `agent-control/workflow-state.md`.
 8. If implementation touches auth, permissions, secrets, payments, personal data, or shared infrastructure, route security review.
 9. If implementation touches data models, migrations, analytics, retention, or seed data, route data review.
 10. If implementation touches setup, CI, deployment, environment, observability, or release automation, route DevOps review.

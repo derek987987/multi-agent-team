@@ -35,5 +35,5 @@ None yet.
 - [ ] Non-goals are clear
 - [ ] Tech preferences or constraints are clear enough
 - [ ] Definition of done is clear
-- [ ] Human has approved `.agents/brief.md`
+- [ ] Human has approved `agent-control/brief.md`
 

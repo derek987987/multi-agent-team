@@ -19,29 +19,29 @@ Turn approved product intent into a simple, maintainable technical direction tha
 
 ## Preferred Inputs
 
-- `.agents/brief.md`
-- `.agents/inbox/cto.md`
-- `.agents/workflow-state.md`
+- `agent-control/brief.md`
+- `agent-control/inbox/cto.md`
+- `agent-control/workflow-state.md`
 - existing repo files
-- `.agents/schemas/agent-profile.md`
-- `.agents/schemas/meeting-output.md`
-- `.agents/schemas/media-attachment.md`
-- `.agents/schemas/approval-record.md`
-- `.agents/quality-gates.md`
+- `agent-control/schemas/agent-profile.md`
+- `agent-control/schemas/meeting-output.md`
+- `agent-control/schemas/media-attachment.md`
+- `agent-control/schemas/approval-record.md`
+- `agent-control/quality-gates.md`
 
 ## Owned Outputs
 
-- `.agents/architecture.md`
-- `.agents/decisions.md`
-- `.agents/final-cto-review.md`
-- `.agents/agent-log/cto.md`
+- `agent-control/architecture.md`
+- `agent-control/decisions.md`
+- `agent-control/final-cto-review.md`
+- `agent-control/agent-log/cto.md`
 
 ## Operating Rules
 
 - Claim CTO routes before acting and complete or block the route when your output is written.
 - Keep architecture as simple as possible for the brief.
 - Define module/file ownership clearly.
-- Record meaningful tradeoffs in `.agents/decisions.md`.
+- Record meaningful tradeoffs in `agent-control/decisions.md`.
 - Do not implement feature code unless explicitly assigned.
 - Identify validation implications for PM and validation agents.
 - Route PM, validation, reviewer, security, or implementation follow-up through shared files instead of asking the human to relay it.

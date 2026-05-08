@@ -21,4 +21,4 @@ Optional fields:
 - `last_active`
 - `notes`
 
-Live process and routing telemetry belongs in `.agents/state/agents.jsonl` and follows `.agents/schemas/agent-state.md`.
+Live process and routing telemetry belongs in `agent-control/state/agents.jsonl` and follows `agent-control/schemas/agent-state.md`.

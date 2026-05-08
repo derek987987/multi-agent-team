@@ -1,34 +1,34 @@
 role: orchestrator
-output_schema: .agents/schemas/orchestrator-output.md
+output_schema: agent-control/schemas/orchestrator-output.md
 required_reads:
   - AGENTS.md
-  - .agents/project-target.md
+  - agent-control/project-target.md
   - scripts/codex-role.sh
   - scripts/watch-routes.sh
   - scripts/dispatch-routes.sh
   - scripts/route-agent.sh
-  - .agents/prompts/orchestrator.md
-  - .agents/skills/orchestrator.md
-  - .agents/memory/orchestrator.md
-  - .agents/schemas/orchestrator-output.md
+  - agent-control/prompts/orchestrator.md
+  - agent-control/skills/orchestrator.md
+  - agent-control/memory/orchestrator.md
+  - agent-control/schemas/orchestrator-output.md
 allowed_paths:
-  - .agents/intake-notes.md
-  - .agents/project-target.md
-  - .agents/brief.md
-  - .agents/workflow-state.md
-  - .agents/handoffs.md
-  - .agents/change-request.md
-  - .agents/inbox/*
-  - .agents/agent-log/orchestrator.md
+  - agent-control/intake-notes.md
+  - agent-control/project-target.md
+  - agent-control/brief.md
+  - agent-control/workflow-state.md
+  - agent-control/handoffs.md
+  - agent-control/change-request.md
+  - agent-control/inbox/*
+  - agent-control/agent-log/orchestrator.md
 required_checks:
   - ./scripts/validate-agent-workflow.sh
 owned_outputs:
-  - .agents/intake-notes.md
-  - .agents/brief.md
-  - .agents/workflow-state.md
-  - .agents/handoffs.md
-  - .agents/agent-log/orchestrator.md
-route_input_schema: .agents/route-schema.md
+  - agent-control/intake-notes.md
+  - agent-control/brief.md
+  - agent-control/workflow-state.md
+  - agent-control/handoffs.md
+  - agent-control/agent-log/orchestrator.md
+route_input_schema: agent-control/route-schema.md
 completion_report_required: true
 handoff_targets:
   - product
@@ -48,13 +48,13 @@ handoff_targets:
   - docs
   - integration
 reads_before_claim:
-  - .agents/inbox/orchestrator.md
-  - .agents/workflow-state.md
-  - .agents/routes/<route-id>.md
+  - agent-control/inbox/orchestrator.md
+  - agent-control/workflow-state.md
+  - agent-control/routes/<route-id>.md
 reads_before_complete:
-  - .agents/routes/<route-id>.md
-  - .agents/quality-gates.md
-  - .agents/definition-of-done.md
+  - agent-control/routes/<route-id>.md
+  - agent-control/quality-gates.md
+  - agent-control/definition-of-done.md
 live_state_fields:
   - session
   - window

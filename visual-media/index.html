@@ -53,7 +53,7 @@
           <canvas id="officeCanvas" width="1180" height="760"></canvas>
           <div id="officeEmptyState" class="empty-state" hidden>
             <strong>No live agent telemetry</strong>
-            <span>Roles are shown as offline until `.agents/state/agents.jsonl` has records.</span>
+            <span>Roles are shown as offline until `agent-control/state/agents.jsonl` has records.</span>
           </div>
           <div class="legend-row" aria-label="Agent status legend">
             <span><i class="legend-dot status-idle"></i>Idle</span>
@@ -161,7 +161,7 @@
             <legend>Storage And Review</legend>
             <label class="check-row">
               <input type="checkbox" name="copy" checked>
-              <span>Copy into <code>.agents/media/files/</code></span>
+              <span>Copy into <code>agent-control/media/files/</code></span>
             </label>
             <div class="field-grid compact">
               <label>
@@ -213,9 +213,9 @@
             <h3>Functional Sources</h3>
             <ul>
               <li><code>scripts/attach-media.sh</code></li>
-              <li><a href="../.agents/schemas/media-attachment.md"><code>.agents/schemas/media-attachment.md</code></a></li>
-              <li><a href="../.agents/media/manifest.jsonl"><code>.agents/media/manifest.jsonl</code></a></li>
-              <li><a href="../.agents/state/media.jsonl"><code>.agents/state/media.jsonl</code></a></li>
+              <li><a href="../agent-control/schemas/media-attachment.md"><code>agent-control/schemas/media-attachment.md</code></a></li>
+              <li><a href="../agent-control/media/manifest.jsonl"><code>agent-control/media/manifest.jsonl</code></a></li>
+              <li><a href="../agent-control/state/media.jsonl"><code>agent-control/state/media.jsonl</code></a></li>
             </ul>
           </div>
         </aside>

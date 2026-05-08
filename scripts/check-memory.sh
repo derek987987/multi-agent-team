@@ -6,7 +6,7 @@ status=0
 
 printf "== Memory Policy Check ==\n\n"
 
-for file in "$ROOT"/.agents/memory/*.md; do
+for file in "$ROOT"/agent-control/memory/*.md; do
   role="$(basename "$file")"
   if grep -qE "^### [0-9]{4}-[0-9]{2}-[0-9]{2} - " "$file"; then
     awk -v file="$role" '
@@ -34,7 +34,7 @@ for file in "$ROOT"/.agents/memory/*.md; do
 done
 
 if [ "$status" -ne 0 ]; then
-  printf "\nMemory check failed. See .agents/memory-policy.md.\n" >&2
+  printf "\nMemory check failed. See agent-control/memory-policy.md.\n" >&2
   exit 1
 fi
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TASK_BOARD="$ROOT/.agents/task-board.md"
+TASK_BOARD="$ROOT/agent-control/task-board.md"
 
 if [ "$#" -lt 3 ]; then
   printf "Usage: %s <task-id> <owner> <title>\n" "$(basename "$0")" >&2

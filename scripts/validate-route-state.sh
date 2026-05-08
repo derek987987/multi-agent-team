@@ -17,7 +17,7 @@ valid_status() {
   esac
 }
 
-for inbox in "$ROOT"/.agents/inbox/*.md; do
+for inbox in "$ROOT"/agent-control/inbox/*.md; do
   role="$(basename "$inbox" .md)"
   while IFS=$'\t' read -r route route_status to_role report has_tbd; do
     [ -n "$route" ] || continue
@@ -48,7 +48,7 @@ for inbox in "$ROOT"/.agents/inbox/*.md; do
         ;;
     esac
 
-    if ! grep -qE "^[|][[:space:]]*$route[[:space:]]*[|]" "$ROOT/.agents/workflow-state.md"; then
+    if ! grep -qE "^[|][[:space:]]*$route[[:space:]]*[|]" "$ROOT/agent-control/workflow-state.md"; then
       printf "%s/%s missing from workflow-state open routes table\n" "$role" "$route" >&2
       status=1
     fi

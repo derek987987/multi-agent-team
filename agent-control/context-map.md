@@ -4,7 +4,7 @@ This file defines what context each role should load so the team can handle unfa
 
 ## Principles
 
-- Start from `.agents/project-target.md`, `.agents/brief.md`, `.agents/task-board.md`, `.agents/company/agent-profiles.jsonl`, and the assigned inbox route.
+- Start from `agent-control/project-target.md`, `agent-control/brief.md`, `agent-control/task-board.md`, `agent-control/company/agent-profiles.jsonl`, and the assigned inbox route.
 - Load role-specific prompts, skills, memory, config, schemas, and ownership rules before acting.
 - Ask Research to inspect unfamiliar frameworks, libraries, APIs, standards, or external docs.
 - Keep route responses concise; link to files and logs instead of pasting raw terminal output.
@@ -31,7 +31,7 @@ This file defines what context each role should load so the team can handle unfa
 | validation | QA plan, quality gates, implementation diff, reports |
 | integration | review/security/validation evidence, release notes |
 
-For meeting-driven work, every role should also load the related `.agents/meetings/M*.md`, linked media records in `.agents/media/manifest.jsonl`, and any approval records in `.agents/approvals.jsonl`.
+For meeting-driven work, every role should also load the related `agent-control/meetings/M*.md`, linked media records in `agent-control/media/manifest.jsonl`, and any approval records in `agent-control/approvals.jsonl`.
 
 ## Context Handoff Contract
 

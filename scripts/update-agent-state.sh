@@ -51,7 +51,7 @@ if ! is_agent_role "$ROLE"; then
   exit 1
 fi
 
-CONFIG="$ROOT/.agents/agent-config/$ROLE.yaml"
+CONFIG="$ROOT/agent-control/agent-config/$ROLE.yaml"
 SESSION="${AGENT_TEAM_SESSION:-}"
 WINDOW="$ROLE"
 PID_OR_COMMAND=""
@@ -60,7 +60,7 @@ STATUS="available"
 ACTIVE_ROUTE="none"
 ACTIVE_TASK="none"
 WORKDIR="$(pwd -P)"
-TARGET_PROJECT="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)"
+TARGET_PROJECT="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)"
 TARGET_PROJECT="${TARGET_PROJECT:-$ROOT}"
 BRANCH_OR_WORKTREE=""
 CAPACITY="$(awk -F':[[:space:]]*' '/^max_parallel_routes:/ { print $2; exit }' "$CONFIG" 2>/dev/null || true)"
@@ -182,7 +182,7 @@ if [ -n "$RECOVERY_OWNER" ] && ! is_agent_role "$RECOVERY_OWNER"; then
 fi
 
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-STATE_FILE="$ROOT/.agents/state/agents.jsonl"
+STATE_FILE="$ROOT/agent-control/state/agents.jsonl"
 mkdir -p "$(dirname "$STATE_FILE")"
 touch "$STATE_FILE"
 

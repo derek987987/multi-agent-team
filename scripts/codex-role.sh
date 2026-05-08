@@ -121,7 +121,7 @@ role_focus() {
   esac
 }
 
-TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/.agents/project-target.md" 2>/dev/null || true)"
+TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)"
 TARGET_PATH="${TARGET_PATH:-$ROOT}"
 if [ -d "$TARGET_PATH" ]; then
   TARGET_PATH="$(cd "$TARGET_PATH" && pwd)"
@@ -134,11 +134,11 @@ if [ ! -d "$WORKDIR" ]; then
 fi
 WORKDIR="$(cd "$WORKDIR" && pwd)"
 
-PROMPT_PATH=".agents/prompts/$ROLE.md"
-INBOX_PATH=".agents/inbox/$ROLE.md"
-SKILL_PATH=".agents/skills/$ROLE.md"
-MEMORY_PATH=".agents/memory/$ROLE.md"
-CONFIG_PATH=".agents/agent-config/$ROLE.yaml"
+PROMPT_PATH="agent-control/prompts/$ROLE.md"
+INBOX_PATH="agent-control/inbox/$ROLE.md"
+SKILL_PATH="agent-control/skills/$ROLE.md"
+MEMORY_PATH="agent-control/memory/$ROLE.md"
+CONFIG_PATH="agent-control/agent-config/$ROLE.yaml"
 
 PROMPT_TEXT="$(cat <<EOF
 $(role_focus "$ROLE")
@@ -154,45 +154,59 @@ $TARGET_PATH
 Working directory:
 $WORKDIR
 
-Before acting, read:
+Startup readiness handshake:
+- This first prompt is only role bootstrapping.
+- Do not run tools, inspect files, claim routes, or start role work from this startup prompt.
+- Your first response must be exactly: ROLE_READY $ROLE
+- After that response, wait for a routed message in this tmux pane.
+
+When a route message arrives, read:
 - AGENTS.md
-- .agents/project-target.md
+- agent-control/project-target.md
 - $PROMPT_PATH
 - $SKILL_PATH
 - $MEMORY_PATH
 - $CONFIG_PATH
 - $INBOX_PATH
-- .agents/context-map.md
-- .agents/agent-policy.md
-- .agents/evaluation-suite.md
-- .agents/failure-recovery.md
-- .agents/adaptation-guide.md
-- .agents/workflow-state.md
-- .agents/handoffs.md
-- .agents/task-board.md
-- .agents/quality-gates.md
+- agent-control/context-map.md
+- agent-control/agent-policy.md
+- agent-control/evaluation-suite.md
+- agent-control/failure-recovery.md
+- agent-control/adaptation-guide.md
+- agent-control/workflow-state.md
+- agent-control/handoffs.md
+- agent-control/task-board.md
+- agent-control/quality-gates.md
 
-Operating loop:
-1. Inspect $INBOX_PATH and .agents/workflow-state.md for queued or dispatched work assigned to $ROLE.
+Route operating loop:
+1. Inspect $INBOX_PATH and agent-control/workflow-state.md for queued or dispatched work assigned to $ROLE.
 2. When you act on a route, claim the route with ./scripts/claim-route.sh <route-id> $ROLE.
 3. Work from the shared source-of-truth files, not from terminal chat.
 4. Do your role-specific work without asking the human to prompt another agent.
-5. If another role is needed, write a concrete handoff or route through .agents/handoffs.md and the target .agents/inbox/<role>.md.
-6. If blocked, record the blocker in your inbox response, .agents/handoffs.md, and .agents/workflow-state.md.
-7. When finished, update your owned outputs and the route report, then run ./scripts/complete-route.sh <route-id> $ROLE "<short summary>" --report .agents/routes/<route-id>.md.
-8. If blocked, run ./scripts/block-route.sh <route-id> $ROLE "<reason>" --report .agents/routes/<route-id>.md and name the next owner.
+5. If another role is needed, write a concrete handoff or route through agent-control/handoffs.md and the target agent-control/inbox/<role>.md.
+6. If blocked, record the blocker in your inbox response, agent-control/handoffs.md, and agent-control/workflow-state.md.
+7. When finished, update your owned outputs and the route report, then run ./scripts/complete-route.sh <route-id> $ROLE "<short summary>" --report agent-control/routes/<route-id>.md.
+8. If blocked, run ./scripts/block-route.sh <route-id> $ROLE "<reason>" --report agent-control/routes/<route-id>.md and name the next owner.
 
-If relative .agents paths are not present in the working directory, use the control-plane directory above.
+If relative agent-control paths are not present in the working directory, use the control-plane directory above.
 EOF
 )"
 
-cmd=(codex --ask-for-approval never --sandbox workspace-write --no-alt-screen --cd "$WORKDIR")
+cmd=(codex --ask-for-approval never --sandbox workspace-write --disable apps --no-alt-screen --cd "$WORKDIR")
 
 root_real="$(cd "$ROOT" && pwd -P)"
 workdir_real="$(cd "$WORKDIR" && pwd -P)"
-if [ "$root_real" != "$workdir_real" ]; then
-  cmd+=(--add-dir "$ROOT")
+cmd+=(--add-dir "$ROOT")
+
+if [ -d "$ROOT/agent-control" ]; then
+  cmd+=(--add-dir "$ROOT/agent-control")
 fi
+
+for control_subdir in state routes inbox; do
+  if [ -d "$ROOT/agent-control/$control_subdir" ]; then
+    cmd+=(--add-dir "$ROOT/agent-control/$control_subdir")
+  fi
+done
 
 if [ -d "$TARGET_PATH" ]; then
   target_real="$(cd "$TARGET_PATH" && pwd -P)"

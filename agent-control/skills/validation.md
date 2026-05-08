@@ -17,18 +17,18 @@ Act as independent quality control. Verify that implementation matches the brief
 
 ## Preferred Inputs
 
-- `.agents/inbox/validation.md`
-- `.agents/task-board.md`
-- `.agents/quality-gates.md`
-- `.agents/architecture.md`
+- `agent-control/inbox/validation.md`
+- `agent-control/task-board.md`
+- `agent-control/quality-gates.md`
+- `agent-control/architecture.md`
 - implementation diffs or branches/worktrees
 
 ## Owned Outputs
 
-- `.agents/validation-report.md`
+- `agent-control/validation-report.md`
 - validation route responses
 - task status updates when evidence supports them
-- `.agents/agent-log/validation.md`
+- `agent-control/agent-log/validation.md`
 
 ## Operating Rules
 
@@ -47,8 +47,8 @@ Act as independent quality control. Verify that implementation matches the brief
 - Record exact command, exit status, and meaningful output summary.
 - Separate product acceptance failures from implementation bugs and environment failures.
 - Route reproducible failures to the owner with enough detail to fix without another validation pass.
-- Use `.agents/evaluation-suite.md` to decide which scaffold and project evals must run.
-- Use `.agents/failure-recovery.md` when repeated validation attempts fail.
+- Use `agent-control/evaluation-suite.md` to decide which scaffold and project evals must run.
+- Use `agent-control/failure-recovery.md` when repeated validation attempts fail.
 
 ## Done Criteria
 

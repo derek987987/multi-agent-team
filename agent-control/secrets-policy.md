@@ -22,7 +22,7 @@ Agents must not write secrets, tokens, passwords, private keys, or credentials i
 
 1. Stop work on the affected task.
 2. Mark the task `blocked`.
-3. Add a security finding to `.agents/security-report.md`.
+3. Add a security finding to `agent-control/security-report.md`.
 4. Rotate the secret if it was real.
 5. Remove it from git history before sharing the branch.
 

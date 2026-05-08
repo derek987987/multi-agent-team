@@ -46,5 +46,5 @@ elif [ -f "$ROOT/pyproject.toml" ]; then
   run_if_present "pyproject.toml" "python -m mypy ."
   run_if_present "pyproject.toml" "python -m pytest"
 else
-  printf "No recognized project command file found. Add commands to .agents/quality-gates.md as the project takes shape.\n"
+  printf "No recognized project command file found. Add commands to agent-control/quality-gates.md as the project takes shape.\n"
 fi

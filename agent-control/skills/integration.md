@@ -15,9 +15,9 @@ Merge reviewed work safely, resolve conflicts deliberately, and keep the main br
 
 ## Preferred Inputs
 
-- `.agents/inbox/integration.md`
-- `.agents/task-board.md`
-- `.agents/validation-report.md`
+- `agent-control/inbox/integration.md`
+- `agent-control/task-board.md`
+- `agent-control/validation-report.md`
 - git branches/worktrees
 
 ## Owned Outputs

@@ -11,7 +11,7 @@ usage() {
   printf "Usage: %s <meeting-id> <scope> <related-id> <file-path> <attachment-type> <description> [options]\n" "$(basename "$0")" >&2
   printf "Example: %s M001 route R001 /tmp/screenshot.png screenshot \"Reference UI\" --copy --sensitive no --review-owner security\n" "$(basename "$0")" >&2
   printf "\nOptions:\n" >&2
-  printf "  --copy                         Copy the file into .agents/media/files/ and record stored_path\n" >&2
+  printf "  --copy                         Copy the file into agent-control/media/files/ and record stored_path\n" >&2
   printf "  --sensitive <yes|no|unknown>   Mark whether the attachment may contain sensitive content\n" >&2
   printf "  --review-owner <role>          Role responsible for reviewing sensitive or risky media\n" >&2
   printf "  --attribution <text>           Source, license, or origin note for the media\n" >&2
@@ -200,7 +200,7 @@ case "$HEIGHT" in
     ;;
 esac
 
-mkdir -p "$ROOT/.agents/media" "$ROOT/.agents/state"
+mkdir -p "$ROOT/agent-control/media" "$ROOT/agent-control/state"
 
 FILE_SIZE="$(wc -c < "$FILE_PATH" | tr -d '[:space:]')"
 SHA256="$(sha256_file "$FILE_PATH")"
@@ -212,8 +212,8 @@ fi
 
 STORED_PATH=""
 if [ "$COPY_MEDIA" -eq 1 ]; then
-  mkdir -p "$ROOT/.agents/media/files"
-  STORED_PATH=".agents/media/files/$ATTACHMENT_ID-$(basename "$FILE_PATH")"
+  mkdir -p "$ROOT/agent-control/media/files"
+  STORED_PATH="agent-control/media/files/$ATTACHMENT_ID-$(basename "$FILE_PATH")"
   cp "$FILE_PATH" "$ROOT/$STORED_PATH"
 fi
 
@@ -228,10 +228,10 @@ record="$(append_number_field "$record" "width" "$WIDTH")"
 record="$(append_number_field "$record" "height" "$HEIGHT")"
 record="$record}"
 
-printf '%s\n' "$record" >> "$ROOT/.agents/media/manifest.jsonl"
-printf '%s\n' "$record" >> "$ROOT/.agents/state/media.jsonl"
+printf '%s\n' "$record" >> "$ROOT/agent-control/media/manifest.jsonl"
+printf '%s\n' "$record" >> "$ROOT/agent-control/state/media.jsonl"
 
-if [ -n "$MEETING_ID" ] && [ -f "$ROOT/.agents/meetings/$MEETING_ID.md" ]; then
+if [ -n "$MEETING_ID" ] && [ -f "$ROOT/agent-control/meetings/$MEETING_ID.md" ]; then
   tmp="$(mktemp)"
   display_path="$FILE_PATH"
   [ -n "$STORED_PATH" ] && display_path="$STORED_PATH"
@@ -245,8 +245,8 @@ if [ -n "$MEETING_ID" ] && [ -f "$ROOT/.agents/meetings/$MEETING_ID.md" ]; then
     }
     /^## / && !/^## Media Attachments/ { in_media = 0 }
     { print }
-  ' "$ROOT/.agents/meetings/$MEETING_ID.md" > "$tmp"
-  mv "$tmp" "$ROOT/.agents/meetings/$MEETING_ID.md"
+  ' "$ROOT/agent-control/meetings/$MEETING_ID.md" > "$tmp"
+  mv "$tmp" "$ROOT/agent-control/meetings/$MEETING_ID.md"
 fi
 
 "$ROOT/scripts/log-event.sh" media-attached orchestrator "Attached media $ATTACHMENT_ID" "$DESCRIPTION" "$RELATED_ID"

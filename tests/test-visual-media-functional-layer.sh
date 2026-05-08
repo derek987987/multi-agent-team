@@ -41,8 +41,8 @@ bash -n "$ROOT/scripts/start-visual-media-dashboard.sh"
 bash -n "$ROOT/scripts/attach-media.sh"
 
 dashboard_markup="$(cat "$ROOT/visual-media/index.html" "$ROOT/visual-media/app.js")"
-assert_contains "$dashboard_markup" ".agents/media/manifest.jsonl" "visual media dashboard"
-assert_contains "$dashboard_markup" ".agents/schemas/media-attachment.md" "visual media dashboard"
+assert_contains "$dashboard_markup" "agent-control/media/manifest.jsonl" "visual media dashboard"
+assert_contains "$dashboard_markup" "agent-control/schemas/media-attachment.md" "visual media dashboard"
 assert_contains "$dashboard_markup" "scripts/attach-media.sh" "visual media dashboard"
 assert_contains "$dashboard_markup" "attachmentType" "visual media dashboard"
 assert_contains "$dashboard_markup" "scope" "visual media dashboard"
@@ -76,8 +76,8 @@ printf "fake png bytes\n" > "$media_file"
   --width 1200 \
   --height 800 >/tmp/visual-media-attach.out
 
-manifest="$(cat "$test_root/.agents/media/manifest.jsonl")"
-state_media="$(cat "$test_root/.agents/state/media.jsonl")"
+manifest="$(cat "$test_root/agent-control/media/manifest.jsonl")"
+state_media="$(cat "$test_root/agent-control/state/media.jsonl")"
 assert_contains "$manifest" "\"attachment_type\":\"image\"" "visual media manifest"
 assert_contains "$manifest" "\"file_size\":" "visual media manifest"
 assert_contains "$manifest" "\"sha256\":\"" "visual media manifest"
@@ -88,8 +88,8 @@ assert_contains "$manifest" "\"attribution\":\"Threads post reference\"" "visual
 assert_contains "$manifest" "\"tags\":\"design,visual,reference\"" "visual media manifest"
 assert_contains "$manifest" "\"width\":1200" "visual media manifest"
 assert_contains "$manifest" "\"height\":800" "visual media manifest"
-assert_contains "$manifest" "\"stored_path\":\".agents/media/files/" "visual media manifest"
-assert_contains "$state_media" "\"stored_path\":\".agents/media/files/" "visual media state"
+assert_contains "$manifest" "\"stored_path\":\"agent-control/media/files/" "visual media manifest"
+assert_contains "$state_media" "\"stored_path\":\"agent-control/media/files/" "visual media state"
 
 copied_path="$(printf '%s\n' "$manifest" | sed -n 's/.*"stored_path":"\([^"]*\)".*/\1/p' | tail -1)"
 if [ ! -f "$test_root/$copied_path" ]; then
@@ -97,6 +97,6 @@ if [ ! -f "$test_root/$copied_path" ]; then
 fi
 
 structured_output="$("$test_root/scripts/validate-structured-state.sh")"
-assert_contains "$structured_output" ".agents/state/media.jsonl valid" "visual media structured state"
+assert_contains "$structured_output" "agent-control/state/media.jsonl valid" "visual media structured state"
 
 printf "Visual media functional layer tests passed.\n"
