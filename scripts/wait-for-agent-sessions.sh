@@ -14,6 +14,7 @@ INTERVAL="${AGENT_ROLE_READY_INTERVAL:-2}"
 ROLES=("${AGENT_ROLES[@]}")
 QUIET=0
 MARK_READY=1
+READY_DIR="$ROOT/agent-control/state/role-ready"
 
 usage() {
   cat >&2 <<EOF
@@ -121,8 +122,8 @@ fi
 
 pane_info_for() {
   local role="$1"
-  tmux list-panes -a -F '#S:#W #{pane_current_command} #{pane_dead}' 2>/dev/null |
-    awk -v target="$SESSION:$role" '$1 == target { print $2 "\t" $3; found = 1 } END { exit found ? 0 : 1 }'
+  tmux list-panes -a -F '#S:#W #{pane_current_command} #{pane_dead} #{pane_pid}' 2>/dev/null |
+    awk -v target="$SESSION:$role" '$1 == target { print $2 "\t" $3 "\t" $4; found = 1 } END { exit found ? 0 : 1 }'
 }
 
 role_is_ready() {
@@ -130,12 +131,13 @@ role_is_ready() {
   local info
   local command
   local dead
+  local pane_pid
   local capture
 
   if ! info="$(pane_info_for "$role")"; then
     return 1
   fi
-  IFS=$'\t' read -r command dead <<< "$info"
+  IFS=$'\t' read -r command dead pane_pid <<< "$info"
   if [ "$dead" != "0" ]; then
     return 1
   fi
@@ -144,12 +146,27 @@ role_is_ready() {
     *) return 1 ;;
   esac
 
-  capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -80 2>/dev/null || true)"
+  capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -2000 2>/dev/null || true)"
   printf '%s\n' "$capture" | grep -Fq "ROLE_READY $role"
 }
 
 mark_ready() {
   local role="$1"
+  local pane_pid
+  local ready_at
+
+  pane_pid="$(tmux list-panes -a -F '#S:#W #{pane_pid}' 2>/dev/null |
+    awk -v target="$SESSION:$role" '$1 == target { print $2; found = 1 } END { exit found ? 0 : 1 }' || true)"
+  ready_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  mkdir -p "$READY_DIR"
+  {
+    printf 'role=%s\n' "$role"
+    printf 'session=%s\n' "$SESSION"
+    printf 'window=%s\n' "$role"
+    printf 'pane_pid=%s\n' "$pane_pid"
+    printf 'ready_at=%s\n' "$ready_at"
+  } > "$READY_DIR/$role.ready"
+
   [ "$MARK_READY" -eq 1 ] || return 0
   "$ROOT/scripts/update-agent-state.sh" "$role" \
     --session "$SESSION" \

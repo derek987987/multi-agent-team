@@ -41,7 +41,7 @@ Add project-specific commands as the repo takes shape.
 - `agent-control/state/routes.jsonl` mirrors created routes.
 - `agent-control/state/workflow.sqlite3` validates when initialized.
 - `agent-control/state/agents.jsonl` reflects live role telemetry when routes are dispatched, claimed, completed, blocked, or cancelled.
-- `scripts/wait-for-agent-sessions.sh <session>` confirms `ROLE_READY <role>` markers before startup dispatch begins.
+- `scripts/wait-for-agent-sessions.sh <session>` confirms `ROLE_READY <role>` markers before startup dispatch begins and persists readiness markers for later route dispatch.
 - `agent-control/routes/R000.md` exists for each created route and is used as the durable route contract.
 - Non-draft routes have concrete instruction, expected output, and validation fields.
 - `scripts/validate-route-state.sh` passes.

@@ -6,7 +6,7 @@ source "$ROOT/scripts/agent-roles.sh"
 SESSION="${1:-agent-team}"
 MODE="${2:---dry-run}"
 ROUTES_JSONL="$ROOT/agent-control/state/routes.jsonl"
-ACK_TIMEOUT="${ROUTE_DISPATCH_ACK_TIMEOUT:-120}"
+ACK_TIMEOUT="${ROUTE_DISPATCH_ACK_TIMEOUT:-20}"
 SEND_TIMEOUT="${ROUTE_DISPATCH_SEND_TIMEOUT:-10}"
 SUBMIT_DELAY="${ROUTE_DISPATCH_SUBMIT_DELAY:-1}"
 TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)"
@@ -187,6 +187,12 @@ send_route_message() {
   fi
   rm -f "$message_file"
 
+  if ! run_with_timeout "$SEND_TIMEOUT" tmux send-keys -t "$session:$role" C-u; then
+    tmux delete-buffer -b "$buffer" 2>/dev/null || true
+    return 124
+  fi
+  sleep 0.1
+
   if ! run_with_timeout "$SEND_TIMEOUT" tmux paste-buffer -d -b "$buffer" -t "$session:$role"; then
     tmux delete-buffer -b "$buffer" 2>/dev/null || true
     return 124
@@ -204,14 +210,60 @@ send_route_message() {
   run_with_timeout "$SEND_TIMEOUT" tmux send-keys -t "$session:$role" Tab
 }
 
+role_pane_info() {
+  local session="$1"
+  local role="$2"
+  tmux list-panes -a -F '#S:#W #{pane_current_command} #{pane_dead} #{pane_pid}' 2>/dev/null |
+    awk -v target="$session:$role" '$1 == target { print $2 "\t" $3 "\t" $4; found = 1 } END { exit found ? 0 : 1 }'
+}
+
+ready_marker_matches() {
+  local session="$1"
+  local role="$2"
+  local pane_pid="$3"
+  local marker="$ROOT/agent-control/state/role-ready/$role.ready"
+  local marker_session
+  local marker_window
+  local marker_pid
+
+  [ -n "$pane_pid" ] || return 1
+  [ -f "$marker" ] || return 1
+  marker_session="$(awk -F= '$1 == "session" { print substr($0, index($0, "=") + 1); exit }' "$marker")"
+  marker_window="$(awk -F= '$1 == "window" { print substr($0, index($0, "=") + 1); exit }' "$marker")"
+  marker_pid="$(awk -F= '$1 == "pane_pid" { print substr($0, index($0, "=") + 1); exit }' "$marker")"
+
+  [ "$marker_session" = "$session" ] && [ "$marker_window" = "$role" ] && [ "$marker_pid" = "$pane_pid" ]
+}
+
 role_session_ready() {
   local session="$1"
   local role="$2"
-  "$ROOT/scripts/wait-for-agent-sessions.sh" "$session" \
+  local info
+  local command
+  local dead
+  local pane_pid
+
+  if ! info="$(role_pane_info "$session" "$role")"; then
+    return 1
+  fi
+  IFS=$'\t' read -r command dead pane_pid <<< "$info"
+  if [ "$dead" != "0" ]; then
+    return 1
+  fi
+  case "$command" in
+    codex*) ;;
+    *) return 1 ;;
+  esac
+
+  if "$ROOT/scripts/wait-for-agent-sessions.sh" "$session" \
     --roles "$role" \
     --timeout 0 \
     --interval 1 \
-    --quiet >/dev/null 2>&1
+    --quiet >/dev/null 2>&1; then
+    return 0
+  fi
+
+  ready_marker_matches "$session" "$role" "$pane_pid"
 }
 
 wait_for_ack() {
@@ -254,7 +306,7 @@ done | while IFS=$'\t' read -r role route prompt title; do
   fi
   report="$(route_report_for "$route" "$role")"
   report="${report:-agent-control/routes/$route.md}"
-  message="Route $route queued: $title. Use $prompt, agent-control/inbox/$role.md, agent-control/handoffs.md, and $report. Read the route report, claim the route with ./scripts/claim-route.sh $route $role, complete role-specific work from shared files, write results to owned outputs and $report, create handoffs when another role is needed, then run ./scripts/complete-route.sh $route $role \"<summary>\" --report $report. If blocked, run ./scripts/block-route.sh $route $role \"<reason>\" --report $report and name the needed owner."
+  message="Route $route queued: $title. Use $prompt, agent-control/inbox/$role.md, agent-control/handoffs.md, and $report. First, read the route report enough to confirm the assignment, then immediately claim the route with ./scripts/claim-route.sh $route $role before extended context loading. Complete role-specific work from shared files, write results to owned outputs and $report, create handoffs when another role is needed, then run ./scripts/complete-route.sh $route $role \"<summary>\" --report $report. If blocked, run ./scripts/block-route.sh $route $role \"<reason>\" --report $report and name the needed owner."
   if [ "$MODE" = "--send" ]; then
     if route_has_tbd_fields "$route" "$role"; then
       printf "Route %s for %s contains TBD fields; blocking instead of dispatching.\n" "$route" "$role" >&2
