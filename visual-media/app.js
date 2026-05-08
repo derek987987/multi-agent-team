@@ -173,7 +173,7 @@ function statusClass(agent) {
 }
 
 function agentByRole(role) {
-  return state.snapshot?agent-control.find((agent) => agent.role === role) || null;
+  return state.snapshot?.agents.find((agent) => agent.role === role) || null;
 }
 
 function routeById(routeId) {
@@ -364,7 +364,7 @@ function drawOffice(ctx, t) {
   drawPixelText(ctx, "routes", 976, 143, "#74b37c", 13);
 
   state.hitTargets = [];
-  const agents = state.snapshot?agent-control || [];
+  const agents = state.snapshot?.agents || [];
   agents.forEach((agent, index) => {
     const desk = stableDesk(agent, index);
     const selected = agent.role === state.selectedRole;
@@ -397,14 +397,20 @@ function animateOffice(now) {
 
 function updateStatusStrip() {
   const workflow = state.snapshot?.workflow || {};
-  const openRoutes = workflow.open_routes || [];
-  const blockedRows = workflow.blocked_tasks || [];
+  const openRoutes = (workflow.open_routes || []).filter((route) => {
+    const routeId = String(route.route_id || "").toLowerCase();
+    return routeId && routeId !== "none" && routeId !== "n/a";
+  });
+  const blockedRows = (workflow.blocked_tasks || []).filter((task) => {
+    const taskId = String(task.task || "").toLowerCase();
+    return taskId && taskId !== "none" && taskId !== "n/a";
+  });
   const routeBlockers = (state.snapshot?.routes || []).filter((route) => route.status === "blocked");
   elements.openRouteCount.textContent = String(openRoutes.length || (state.snapshot?.routes || []).filter((route) => route.status !== "done" && route.status !== "cancelled").length);
   elements.blockerCount.textContent = String(blockedRows.length + routeBlockers.length);
   elements.workflowPhase.textContent = workflow.phase || "-";
   elements.lastRefresh.textContent = formatRelative(state.snapshot?.generated_at);
-  elements.emptyState.hidden = (state.snapshot?agent-control || []).some((agent) => agent.live);
+  elements.emptyState.hidden = (state.snapshot?.agents || []).some((agent) => agent.live);
 }
 
 function refsForAgent(agent) {
@@ -441,7 +447,7 @@ function eventsForAgent(agent) {
 }
 
 function updateDrawer() {
-  const agent = agentByRole(state.selectedRole) || state.snapshot?agent-control[0] || null;
+  const agent = agentByRole(state.selectedRole) || state.snapshot?.agents[0] || null;
   if (agent && state.selectedRole !== agent.role) {
     state.selectedRole = agent.role;
   }
@@ -487,7 +493,7 @@ function updateDrawer() {
 function populateRecipientSelect() {
   const current = elements.recipientSelect.value || state.selectedRole;
   elements.recipientSelect.innerHTML = "";
-  for (const agent of state.snapshot?agent-control || []) {
+  for (const agent of state.snapshot?.agents || []) {
     const option = document.createElement("option");
     option.value = agent.role;
     option.textContent = agent.display_name || agent.role;
@@ -505,7 +511,7 @@ async function loadSnapshot() {
     }
     state.snapshot = await response.json();
     if (!agentByRole(state.selectedRole)) {
-      state.selectedRole = state.snapshotagent-control[0]?.role || "orchestrator";
+      state.selectedRole = state.snapshot.agents[0]?.role || "orchestrator";
     }
     populateRecipientSelect();
     updateStatusStrip();
