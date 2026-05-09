@@ -6,7 +6,13 @@ case "${1:-}" in
     exit 0
     ;;
   list-panes)
-    printf 'fake-session:frontend\tcodex-aarch64-a\t0\n'
+    if [[ "$*" == *"#S:#W #{pane_current_command}"* ]]; then
+      printf 'fake-session:frontend codex-aarch64-a 0 fixture-pane\n'
+    elif [[ "$*" == *"#S:#W #{pane_pid}"* ]]; then
+      printf 'fake-session:frontend fixture-pane\n'
+    else
+      printf 'fake-session\tfrontend\tcodex-aarch64-a\t0\tfixture-pane\n'
+    fi
     ;;
   capture-pane)
     printf '%s\n' "${TMUX_FIXTURE_CAPTURE:-fake Codex pane waiting at prompt}"
