@@ -98,6 +98,45 @@ PATH="$ROOT/tests/fixtures:$PATH" \
 
 assert_contains "$(cat /tmp/dispatch-not-ready.out /tmp/dispatch-not-ready.err)" "Role session not ready" "dispatch readiness gate"
 assert_contains "$(cat "$ROOT/agent-control/inbox/backend.md")" "Status: queued" "dispatch readiness gate"
+"$ROOT/scripts/cancel-route.sh" R908 test "readiness gate verified" >/tmp/cancel-r908.out
+
+target_project="$tmp_parent/target-project"
+mkdir -p "$target_project"
+tmp="$(mktemp)"
+awk -v path="$target_project" '/^Path:/ { print "Path: " path; next } { print }' "$ROOT/agent-control/project-target.md" > "$tmp"
+mv "$tmp" "$ROOT/agent-control/project-target.md"
+
+"$ROOT/scripts/update-agent-state.sh" frontend \
+  --session fake-session \
+  --window frontend \
+  --status available \
+  --active-route none \
+  --workdir "$ROOT" \
+  --target-project "$target_project" \
+  --process-status alive
+
+"$ROOT/scripts/route-agent.sh" R909 frontend "Dispatch detects stale project role workdir" \
+  --instruction "Dummy route that should not dispatch to a project-writing role launched from the control-plane root." \
+  --expected-output "agent-control/routes/R909.md remains queued until frontend is relaunched from the target path." \
+  --validation "Dispatcher leaves target-writing routes queued when live role telemetry workdir does not match the project target." \
+  --context "agent-control/failure-recovery.md" >/tmp/route-r909.out
+
+PATH="$ROOT/tests/fixtures:$PATH" TMUX_FIXTURE_CAPTURE="ROLE_READY frontend" \
+  "$ROOT/scripts/dispatch-routes.sh" fake-session --send >/tmp/dispatch-workdir-mismatch.out 2>/tmp/dispatch-workdir-mismatch.err || true
+
+assert_contains "$(cat /tmp/dispatch-workdir-mismatch.out /tmp/dispatch-workdir-mismatch.err)" "Role workdir mismatch" "dispatch project workdir gate"
+assert_contains "$(cat "$ROOT/agent-control/inbox/frontend.md")" "Status: queued" "dispatch project workdir gate"
+assert_contains "$(cat "$ROOT/agent-control/state/agents.jsonl")" "project-writing role launched from" "dispatch project workdir telemetry"
+"$ROOT/scripts/cancel-route.sh" R909 test "project workdir mismatch guard verified" >/tmp/cancel-r909.out
+
+"$ROOT/scripts/update-agent-state.sh" frontend \
+  --session fake-session \
+  --window frontend \
+  --status available \
+  --active-route none \
+  --workdir "$target_project" \
+  --target-project "$target_project" \
+  --process-status alive
 
 "$ROOT/scripts/route-agent.sh" R902 frontend "Dispatch acknowledgement timeout" \
   --instruction "Dummy dispatch route for timeout behavior." \

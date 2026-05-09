@@ -52,22 +52,62 @@ if ! is_agent_role "$ROLE"; then
 fi
 
 CONFIG="$ROOT/agent-control/agent-config/$ROLE.yaml"
-SESSION="${AGENT_TEAM_SESSION:-}"
-WINDOW="$ROLE"
-PID_OR_COMMAND=""
-PROCESS_STATUS=""
-STATUS="available"
-ACTIVE_ROUTE="none"
-ACTIVE_TASK="none"
-WORKDIR="$(pwd -P)"
+STATE_FILE="$ROOT/agent-control/state/agents.jsonl"
+
+previous_field() {
+  local field="$1"
+  [ -f "$STATE_FILE" ] || return 0
+  if command -v jq >/dev/null 2>&1; then
+    jq -r --arg role "$ROLE" --arg field "$field" 'select(.role == $role) | .[$field] // empty' "$STATE_FILE" 2>/dev/null | tail -n 1
+  else
+    awk -v role="\"role\":\"$ROLE\"" -v field="\"$field\":" '
+      index($0, role) {
+        pos = index($0, field)
+        if (!pos) next
+        value = substr($0, pos + length(field))
+        sub(/^[[:space:]]*/, "", value)
+        if (value ~ /^"/) {
+          sub(/^"/, "", value)
+          sub(/".*/, "", value)
+        } else {
+          sub(/[,}].*/, "", value)
+        }
+        latest = value
+      }
+      END { print latest }
+    ' "$STATE_FILE"
+  fi
+}
+
+PREV_SESSION="$(previous_field session)"
+PREV_WINDOW="$(previous_field window)"
+PREV_PID_OR_COMMAND="$(previous_field pid_or_command)"
+PREV_PROCESS_STATUS="$(previous_field process_status)"
+PREV_STATUS="$(previous_field status)"
+PREV_ACTIVE_ROUTE="$(previous_field active_route)"
+PREV_ACTIVE_TASK="$(previous_field active_task)"
+PREV_WORKDIR="$(previous_field workdir)"
+PREV_TARGET_PROJECT="$(previous_field target_project)"
+PREV_BRANCH_OR_WORKTREE="$(previous_field branch_or_worktree)"
+PREV_CAPACITY="$(previous_field capacity)"
+PREV_RECOVERY_OWNER="$(previous_field recovery_owner)"
+
+SESSION="${AGENT_TEAM_SESSION:-$PREV_SESSION}"
+WINDOW="${PREV_WINDOW:-$ROLE}"
+PID_OR_COMMAND="$PREV_PID_OR_COMMAND"
+PROCESS_STATUS="$PREV_PROCESS_STATUS"
+STATUS="${PREV_STATUS:-available}"
+ACTIVE_ROUTE="${PREV_ACTIVE_ROUTE:-none}"
+ACTIVE_TASK="${PREV_ACTIVE_TASK:-none}"
+WORKDIR="${PREV_WORKDIR:-$(pwd -P)}"
 TARGET_PROJECT="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)"
 TARGET_PROJECT="${TARGET_PROJECT:-$ROOT}"
-BRANCH_OR_WORKTREE=""
+BRANCH_OR_WORKTREE="$PREV_BRANCH_OR_WORKTREE"
 CAPACITY="$(awk -F':[[:space:]]*' '/^max_parallel_routes:/ { print $2; exit }' "$CONFIG" 2>/dev/null || true)"
-CAPACITY="${CAPACITY:-1}"
+CAPACITY="${CAPACITY:-${PREV_CAPACITY:-1}}"
 BLOCKED_REASON=""
 RECOVERY_OWNER="$(awk -F':[[:space:]]*' '/^escalation_owner:/ { print $2; exit }' "$CONFIG" 2>/dev/null || true)"
-RECOVERY_OWNER="${RECOVERY_OWNER:-orchestrator}"
+RECOVERY_OWNER="${RECOVERY_OWNER:-${PREV_RECOVERY_OWNER:-orchestrator}}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -182,7 +222,6 @@ if [ -n "$RECOVERY_OWNER" ] && ! is_agent_role "$RECOVERY_OWNER"; then
 fi
 
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-STATE_FILE="$ROOT/agent-control/state/agents.jsonl"
 mkdir -p "$(dirname "$STATE_FILE")"
 touch "$STATE_FILE"
 

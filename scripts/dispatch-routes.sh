@@ -12,6 +12,18 @@ SUBMIT_DELAY="${ROUTE_DISPATCH_SUBMIT_DELAY:-1}"
 TARGET_PATH="$(awk -F': ' '/^Path:/ { print $2; exit }' "$ROOT/agent-control/project-target.md" 2>/dev/null || true)"
 TARGET_PATH="${TARGET_PATH:-$ROOT}"
 
+normalize_existing_path() {
+  local path="$1"
+  if [ -d "$path" ]; then
+    (cd "$path" && pwd -P)
+  else
+    printf "%s" "$path"
+  fi
+}
+
+ROOT_REAL="$(normalize_existing_path "$ROOT")"
+TARGET_REAL="$(normalize_existing_path "$TARGET_PATH")"
+
 case "$ACK_TIMEOUT" in
   ''|*[!0-9]*)
     printf "ROUTE_DISPATCH_ACK_TIMEOUT must be a positive integer: %s\n" "$ACK_TIMEOUT" >&2
@@ -40,6 +52,45 @@ esac
 
 json_escape() {
   printf '%s' "$1" | tr '\n' ' ' | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g'
+}
+
+agent_workdir_for() {
+  local role="$1"
+  local state="$ROOT/agent-control/state/agents.jsonl"
+  [ -f "$state" ] || return 0
+  awk -v role="$role" '
+    index($0, "\"role\":\"" role "\"") {
+      line = $0
+      if (match(line, /"workdir":"[^"]*"/)) {
+        value = substr(line, RSTART + 11, RLENGTH - 12)
+      }
+    }
+    END {
+      if (value != "") {
+        print value
+      }
+    }
+  ' "$state"
+}
+
+role_requires_target_workdir() {
+  local role="$1"
+  role_uses_project_worktree "$role" || [ "$role" = "integration" ]
+}
+
+role_workdir_matches_target() {
+  local role="$1"
+  local workdir
+  local workdir_real
+
+  role_requires_target_workdir "$role" || return 0
+  [ "$TARGET_REAL" != "$ROOT_REAL" ] || return 0
+
+  workdir="$(agent_workdir_for "$role")"
+  [ -n "$workdir" ] || return 0
+
+  workdir_real="$(normalize_existing_path "$workdir")"
+  [ "$workdir_real" = "$TARGET_REAL" ]
 }
 
 prompt_for_role() {
@@ -318,6 +369,21 @@ done | while IFS=$'\t' read -r role route prompt title; do
       "$ROOT/scripts/block-route.sh" "$route" dispatch-routes "tmux session not found: $SESSION" --report "$report" >/dev/null
       continue
     fi
+    if ! role_workdir_matches_target "$role"; then
+      role_workdir="$(agent_workdir_for "$role")"
+      reason="project-writing role launched from ${role_workdir:-unknown}; expected target workdir $TARGET_PATH. Relaunch $SESSION:$role with $ROOT/scripts/codex-role.sh $role --workdir $TARGET_PATH before dispatching target-writing routes."
+      printf "Role workdir mismatch for route %s: %s\n" "$route" "$reason" >&2
+      "$ROOT/scripts/update-agent-state.sh" "$role" \
+        --session "$SESSION" \
+        --window "$role" \
+        --status blocked \
+        --active-route "$route" \
+        --blocked-reason "$reason" \
+        --target-project "$TARGET_PATH" \
+        --pid-or-command "tmux:$SESSION:$role" \
+        --process-status alive
+      continue
+    fi
     if ! role_session_ready "$SESSION" "$role"; then
       printf "Role session not ready for route %s: %s:%s; leaving queued\n" "$route" "$SESSION" "$role" >&2
       "$ROOT/scripts/update-agent-state.sh" "$role" \
@@ -367,19 +433,42 @@ done | while IFS=$'\t' read -r role route prompt title; do
         printf "Route %s left dispatch wait with status %s\n" "$route" "$(current_route_status "$route" "$role")" >&2
         ;;
       2)
-        capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -40 2>/dev/null || true)"
-        printf "Route %s still awaiting claim by %s after %ss; leaving dispatched for stale recovery\n" "$route" "$role" "$ACK_TIMEOUT" >&2
-        append_report_note "$report" "Dispatch acknowledgement pending" "No route claim after ${ACK_TIMEOUT}s. Route remains dispatched so the role can still claim it; stale-route recovery owns retry/block decisions. Pane tail:\n\n\`\`\`text\n$capture\n\`\`\`"
-        "$ROOT/scripts/update-agent-state.sh" "$role" \
-          --session "$SESSION" \
-          --window "$role" \
-          --status dispatching \
-          --active-route "$route" \
-          --blocked-reason none \
-          --target-project "$TARGET_PATH" \
-          --pid-or-command "tmux:$SESSION:$role" \
-          --process-status alive
-        "$ROOT/scripts/log-event.sh" route-ack-pending dispatch-routes "Route $route not claimed after ${ACK_TIMEOUT}s; left dispatched" "" "$route"
+        final_status="$(current_route_status "$route" "$role")"
+        case "$final_status" in
+          in-progress|acknowledged)
+            "$ROOT/scripts/update-agent-state.sh" "$role" \
+              --session "$SESSION" \
+              --window "$role" \
+              --status busy \
+              --active-route "$route" \
+              --blocked-reason none \
+              --target-project "$TARGET_PATH" \
+              --pid-or-command "tmux:$SESSION:$role" \
+              --process-status alive
+            "$ROOT/scripts/log-event.sh" route-acknowledged dispatch-routes "Route $route acknowledged by $role after timeout boundary" "" "$route"
+            ;;
+          done)
+            "$ROOT/scripts/log-event.sh" route-acknowledged dispatch-routes "Route $route completed by $role after timeout boundary" "" "$route"
+            ;;
+          blocked|cancelled)
+            printf "Route %s changed to %s after dispatch wait\n" "$route" "$final_status" >&2
+            ;;
+          *)
+            capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -40 2>/dev/null || true)"
+            printf "Route %s still awaiting claim by %s after %ss; leaving dispatched for stale recovery\n" "$route" "$role" "$ACK_TIMEOUT" >&2
+            append_report_note "$report" "Dispatch acknowledgement pending" "No route claim after ${ACK_TIMEOUT}s. Route remains dispatched so the role can still claim it; stale-route recovery owns retry/block decisions. Pane tail:\n\n\`\`\`text\n$capture\n\`\`\`"
+            "$ROOT/scripts/update-agent-state.sh" "$role" \
+              --session "$SESSION" \
+              --window "$role" \
+              --status dispatching \
+              --active-route "$route" \
+              --blocked-reason none \
+              --target-project "$TARGET_PATH" \
+              --pid-or-command "tmux:$SESSION:$role" \
+              --process-status alive
+            "$ROOT/scripts/log-event.sh" route-ack-pending dispatch-routes "Route $route not claimed after ${ACK_TIMEOUT}s; left dispatched" "" "$route"
+            ;;
+        esac
         ;;
     esac
   else
