@@ -61,6 +61,14 @@ agent_workdir_for() {
   awk -v role="$role" '
     index($0, "\"role\":\"" role "\"") {
       line = $0
+      if (match(line, /"session":"[^"]*"/)) {
+        session = substr(line, RSTART + 11, RLENGTH - 12)
+      } else {
+        session = ""
+      }
+      if (session != session_filter) {
+        next
+      }
       if (match(line, /"workdir":"[^"]*"/)) {
         value = substr(line, RSTART + 11, RLENGTH - 12)
       }
@@ -70,7 +78,7 @@ agent_workdir_for() {
         print value
       }
     }
-  ' "$state"
+  ' session_filter="$SESSION" "$state"
 }
 
 role_requires_target_workdir() {
