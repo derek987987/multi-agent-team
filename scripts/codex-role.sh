@@ -18,6 +18,8 @@ $(print_agent_roles | sed 's/^/  /')
 
 Options:
   --workdir <dir>   Directory passed to codex --cd. Default: agent-team root.
+                   When this is the project target, control-plane scripts remain
+                   available through the agent-team root added as a writable dir.
   --print           Print the Codex command instead of executing it.
 EOF
 }
@@ -180,13 +182,13 @@ When a route message arrives, read:
 
 Route operating loop:
 1. Inspect $INBOX_PATH and agent-control/workflow-state.md for queued or dispatched work assigned to $ROLE.
-2. When you act on a route, claim the route with ./scripts/claim-route.sh <route-id> $ROLE.
+2. When you act on a route, claim the route with $ROOT/scripts/claim-route.sh <route-id> $ROLE from the control-plane directory, or ./scripts/claim-route.sh <route-id> $ROLE when your working directory is $ROOT.
 3. Work from the shared source-of-truth files, not from terminal chat.
 4. Do your role-specific work without asking the human to prompt another agent.
 5. If another role is needed, write a concrete handoff or route through agent-control/handoffs.md and the target agent-control/inbox/<role>.md.
 6. If blocked, record the blocker in your inbox response, agent-control/handoffs.md, and agent-control/workflow-state.md.
-7. When finished, update your owned outputs and the route report, then run ./scripts/complete-route.sh <route-id> $ROLE "<short summary>" --report agent-control/routes/<route-id>.md.
-8. If blocked, run ./scripts/block-route.sh <route-id> $ROLE "<reason>" --report agent-control/routes/<route-id>.md and name the next owner.
+7. When finished, update your owned outputs and the route report, then run $ROOT/scripts/complete-route.sh <route-id> $ROLE "<short summary>" --report agent-control/routes/<route-id>.md from the control-plane directory, or ./scripts/complete-route.sh <route-id> $ROLE "<short summary>" --report agent-control/routes/<route-id>.md when your working directory is $ROOT.
+8. If blocked, run $ROOT/scripts/block-route.sh <route-id> $ROLE "<reason>" --report agent-control/routes/<route-id>.md from the control-plane directory, or ./scripts/block-route.sh <route-id> $ROLE "<reason>" --report agent-control/routes/<route-id>.md when your working directory is $ROOT, and name the next owner.
 
 If relative agent-control paths are not present in the working directory, use the control-plane directory above.
 EOF

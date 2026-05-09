@@ -98,6 +98,8 @@ assert_contains "$(cat "$ROOT/scripts/start-agent-team.sh")" "AGENT_ROLES" "stan
 assert_contains "$(cat "$ROOT/scripts/start-agent-team.sh")" "start-agent-office-dashboard.sh" "standard tmux start"
 assert_contains "$(cat "$ROOT/scripts/start-agent-team.sh")" "AGENT_OFFICE_PORT" "standard tmux start"
 assert_contains "$(cat "$ROOT/scripts/start-agent-team.sh")" "Agent Office dashboard" "standard tmux start"
+assert_contains "$(cat "$ROOT/scripts/start-agent-team.sh")" "role_uses_project_worktree" "standard tmux project role startup"
+assert_contains "$(cat "$ROOT/scripts/start-agent-team.sh")" 'start_role_window "$role" "$TARGET_PATH"' "standard tmux project role startup"
 assert_contains "$(cat "$ROOT/scripts/start-agent-team-worktrees.sh")" "codex-role.sh" "worktree tmux start"
 assert_contains "$(cat "$ROOT/scripts/start-agent-team-worktrees.sh")" "trust-codex-projects.sh" "worktree tmux start"
 assert_contains "$(cat "$ROOT/scripts/start-agent-team-worktrees.sh")" "wait-for-agent-sessions.sh" "worktree tmux start"
@@ -122,6 +124,14 @@ assert_contains "$frontend_output" "codex --ask-for-approval never --sandbox wor
 assert_contains "$frontend_output" "agent-control/prompts/frontend.md" "frontend launcher"
 assert_contains "$frontend_output" "agent-control/inbox/frontend.md" "frontend launcher"
 assert_contains "$frontend_output" "claim assigned routes" "frontend launcher"
+
+target_project="$tmp_parent/target-project"
+mkdir -p "$target_project"
+target_frontend_output="$("$ROOT/scripts/codex-role.sh" frontend --workdir "$target_project" --print)"
+assert_contains "$target_frontend_output" "--cd $target_project" "frontend target launcher"
+assert_contains "$target_frontend_output" "$ROOT/scripts/claim-route.sh" "frontend target launcher"
+assert_contains "$target_frontend_output" "$ROOT/scripts/complete-route.sh" "frontend target launcher"
+assert_contains "$target_frontend_output" "$ROOT/scripts/block-route.sh" "frontend target launcher"
 
 "$ROOT/scripts/watch-routes.sh" agent-team-test --once --dry-run >/tmp/agent-team-watch-routes-test.out
 assert_contains "$(cat /tmp/agent-team-watch-routes-test.out)" "watch-routes" "route watcher"

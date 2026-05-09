@@ -47,7 +47,11 @@ start_role_window() {
 }
 
 for role in "${AGENT_ROLES[@]}"; do
-  start_role_window "$role" "$PROJECT_DIR"
+  if role_uses_project_worktree "$role" || [ "$role" = "integration" ]; then
+    start_role_window "$role" "$TARGET_PATH"
+  else
+    start_role_window "$role" "$PROJECT_DIR"
+  fi
 done
 
 tmux send-keys -t "$SESSION:control" "$control_cmd" C-m
