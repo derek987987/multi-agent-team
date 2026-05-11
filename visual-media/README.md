@@ -33,11 +33,20 @@ browser:
 - `GET /api/snapshot` reads `agent-control/company/agent-profiles.jsonl`,
   `agent-control/state/agents.jsonl`, `agent-control/state/routes.jsonl`,
   `agent-control/events.jsonl`, `agent-control/workflow-state.md`, and route reports under
-  `agent-control/routes/`.
+  `agent-control/routes/`. It also returns health signals for stuck or watched
+  agents/routes.
+- `GET /api/agent-pane?role=<role>&lines=<count>` validates the selected role
+  and returns a tmux `capture-pane` tail for its recorded session/window when
+  available. This powers the `Codex Session` section in the agent inspector.
 - `POST /api/orchestrator-prompt` accepts `{ "role": "<role>", "message": "<text>" }`,
   validates the role against `agent-control/company/agent-profiles.jsonl`, creates the
   next route with `scripts/route-agent.sh --from human-ui`, and queues it to
   `agent-control/inbox/orchestrator.md`.
+
+Health signals flag common stuck cases: blocked routes, stale active routes,
+missing tmux panes, dead panes, missing readiness markers, old
+launching/dispatching telemetry, and explicit blocked reasons from
+`agent-control/state/agents.jsonl`.
 
 Prompt-created routes always go to Orchestrator. The selected role, status, and
 active route are copied into the route instruction as context; direct role

@@ -78,7 +78,11 @@ dashboard_markup="$(cat "$ROOT/visual-media/index.html" "$ROOT/visual-media/app.
 assert_contains "$dashboard_markup" "Agent Office" "agent office dashboard"
 assert_contains "$dashboard_markup" "Media Builder" "agent office dashboard"
 assert_contains "$dashboard_markup" "/api/snapshot" "agent office dashboard"
+assert_contains "$dashboard_markup" "/api/agent-pane" "agent office dashboard"
 assert_contains "$dashboard_markup" "/api/orchestrator-prompt" "agent office dashboard"
+assert_contains "$dashboard_markup" "Codex Session" "agent office dashboard"
+assert_contains "$dashboard_markup" "stuckSignalCount" "agent office dashboard"
+assert_contains "$dashboard_markup" "healthList" "agent office dashboard"
 assert_contains "$dashboard_markup" "scripts/attach-media.sh" "media builder tab"
 
 office_url="$("$ROOT/scripts/start-agent-office-dashboard.sh" --print-url 9877)"
@@ -109,12 +113,41 @@ chmod +x "$test_root"/scripts/*.sh
   --status busy \
   --active-route R777 \
   --active-task T777 \
-  --session agent-team \
+  --session fake-session \
   --window frontend
+"$test_root/scripts/update-agent-state.sh" frontend \
+  --status busy \
+  --active-route R777 \
+  --active-task T777
 "$test_root/scripts/update-agent-state.sh" backend \
   --status blocked \
   --active-route R778 \
   --blocked-reason "Needs API contract"
+cat >> "$test_root/agent-control/state/routes.jsonl" <<'JSONL'
+{"route_id":"R777","from":"orchestrator","to":"frontend","status":"in-progress","priority":"P1","attempt":1,"created":"2026-01-01T00:00:00Z","updated":"2099-01-01T00:00:00Z","report":"agent-control/routes/R777.md"}
+{"route_id":"R778","from":"orchestrator","to":"backend","status":"blocked","priority":"P1","attempt":1,"created":"2026-01-01T00:00:00Z","updated":"2026-01-01T00:00:00Z","report":"agent-control/routes/R778.md"}
+JSONL
+
+PATH="$ROOT/tests/fixtures:$PATH" TMUX_FIXTURE_CAPTURE="ROLE_READY frontend" python3 - "$test_root" <<'PY'
+import importlib.util
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("agent_office_server", root / "visual-media" / "agent_office_server.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+payload = module.build_snapshot(root)
+frontend = {agent["role"]: agent for agent in payload["agents"]}["frontend"]
+assert frontend["pane"]["pane_pid"] == "fixture-pane", frontend
+assert frontend["health"]["ready_marker_matches_pane"] is False, frontend
+assert frontend["health"]["role_ready_visible_in_pane"] is True, frontend
+assert frontend["health"]["severity"] == "ok", frontend
+status, pane_payload = module.capture_agent_pane(root, "frontend", 30)
+assert status == 200, pane_payload
+assert pane_payload["available"] is True, pane_payload
+assert "ROLE_READY frontend" in pane_payload["output"], pane_payload
+PY
 
 port="$(free_port)"
 "$test_root/scripts/start-agent-office-dashboard.sh" --port "$port" >"$tmp_parent/server.log" 2>&1 &
@@ -141,11 +174,43 @@ roles = {agent["role"]: agent for agent in payload["agents"]}
 assert "orchestrator" in roles, "orchestrator profile missing"
 assert roles["frontend"]["status"] == "busy", roles["frontend"]
 assert roles["frontend"]["active_route"] == "R777", roles["frontend"]
+assert roles["frontend"]["session"] == "fake-session", roles["frontend"]
+assert roles["frontend"]["window"] == "frontend", roles["frontend"]
+assert "health" in roles["frontend"], roles["frontend"]
+routes = {route["route_id"]: route for route in payload["routes"]}
+assert routes["R777"]["health"]["severity"] == "ok", routes["R777"]
+assert routes["R777"]["health"]["age_seconds"] == 0, routes["R777"]
 assert roles["backend"]["status"] == "blocked", roles["backend"]
+assert roles["backend"]["health"]["severity"] == "stuck", roles["backend"]
+assert routes["R778"]["health"]["severity"] == "stuck", routes["R778"]
 assert "events" in payload and isinstance(payload["events"], list)
+assert "health" in payload and "attention_count" in payload["health"], payload
 assert "workflow" in payload and payload["workflow"]["phase"] == "intake"
 assert "routes" in payload and isinstance(payload["routes"], list)
 PY
+
+python3 - "$port" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.request
+
+port = int(sys.argv[1])
+with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/agent-pane?role=frontend&lines=30", timeout=3) as response:
+    payload = json.load(response)
+assert payload["role"] == "frontend", payload
+assert "available" in payload, payload
+assert "output" in payload, payload
+
+try:
+    urllib.request.urlopen(f"http://127.0.0.1:{port}/api/agent-pane?role=not-a-role", timeout=3)
+except urllib.error.HTTPError as exc:
+    assert exc.code == 400, exc.code
+else:
+    raise AssertionError("expected HTTP 400 for invalid pane role")
+PY
+
+: > "$test_root/agent-control/state/routes.jsonl"
 
 prompt_response="$tmp_parent/prompt-response.json"
 python3 - "$port" "$prompt_response" <<'PY'

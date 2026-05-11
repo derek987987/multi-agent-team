@@ -70,6 +70,8 @@ const state = {
   hitTargets: [],
   canvasView: { scale: 1, offsetX: 0, offsetY: 0 },
   animationStart: performance.now(),
+  paneRequestId: 0,
+  paneText: "",
 };
 
 const elements = {
@@ -81,6 +83,7 @@ const elements = {
   openRouteCount: document.querySelector("#openRouteCount"),
   blockerCount: document.querySelector("#blockerCount"),
   workflowPhase: document.querySelector("#workflowPhase"),
+  stuckSignalCount: document.querySelector("#stuckSignalCount"),
   lastRefresh: document.querySelector("#lastRefresh"),
   refreshSnapshot: document.querySelector("#refreshSnapshot"),
   canvas: document.querySelector("#officeCanvas"),
@@ -94,7 +97,12 @@ const elements = {
   drawerLastSeen: document.querySelector("#drawerLastSeen"),
   drawerRefs: document.querySelector("#drawerRefs"),
   routeReportLink: document.querySelector("#routeReportLink"),
+  healthList: document.querySelector("#healthList"),
   eventTimeline: document.querySelector("#eventTimeline"),
+  paneMeta: document.querySelector("#paneMeta"),
+  paneTail: document.querySelector("#paneTail"),
+  refreshPane: document.querySelector("#refreshPane"),
+  copyPane: document.querySelector("#copyPane"),
   copyRefs: document.querySelector("#copyRefs"),
   promptForm: document.querySelector("#promptForm"),
   promptMessage: document.querySelector("#promptMessage"),
@@ -165,6 +173,12 @@ function statusKey(agent) {
   if (!agent || !agent.live) {
     return "offline";
   }
+  if (agent.health?.severity === "stuck") {
+    return "blocked";
+  }
+  if (agent.health?.severity === "watch") {
+    return "dispatching";
+  }
   return statusLabels[agent.status] || "idle";
 }
 
@@ -201,6 +215,22 @@ function formatRelative(value) {
   }
   const hours = Math.round(minutes / 60);
   return `${hours}h ago`;
+}
+
+function formatDuration(seconds) {
+  if (seconds === null || seconds === undefined || Number.isNaN(Number(seconds))) {
+    return "-";
+  }
+  const value = Number(seconds);
+  if (value < 60) {
+    return `${value}s`;
+  }
+  const minutes = Math.round(value / 60);
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+  const hours = Math.round(minutes / 60);
+  return `${hours}h`;
 }
 
 function roleZone(role) {
@@ -409,6 +439,7 @@ function updateStatusStrip() {
   elements.openRouteCount.textContent = String(openRoutes.length || (state.snapshot?.routes || []).filter((route) => route.status !== "done" && route.status !== "cancelled").length);
   elements.blockerCount.textContent = String(blockedRows.length + routeBlockers.length);
   elements.workflowPhase.textContent = workflow.phase || "-";
+  elements.stuckSignalCount.textContent = String(state.snapshot?.health?.attention_count || 0);
   elements.lastRefresh.textContent = formatRelative(state.snapshot?.generated_at);
   elements.emptyState.hidden = (state.snapshot?.agents || []).some((agent) => agent.live);
 }
@@ -420,17 +451,63 @@ function refsForAgent(agent) {
   const lines = [
     `Role: ${agent.role}`,
     `Status: ${statusKey(agent)}`,
+    `Health: ${agent.health?.label || "unknown"}`,
     `Profile: ${agent.profile_path || "none"}`,
     `Memory: ${agent.memory_path || "none"}`,
     `Inbox: ${agent.inbox_path || "none"}`,
     `Telemetry: agent-control/state/agents.jsonl`,
     `Events: agent-control/events.jsonl`,
+    `Pane: ${agent.session || "no-session"}:${agent.window || agent.role}`,
   ];
   if (agent.active_route && agent.active_route !== "none") {
     lines.push(`Route report: agent-control/routes/${agent.active_route}.md`);
     lines.push(`Status command: ./scripts/route-status.sh ${agent.active_route}`);
   }
   return lines.join("\n");
+}
+
+function updateHealthList(agent) {
+  elements.healthList.innerHTML = "";
+  if (!agent) {
+    const item = document.createElement("li");
+    item.textContent = "No selected agent.";
+    elements.healthList.append(item);
+    return;
+  }
+
+  const health = agent.health || { severity: "watch", label: "No health data", signals: [] };
+  const item = document.createElement("li");
+  item.className = `health-item health-${health.severity || "ok"}`;
+  const title = document.createElement("strong");
+  title.textContent = health.label || "Agent health";
+  const meta = document.createElement("span");
+  const age = health.last_seen_age_seconds !== undefined ? `Last telemetry ${formatDuration(health.last_seen_age_seconds)} ago` : "Telemetry age unknown";
+  meta.textContent = `${health.severity || "ok"} · ${age}`;
+  item.append(title, meta);
+  elements.healthList.append(item);
+
+  const signals = health.signals || [];
+  if (signals.length === 0) {
+    const ok = document.createElement("li");
+    ok.className = "health-item health-ok";
+    ok.textContent = "No stuck signals for this agent.";
+    elements.healthList.append(ok);
+  } else {
+    for (const signal of signals) {
+      const signalItem = document.createElement("li");
+      signalItem.className = `health-item health-${health.severity || "watch"}`;
+      signalItem.textContent = signal;
+      elements.healthList.append(signalItem);
+    }
+  }
+
+  const route = routeById(agent.active_route);
+  if (route?.health) {
+    const routeItem = document.createElement("li");
+    routeItem.className = `health-item health-${route.health.severity || "ok"}`;
+    routeItem.textContent = `${route.route_id}: ${route.health.label} · age ${formatDuration(route.health.age_seconds)}`;
+    elements.healthList.append(routeItem);
+  }
 }
 
 function eventsForAgent(agent) {
@@ -462,6 +539,8 @@ function updateDrawer() {
   elements.drawerRoute.textContent = agent?.active_route || "none";
   elements.drawerLastSeen.textContent = formatRelative(agent?.last_seen_at);
   elements.drawerRefs.textContent = refsForAgent(agent);
+  updateHealthList(agent);
+  loadAgentPane(agent);
 
   const activeRoute = routeById(agent?.active_route);
   if (activeRoute?.report) {
@@ -487,6 +566,42 @@ function updateDrawer() {
       item.append(time, summary);
       elements.eventTimeline.append(item);
     }
+  }
+}
+
+async function loadAgentPane(agent) {
+  const requestId = ++state.paneRequestId;
+  if (!agent) {
+    state.paneText = "";
+    elements.paneMeta.textContent = "No selected agent.";
+    elements.paneTail.textContent = "No selected agent.";
+    return;
+  }
+
+  elements.paneMeta.textContent = `Loading ${agent.session || "no-session"} / ${agent.window || agent.role}`;
+  try {
+    const response = await fetch(`/api/agent-pane?role=${encodeURIComponent(agent.role)}&lines=180`, { cache: "no-store" });
+    const payload = await response.json();
+    if (requestId !== state.paneRequestId) {
+      return;
+    }
+    if (!response.ok) {
+      throw new Error(payload.error || `Pane request failed: ${response.status}`);
+    }
+    state.paneText = payload.output || payload.message || "";
+    if (payload.available) {
+      elements.paneMeta.textContent = `${payload.session} / ${payload.window} · ${payload.line_limit} lines · ${formatRelative(payload.captured_at)}`;
+    } else {
+      elements.paneMeta.textContent = payload.message || "Pane is unavailable.";
+    }
+    elements.paneTail.textContent = state.paneText || "No pane output captured.";
+  } catch (error) {
+    if (requestId !== state.paneRequestId) {
+      return;
+    }
+    state.paneText = "";
+    elements.paneMeta.textContent = error.message;
+    elements.paneTail.textContent = "Pane capture failed.";
   }
 }
 
@@ -566,6 +681,16 @@ async function copySelectedRefs() {
   }
 }
 
+async function copyPaneText() {
+  const text = state.paneText || elements.paneTail.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    elements.promptResult.textContent = "Pane copied.";
+  } catch {
+    elements.promptResult.textContent = text;
+  }
+}
+
 function activateTab(name) {
   for (const tab of elements.tabs) {
     const selected = tab.dataset.tab === name;
@@ -606,6 +731,8 @@ elements.mediaForm.addEventListener("change", updateCommandPreview);
 elements.refreshSnapshot.addEventListener("click", loadSnapshot);
 elements.promptForm.addEventListener("submit", submitPrompt);
 elements.copyRefs.addEventListener("click", copySelectedRefs);
+elements.refreshPane.addEventListener("click", () => loadAgentPane(agentByRole(state.selectedRole)));
+elements.copyPane.addEventListener("click", copyPaneText);
 elements.recipientSelect.addEventListener("change", (event) => {
   state.selectedRole = event.target.value;
   updateDrawer();

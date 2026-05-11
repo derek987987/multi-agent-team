@@ -94,7 +94,7 @@ a {
 
 .status-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   border-left: 1px solid var(--line);
 }
 
@@ -459,6 +459,44 @@ a {
   list-style: none;
 }
 
+.health-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.health-item {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 6px;
+  background: #0b1015;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.health-item strong {
+  color: var(--ink);
+  font-size: 0.84rem;
+}
+
+.health-ok {
+  border-left-color: var(--green);
+}
+
+.health-watch {
+  border-left-color: var(--amber);
+}
+
+.health-stuck {
+  border-left-color: var(--red);
+}
+
 .event-list li {
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr);
@@ -518,6 +556,35 @@ textarea:focus {
   color: var(--muted);
   font-size: 0.82rem;
   overflow-wrap: anywhere;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pane-meta {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.terminal-block {
+  min-height: 240px;
+  max-height: 420px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #26323a;
+  border-radius: 6px;
+  background: #05070a;
+  color: #d9e3ec;
+  font-family: var(--mono);
+  font-size: 0.73rem;
+  line-height: 1.45;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .media-layout {

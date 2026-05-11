@@ -27,6 +27,10 @@
           <span>Workflow Phase</span>
           <strong id="workflowPhase">-</strong>
         </div>
+        <div class="status-cell">
+          <span>At Risk</span>
+          <strong id="stuckSignalCount">0</strong>
+        </div>
         <div class="status-cell refresh-cell">
           <span>Last Refresh</span>
           <strong id="lastRefresh">-</strong>
@@ -94,6 +98,11 @@
           </dl>
 
           <section class="drawer-section">
+            <h3>Health Signals</h3>
+            <ol id="healthList" class="health-list"></ol>
+          </section>
+
+          <section class="drawer-section">
             <div class="section-title-row">
               <h3>Evidence</h3>
               <button id="copyRefs" class="small-button" type="button">Copy refs</button>
@@ -105,6 +114,18 @@
           <section class="drawer-section">
             <h3>Recent Events</h3>
             <ol id="eventTimeline" class="event-list"></ol>
+          </section>
+
+          <section class="drawer-section">
+            <div class="section-title-row">
+              <h3>Codex Session</h3>
+              <div class="button-row">
+                <button id="refreshPane" class="small-button" type="button">Refresh</button>
+                <button id="copyPane" class="small-button" type="button">Copy</button>
+              </div>
+            </div>
+            <p id="paneMeta" class="pane-meta">Select an agent to inspect its tmux pane.</p>
+            <pre id="paneTail" class="terminal-block">No selected agent.</pre>
           </section>
 
           <form id="promptForm" class="drawer-section prompt-form">

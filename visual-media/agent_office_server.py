@@ -17,11 +17,49 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
+
+
+ACTIVE_ROUTE_STATUSES = {"queued", "dispatching", "dispatched", "in-progress", "blocked"}
+ROUTE_WATCH_LIMITS = {
+    "queued": 120,
+    "dispatching": 45,
+    "dispatched": 60,
+    "in-progress": 1800,
+}
+ROUTE_STALE_LIMITS = {
+    "queued": 30 * 60,
+    "dispatching": 30 * 60,
+    "dispatched": 30 * 60,
+    "in-progress": 4 * 60 * 60,
+}
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def parse_utc(value: Any) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    try:
+        if text.endswith("Z"):
+            return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        parsed = datetime.fromisoformat(text)
+        if parsed.tzinfo is None:
+            return parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except ValueError:
+        return None
+
+
+def age_seconds(value: Any, now: datetime | None = None) -> int | None:
+    parsed = parse_utc(value)
+    if parsed is None:
+        return None
+    current = now or datetime.now(timezone.utc)
+    return max(0, int((current - parsed).total_seconds()))
 
 
 def read_text(path: Path) -> str:
@@ -166,6 +204,8 @@ def parse_route_reports(root: Path) -> dict[str, dict[str, Any]]:
             "status": fields.get("status", ""),
             "priority": fields.get("priority", ""),
             "related_task": fields.get("related_task", ""),
+            "created": fields.get("created", ""),
+            "attempt": fields.get("attempt", ""),
             "title": text.splitlines()[0].lstrip("# ").strip() if text else route_id,
             "report": f"agent-control/routes/{path.name}",
             "updated": fields.get("last_updated", ""),
@@ -180,14 +220,206 @@ def read_profiles(root: Path) -> list[dict[str, Any]]:
     return [profile for profile in profiles if profile.get("role")]
 
 
-def build_agents(root: Path) -> list[dict[str, Any]]:
+def tmux_pane_inventory() -> dict[str, dict[str, Any]]:
+    try:
+        result = subprocess.run(
+            ["tmux", "list-panes", "-a", "-F", "#S\t#W\t#{pane_current_command}\t#{pane_dead}\t#{pane_pid}"],
+            text=True,
+            capture_output=True,
+            timeout=1,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return {}
+    if result.returncode != 0:
+        return {}
+    panes: dict[str, dict[str, Any]] = {}
+    for line in result.stdout.splitlines():
+        parts = line.split("\t")
+        if len(parts) != 5:
+            continue
+        session, window, command, dead, pane_pid = parts
+        panes[f"{session}:{window}"] = {
+            "session": session,
+            "window": window,
+            "command": command,
+            "dead": dead == "1",
+            "pane_pid": pane_pid,
+        }
+    return panes
+
+
+def route_health(route: dict[str, Any], now: datetime | None = None) -> dict[str, Any]:
+    status = str(route.get("status") or "").strip().lower()
+    created_age = age_seconds(route.get("created"), now)
+    updated_age = age_seconds(route.get("updated"), now)
+    route_age = updated_age if updated_age is not None else created_age
+    signals: list[str] = []
+    severity = "ok"
+    label = "Route moving"
+
+    if status == "blocked":
+        severity = "stuck"
+        label = "Blocked route"
+        signals.append("Route is blocked and needs recovery or a new owner.")
+    elif status in {"done", "cancelled"}:
+        label = "Route closed"
+    elif status in ACTIVE_ROUTE_STATUSES:
+        if route_age is None:
+            severity = "watch"
+            label = "Missing route timestamp"
+            signals.append("Route has no parseable Created or Last updated timestamp.")
+        else:
+            stale_limit = ROUTE_STALE_LIMITS.get(status)
+            watch_limit = ROUTE_WATCH_LIMITS.get(status)
+            if stale_limit is not None and route_age > stale_limit:
+                severity = "stuck"
+                label = f"{status} route is stale"
+                signals.append(f"Route has been {status} for {route_age}s; stale recovery should inspect it.")
+            elif watch_limit is not None and route_age > watch_limit:
+                severity = "watch"
+                label = f"{status} route needs attention"
+                signals.append(f"Route has been {status} for {route_age}s.")
+            else:
+                label = f"{status} route active"
+
+    return {
+        "severity": severity,
+        "label": label,
+        "signals": signals,
+        "age_seconds": route_age,
+        "created_age_seconds": created_age,
+        "updated_age_seconds": updated_age,
+        "watch_after_seconds": ROUTE_WATCH_LIMITS.get(status),
+        "stale_after_seconds": ROUTE_STALE_LIMITS.get(status),
+        "recovery_command": "./scripts/recover-stale-routes.sh --dry-run",
+    }
+
+
+def ready_marker_for(root: Path, role: str) -> dict[str, str]:
+    marker = root / "agent-control" / "state" / "role-ready" / f"{role}.ready"
+    values: dict[str, str] = {}
+    if not marker.exists():
+        return values
+    for line in read_text(marker).splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key.strip()] = value.strip()
+    return values
+
+
+def ready_marker_matches(marker: dict[str, str], pane: dict[str, Any] | None) -> bool:
+    if not marker or not pane:
+        return False
+    return (
+        marker.get("session") == pane.get("session")
+        and marker.get("window") == pane.get("window")
+        and marker.get("pane_pid") == pane.get("pane_pid")
+    )
+
+
+def pane_contains_role_ready(pane: dict[str, Any] | None, role: str) -> bool:
+    if not pane or pane.get("dead"):
+        return False
+    session = str(pane.get("session") or "")
+    window = str(pane.get("window") or "")
+    if not session or not window:
+        return False
+    try:
+        result = subprocess.run(
+            ["tmux", "capture-pane", "-p", "-t", f"{session}:{window}", "-S", "-2000"],
+            text=True,
+            capture_output=True,
+            timeout=1,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0 and f"ROLE_READY {role}" in result.stdout
+
+
+def agent_health(
+    agent: dict[str, Any],
+    route: dict[str, Any] | None,
+    pane: dict[str, Any] | None,
+    marker: dict[str, str],
+    pane_ready: bool,
+) -> dict[str, Any]:
+    signals: list[str] = []
+    severity = "ok"
+    label = "Agent ready"
+    status = str(agent.get("status") or "").lower()
+    marker_matches = ready_marker_matches(marker, pane)
+
+    if not agent.get("live"):
+        severity = "watch"
+        label = "No live telemetry"
+        signals.append("No record exists in agent-control/state/agents.jsonl for this role.")
+    elif not pane:
+        severity = "stuck"
+        label = "tmux pane missing"
+        signals.append("Telemetry exists, but no matching tmux pane was found for this session/window.")
+    elif pane.get("dead"):
+        severity = "stuck"
+        label = "tmux pane dead"
+        signals.append("The role pane exists but tmux reports it as dead.")
+    elif not marker_matches and not pane_ready:
+        severity = "watch"
+        label = "Readiness marker missing"
+        signals.append("No persistent ROLE_READY marker matches the current tmux pane PID.")
+
+    route_health_value = route.get("health") if route else None
+    if route_health_value and route_health_value.get("severity") in {"watch", "stuck"}:
+        route_severity = str(route_health_value.get("severity"))
+        if route_severity == "stuck":
+            severity = "stuck"
+        elif severity == "ok":
+            severity = "watch"
+        label = str(route_health_value.get("label") or label)
+        signals.extend(str(signal) for signal in route_health_value.get("signals", []))
+
+    last_seen_age = age_seconds(agent.get("last_seen_at"))
+    if status in {"launching", "dispatching"} and last_seen_age is not None and last_seen_age > 180:
+        if severity == "ok":
+            severity = "watch"
+        label = f"{status} state is old"
+        signals.append(f"Agent has been marked {status} for {last_seen_age}s.")
+
+    blocked_reason = str(agent.get("blocked_reason") or "").strip()
+    if blocked_reason and blocked_reason.lower() != "none":
+        severity = "stuck"
+        label = "Agent blocked"
+        signals.append(blocked_reason)
+
+    return {
+        "severity": severity,
+        "label": label,
+        "signals": signals,
+        "last_seen_age_seconds": last_seen_age,
+        "ready_marker": bool(marker),
+        "ready_marker_matches_pane": marker_matches,
+        "role_ready_visible_in_pane": pane_ready,
+    }
+
+
+def build_agents(root: Path, routes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     profiles = read_profiles(root)
     telemetry = latest_by(read_jsonl(root / "agent-control" / "state" / "agents.jsonl"), "role")
+    panes = tmux_pane_inventory()
+    routes_by_id = {str(route.get("route_id")): route for route in routes}
     agents: list[dict[str, Any]] = []
     for profile in profiles:
         role = str(profile.get("role", ""))
         live = telemetry.get(role, {})
         has_live = bool(live)
+        marker = ready_marker_for(root, role)
+        session = live.get("session", "") or marker.get("session", "")
+        window = live.get("window", role) or marker.get("window", role)
+        pane = panes.get(f"{session}:{window}") if session else None
+        active_route = live.get("active_route", "none") if has_live else "none"
+        marker_matches = ready_marker_matches(marker, pane)
+        pane_ready = marker_matches or pane_contains_role_ready(pane, role)
         agent = {
             "role": role,
             "display_name": profile.get("display_name") or role.title(),
@@ -200,11 +432,11 @@ def build_agents(root: Path) -> list[dict[str, Any]]:
             "load": profile.get("load", ""),
             "live": has_live,
             "status": live.get("status") if has_live else "offline",
-            "session": live.get("session", ""),
-            "window": live.get("window", role),
+            "session": session,
+            "window": window,
             "process_status": live.get("process_status", "unknown") if has_live else "unknown",
             "last_seen_at": live.get("last_seen_at", ""),
-            "active_route": live.get("active_route", "none") if has_live else "none",
+            "active_route": active_route,
             "active_task": live.get("active_task", "none") if has_live else "none",
             "workdir": live.get("workdir", ""),
             "target_project": live.get("target_project", ""),
@@ -213,7 +445,17 @@ def build_agents(root: Path) -> list[dict[str, Any]]:
             "blocked_reason": live.get("blocked_reason", ""),
             "recovery_owner": live.get("recovery_owner", ""),
             "source": live.get("source", "profile-empty-telemetry") if has_live else "profile-empty-telemetry",
+            "pane": pane
+            or {
+                "session": session,
+                "window": window,
+                "command": "",
+                "dead": None,
+                "pane_pid": "",
+            },
+            "ready_marker": marker,
         }
+        agent["health"] = agent_health(agent, routes_by_id.get(str(active_route)), pane, marker, pane_ready)
         agents.append(agent)
     return agents
 
@@ -229,18 +471,58 @@ def build_routes(root: Path) -> list[dict[str, Any]]:
         merged[route_id].update(record)
         merged[route_id].setdefault("report", f"agent-control/routes/{route_id}.md")
         merged[route_id]["source"] = "routes-jsonl"
-    return sorted(merged.values(), key=lambda item: str(item.get("route_id", "")))
+    routes = sorted(merged.values(), key=lambda item: str(item.get("route_id", "")))
+    for route in routes:
+        route["health"] = route_health(route)
+    return routes
+
+
+def build_health_summary(agents: list[dict[str, Any]], routes: list[dict[str, Any]]) -> dict[str, Any]:
+    items: list[dict[str, Any]] = []
+    for agent in agents:
+        health = agent.get("health", {})
+        if health.get("severity") in {"watch", "stuck"}:
+            items.append(
+                {
+                    "kind": "agent",
+                    "id": agent.get("role", ""),
+                    "severity": health.get("severity", "watch"),
+                    "label": health.get("label", ""),
+                    "signals": health.get("signals", []),
+                }
+            )
+    for route in routes:
+        health = route.get("health", {})
+        if health.get("severity") in {"watch", "stuck"}:
+            items.append(
+                {
+                    "kind": "route",
+                    "id": route.get("route_id", ""),
+                    "severity": health.get("severity", "watch"),
+                    "label": health.get("label", ""),
+                    "signals": health.get("signals", []),
+                }
+            )
+    return {
+        "attention_count": len(items),
+        "stuck_count": sum(1 for item in items if item.get("severity") == "stuck"),
+        "watch_count": sum(1 for item in items if item.get("severity") == "watch"),
+        "items": items[:20],
+    }
 
 
 def build_snapshot(root: Path) -> dict[str, Any]:
+    routes = build_routes(root)
+    agents = build_agents(root, routes)
     return {
         "generated_at": utc_now(),
         "project_target": read_text(root / "agent-control" / "project-target.md"),
         "profiles": read_profiles(root),
-        "agents": build_agents(root),
-        "routes": build_routes(root),
+        "agents": agents,
+        "routes": routes,
         "workflow": parse_workflow_state(root),
         "events": read_jsonl(root / "agent-control" / "events.jsonl")[-40:],
+        "health": build_health_summary(agents, routes),
         "sources": {
             "profiles": "agent-control/company/agent-profiles.jsonl",
             "agents": "agent-control/state/agents.jsonl",
@@ -296,6 +578,87 @@ def selected_agent(snapshot: dict[str, Any], role: str) -> dict[str, Any] | None
         if agent.get("role") == role:
             return agent
     return None
+
+
+def capture_agent_pane(root: Path, role: str, lines: int) -> tuple[int, dict[str, Any]]:
+    snapshot = build_snapshot(root)
+    agent = selected_agent(snapshot, role)
+    if agent is None:
+        return 400, {"error": "role must match agent-control/company/agent-profiles.jsonl"}
+    session = str(agent.get("session") or "")
+    window = str(agent.get("window") or role)
+    if not session:
+        return 200, {
+            "role": role,
+            "available": False,
+            "message": "No tmux session is recorded for this agent.",
+            "output": "",
+        }
+    pane = agent.get("pane") or {}
+    if not pane.get("pane_pid"):
+        return 200, {
+            "role": role,
+            "session": session,
+            "window": window,
+            "available": False,
+            "message": f"No tmux pane found for {session}:{window}.",
+            "output": "",
+            "health": agent.get("health", {}),
+        }
+    if pane.get("dead"):
+        return 200, {
+            "role": role,
+            "session": session,
+            "window": window,
+            "available": False,
+            "message": f"tmux pane {session}:{window} is dead.",
+            "output": "",
+            "pane": pane,
+            "health": agent.get("health", {}),
+        }
+    safe_lines = max(20, min(lines, 500))
+    target = f"{session}:{window}"
+    try:
+        result = subprocess.run(
+            ["tmux", "capture-pane", "-p", "-t", target, "-S", f"-{safe_lines}"],
+            text=True,
+            capture_output=True,
+            timeout=2,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        return 200, {
+            "role": role,
+            "session": session,
+            "window": window,
+            "available": False,
+            "message": f"Pane capture failed: {exc}",
+            "output": "",
+            "pane": pane,
+            "health": agent.get("health", {}),
+        }
+    if result.returncode != 0:
+        return 200, {
+            "role": role,
+            "session": session,
+            "window": window,
+            "available": False,
+            "message": result.stderr.strip() or f"tmux capture failed for {target}.",
+            "output": "",
+            "pane": pane,
+            "health": agent.get("health", {}),
+        }
+    return 200, {
+        "role": role,
+        "session": session,
+        "window": window,
+        "available": True,
+        "captured_at": utc_now(),
+        "line_limit": safe_lines,
+        "output": result.stdout.rstrip(),
+        "pane": pane,
+        "health": agent.get("health", {}),
+    }
 
 
 def create_orchestrator_prompt(root: Path, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
@@ -406,6 +769,17 @@ class AgentOfficeHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/api/snapshot":
             self.send_json(HTTPStatus.OK, build_snapshot(self.root))
+            return
+        if parsed.path == "/api/agent-pane":
+            query = parse_qs(parsed.query)
+            role = str(query.get("role", [""])[0]).strip()
+            line_value = str(query.get("lines", ["180"])[0]).strip()
+            try:
+                lines = int(line_value)
+            except ValueError:
+                lines = 180
+            status, payload = capture_agent_pane(self.root, role, lines)
+            self.send_json(status, payload)
             return
         if parsed.path == "/favicon.ico":
             self.send_response(HTTPStatus.NO_CONTENT)

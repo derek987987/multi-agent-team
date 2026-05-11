@@ -139,7 +139,12 @@ project.
    - If agents show as offline, the dashboard is telling you that live telemetry
      is empty or the tmux team is not running.
    - Clicking an agent opens the inspector with role, status, active route,
-     evidence refs, and recent events.
+     health signals, evidence refs, recent events, and a `Codex Session` pane
+     tail captured from the matching tmux window when available.
+   - The `At Risk` count summarizes agents and routes with stuck or watch
+     signals, such as blocked routes, stale active routes, missing tmux panes,
+     dead panes, missing readiness markers, old launching/dispatching telemetry,
+     or explicit blocked reasons.
 
 7. Use the dashboard prompt box for context-aware Orchestrator requests:
 
@@ -417,8 +422,10 @@ options for the functional media command and previews the matching
 Agent Office APIs:
 
 - `GET /api/snapshot` returns profiles, latest live telemetry, route state,
-  workflow summary, route reports, and recent events from the control-plane
-  files.
+  workflow summary, route reports, health signals, and recent events from the
+  control-plane files.
+- `GET /api/agent-pane?role=<role>&lines=<count>` captures the selected role's
+  tmux pane tail when the role has matching session/window telemetry.
 - `POST /api/orchestrator-prompt` validates the selected role and prompt, then
   queues an Orchestrator route with `From: human-ui`.
 
