@@ -194,7 +194,20 @@ If relative agent-control paths are not present in the working directory, use th
 EOF
 )"
 
-cmd=(codex --ask-for-approval never --sandbox workspace-write --disable apps --no-alt-screen --cd "$WORKDIR")
+CODEX_MODEL="${AGENT_TEAM_CODEX_MODEL:-gpt-5.4-mini}"
+CODEX_REASONING_EFFORT="${AGENT_TEAM_CODEX_REASONING_EFFORT:-low}"
+
+cmd=(
+  codex
+  --ask-for-approval never
+  --sandbox workspace-write
+  --disable apps
+  --disable plugins
+  --no-alt-screen
+  --model "$CODEX_MODEL"
+  --config "model_reasoning_effort=\"$CODEX_REASONING_EFFORT\""
+  --cd "$WORKDIR"
+)
 
 root_real="$(cd "$ROOT" && pwd -P)"
 workdir_real="$(cd "$WORKDIR" && pwd -P)"

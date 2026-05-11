@@ -29,6 +29,7 @@ fi
 AGENT_OFFICE_PORT="${AGENT_OFFICE_PORT:-8765}"
 AGENT_OFFICE_URL="$("$ROOT/scripts/start-agent-office-dashboard.sh" --print-url "$AGENT_OFFICE_PORT")"
 AGENT_ROLE_READY_TIMEOUT="${AGENT_ROLE_READY_TIMEOUT:-180}"
+AGENT_TEAM_SEQUENTIAL_ROLE_STARTUP="${AGENT_TEAM_SEQUENTIAL_ROLE_STARTUP:-1}"
 
 mkdir -p "$BASE"
 
@@ -82,6 +83,21 @@ start_role_window() {
     --process-status starting
   cmd="$(shell_join "$ROOT/scripts/codex-role.sh" "$role" --workdir "$workdir")"
   tmux send-keys -t "$SESSION:$role" "$cmd" C-m
+  if [ "$AGENT_TEAM_SEQUENTIAL_ROLE_STARTUP" != "0" ]; then
+    if ! "$ROOT/scripts/wait-for-agent-sessions.sh" "$SESSION" \
+      --timeout "$AGENT_ROLE_READY_TIMEOUT" \
+      --roles "$role"; then
+      printf "Warning: %s did not report startup readiness within %ss; continuing startup.\n" "$role" "$AGENT_ROLE_READY_TIMEOUT" >&2
+      "$ROOT/scripts/update-agent-state.sh" "$role" \
+        --session "$SESSION" \
+        --window "$role" \
+        --status blocked \
+        --active-route none \
+        --blocked-reason "startup readiness timeout" \
+        --recovery-owner devops \
+        --process-status alive >/dev/null || true
+    fi
+  fi
 }
 
 for role in "${AGENT_ROLES[@]}"; do

@@ -147,7 +147,12 @@ role_is_ready() {
   esac
 
   capture="$(tmux capture-pane -p -t "$SESSION:$role" -S -2000 2>/dev/null || true)"
-  printf '%s\n' "$capture" | grep -Fq "ROLE_READY $role"
+  printf '%s\n' "$capture" | awk -v marker="ROLE_READY $role" '
+    index($0, marker) && $0 !~ /exactly:/ && $0 !~ /^[[:space:]]*-/ {
+      found = 1
+    }
+    END { exit found ? 0 : 1 }
+  '
 }
 
 mark_ready() {
