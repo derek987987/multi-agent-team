@@ -558,7 +558,7 @@ The control window normally runs this automatically through:
 ./scripts/watch-routes.sh agent-team --send
 ```
 
-The startup scripts keep this watcher inside a restart loop. They start role windows first, pre-trust the local Codex workspaces, then run `scripts/wait-for-agent-sessions.sh` so dispatch waits for the explicit `ROLE_READY <role>` marker instead of a blind sleep. If a role is still launching, `dispatch-routes.sh` leaves its queued routes queued for the next watcher pass instead of blocking them as infrastructure failures. If `watch-routes.sh` exits, the `control` window stays open, prints the exit status, waits 5 seconds, and restarts the watcher. Startup also falls back to the `orchestrator` window if the `control` window is unavailable, so a watcher crash should not abort startup with `can't find window: control`.
+The startup scripts keep this watcher inside a restart loop. They start role windows first, pre-trust the local Codex workspaces, then run `scripts/wait-for-agent-sessions.sh` so dispatch waits for the explicit `ROLE_READY <role>` marker instead of a blind sleep. Each watcher scan runs stale-route and recoverable communication-blocker recovery before dispatching queued routes. If a role is still launching, `dispatch-routes.sh` leaves its queued routes queued for the next watcher pass instead of blocking them as infrastructure failures. If `watch-routes.sh` exits, the `control` window stays open, prints the exit status, waits 5 seconds, and restarts the watcher. Startup also falls back to the `orchestrator` window if the `control` window is unavailable, so a watcher crash should not abort startup with `can't find window: control`.
 
 Dispatch has two separate timeouts. `ROUTE_DISPATCH_SEND_TIMEOUT` bounds tmux delivery; a delivery timeout blocks the route because the prompt did not reach the role pane. `ROUTE_DISPATCH_ACK_TIMEOUT` only controls how long the watcher waits for the role to claim the route; if that expires, the route stays `dispatched` so a slow Codex session can still claim it and stale-route recovery can make the retry/block decision later.
 
@@ -576,7 +576,7 @@ Check route health:
 ./scripts/record-route-run.sh R001 frontend --status succeeded --model gpt-5.4 --input-tokens 12000 --output-tokens 3000 --cost-cents 25 --exit-code 0 --summary "Implemented assigned route"
 ```
 
-`recover-stale-routes.sh --apply` increments `Attempt` and requeues stale active routes while they are inside `agent-control/route-budget.md`; routes at retry budget are blocked with recovery evidence in `agent-control/routes/R000.md`.
+`recover-stale-routes.sh --apply` increments `Attempt` and requeues stale active routes while they are inside `agent-control/route-budget.md`; routes at retry budget are blocked with recovery evidence in `agent-control/routes/R000.md`. In-progress routes with pane evidence such as `stream disconnected`, `Transport error`, `error decoding response body`, `Timeout waiting for child process`, or `Reconnecting... 5/5` use the faster `AGENT_TEAM_FAILED_SESSION_MINUTES` threshold, default `5`, instead of waiting for the broad `IN_PROGRESS_HOURS` threshold. Routes blocked by recoverable dispatch infrastructure, such as missing tmux sessions or tmux delivery timeouts, use `AGENT_TEAM_BLOCKED_COMMUNICATION_MINUTES`, default `5`, and are requeued if retry budget remains. Set `AGENT_TEAM_AUTO_RECOVER_STALE=0` when you need the watcher or heartbeat loop to dispatch without mutating recovery state.
 
 ## Quality Gates
 

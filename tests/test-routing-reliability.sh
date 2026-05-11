@@ -32,6 +32,15 @@ assert_contains() {
   fi
 }
 
+assert_equals() {
+  local actual="$1"
+  local expected="$2"
+  local label="$3"
+  if [ "$actual" != "$expected" ]; then
+    fail "$label expected '$expected' but got '$actual'"
+  fi
+}
+
 assert_not_contains() {
   local haystack="$1"
   local needle="$2"
@@ -258,5 +267,70 @@ assert_contains "$(cat /tmp/recover-r905.out)" "Blocked stale route R905" "stale
 assert_contains "$(cat "$ROOT/agent-control/inbox/pm.md")" "## R905 - Block stale over retry budget" "stale recovery route"
 assert_contains "$(cat "$ROOT/agent-control/inbox/pm.md")" "Status: blocked" "stale recovery retry budget"
 assert_contains "$(cat "$ROOT/agent-control/routes/R905.md")" "Retry budget exhausted" "stale recovery retry budget"
+
+"$ROOT/scripts/route-agent.sh" R914 cto "Recover transport failed in-progress route" \
+  --instruction "Recover this route when the role pane reports a Codex transport failure after claim." \
+  --expected-output "agent-control/routes/R914.md recovery note and queued retry." \
+  --validation "recover-stale-routes requeues transport-failed active routes before the broad in-progress timeout." \
+  --attempt 0 \
+  --context "agent-control/failure-recovery.md" >/tmp/route-r914.out
+"$ROOT/scripts/claim-route.sh" R914 cto >/tmp/claim-r914.out
+set_route_created R914 cto "2020-01-01T00:00:00Z"
+
+PATH="$ROOT/tests/fixtures:$PATH" \
+  TMUX_FIXTURE_CAPTURE="■ stream disconnected before completion: Transport error: network error: error decoding response body" \
+  IN_PROGRESS_HOURS=999999 \
+  AGENT_TEAM_FAILED_SESSION_MINUTES=1 \
+  "$ROOT/scripts/recover-stale-routes.sh" fake-session --apply >/tmp/recover-r914.out
+
+assert_contains "$(cat /tmp/recover-r914.out)" "Recovered stale route R914" "transport failure recovery"
+assert_contains "$(cat "$ROOT/agent-control/inbox/cto.md")" "## R914 - Recover transport failed in-progress route" "transport failure route"
+assert_contains "$(cat "$ROOT/agent-control/inbox/cto.md")" "Status: queued" "transport failure recovery"
+assert_contains "$(cat "$ROOT/agent-control/inbox/cto.md")" "Attempt: 1" "transport failure attempt increment"
+assert_contains "$(cat "$ROOT/agent-control/routes/R914.md")" "Detected failed role session" "transport failure report"
+r914_db_attempt="$(sqlite3 "$ROOT/agent-control/state/workflow.sqlite3" "select status || '|' || attempt from routes where route_id='R914';")"
+assert_equals "$r914_db_attempt" "queued|1" "transport failure sqlite attempt"
+
+"$ROOT/scripts/route-agent.sh" R915 frontend "Watcher recovers failed session route" \
+  --instruction "This route should be requeued automatically by watch-routes before dispatching again." \
+  --expected-output "agent-control/routes/R915.md shows recovery evidence and the route is redispatched." \
+  --validation "watch-routes performs stale-session recovery before dispatch." \
+  --attempt 0 \
+  --context "agent-control/failure-recovery.md" >/tmp/route-r915.out
+"$ROOT/scripts/claim-route.sh" R915 frontend >/tmp/claim-r915.out
+set_route_created R915 frontend "2020-01-01T00:00:00Z"
+
+PATH="$ROOT/tests/fixtures:$PATH" \
+  TMUX_FIXTURE_CAPTURE=$'ROLE_READY frontend\n■ stream disconnected before completion: Transport error: network error: error decoding response body' \
+  IN_PROGRESS_HOURS=999999 \
+  AGENT_TEAM_FAILED_SESSION_MINUTES=1 \
+  ROUTE_DISPATCH_ACK_TIMEOUT=1 \
+  "$ROOT/scripts/watch-routes.sh" fake-session --send --once >/tmp/watch-recover-r915.out 2>/tmp/watch-recover-r915.err || true
+
+assert_contains "$(cat /tmp/watch-recover-r915.out /tmp/watch-recover-r915.err)" "Recovered stale route R915" "watch recovery"
+assert_contains "$(cat /tmp/watch-recover-r915.out /tmp/watch-recover-r915.err)" "still awaiting claim" "watch redispatch"
+assert_contains "$(cat "$ROOT/agent-control/inbox/frontend.md")" "## R915 - Watcher recovers failed session route" "watch recovery route"
+assert_contains "$(cat "$ROOT/agent-control/inbox/frontend.md")" "Status: dispatched" "watch recovery redispatch status"
+assert_contains "$(cat "$ROOT/agent-control/routes/R915.md")" "Detected failed role session" "watch recovery report"
+r915_db_attempt="$(sqlite3 "$ROOT/agent-control/state/workflow.sqlite3" "select status || '|' || attempt from routes where route_id='R915';")"
+assert_equals "$r915_db_attempt" "dispatched|1" "watch recovery sqlite attempt"
+
+"$ROOT/scripts/route-agent.sh" R916 frontend "Recover blocked communication route" \
+  --instruction "This route should recover when dispatch infrastructure blocked the communication path." \
+  --expected-output "agent-control/routes/R916.md recovery note and queued retry." \
+  --validation "recover-stale-routes requeues recoverable communication blockers instead of leaving automation stuck." \
+  --attempt 0 \
+  --context "agent-control/failure-recovery.md" >/tmp/route-r916.out
+"$ROOT/scripts/block-route.sh" R916 dispatch-routes "tmux session not found: fake-session" --report agent-control/routes/R916.md >/tmp/block-r916.out
+set_route_created R916 frontend "2020-01-01T00:00:00Z"
+
+BLOCKED_COMMUNICATION_MINUTES=1 "$ROOT/scripts/recover-stale-routes.sh" --apply >/tmp/recover-r916.out
+assert_contains "$(cat /tmp/recover-r916.out)" "Recovered stale route R916" "blocked communication recovery"
+assert_contains "$(cat "$ROOT/agent-control/inbox/frontend.md")" "## R916 - Recover blocked communication route" "blocked communication route"
+assert_contains "$(cat "$ROOT/agent-control/inbox/frontend.md")" "Status: queued" "blocked communication recovery"
+assert_contains "$(cat "$ROOT/agent-control/inbox/frontend.md")" "Attempt: 1" "blocked communication attempt increment"
+assert_contains "$(cat "$ROOT/agent-control/routes/R916.md")" "Detected recoverable communication blocker" "blocked communication report"
+r916_db_attempt="$(sqlite3 "$ROOT/agent-control/state/workflow.sqlite3" "select status || '|' || attempt || '|' || blocked_reason from routes where route_id='R916';")"
+assert_equals "$r916_db_attempt" "queued|1|" "blocked communication sqlite attempt"
 
 printf "Routing reliability tests passed.\n"

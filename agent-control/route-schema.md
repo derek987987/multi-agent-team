@@ -41,8 +41,8 @@ Non-draft routes must not contain `TBD` in `Instruction`, `Expected output`, or 
 ## Lifecycle
 
 1. `scripts/route-agent.sh` creates a route envelope and queued route. It requires `--instruction`, `--expected-output`, and `--validation` unless `--draft` is used. Use `--from <actor>` when the route originates outside Orchestrator, for example `--from human-ui` from Agent Office. It also mirrors the route into `agent-control/state/workflow.sqlite3` through `scripts/route-db.sh`.
-2. `scripts/watch-routes.sh` normally runs in the control window and calls `scripts/dispatch-routes.sh`.
-3. `scripts/heartbeat-routes.sh` can run a heartbeat-style pass over the structured queue, optionally recover stale routes, and delegate dispatch.
+2. `scripts/watch-routes.sh` normally runs in the control window, applies stale-route recovery, and calls `scripts/dispatch-routes.sh`.
+3. `scripts/heartbeat-routes.sh` can run a heartbeat-style pass over the structured queue, runs stale-route recovery by default, and delegates dispatch. Use `--no-recover-stale` or `AGENT_TEAM_AUTO_RECOVER_STALE=0` only for diagnostic scans that must not mutate recovery state.
 4. `scripts/dispatch-routes.sh` first confirms the target role pane has emitted `ROLE_READY <role>` or has a matching persistent readiness marker in `agent-control/state/role-ready/`. If the role is still launching, the route stays `queued` for the next watcher pass. Once ready, dispatch marks `queued -> dispatching -> dispatched`, clears stale prompt text, sends a bounded tmux notification, then briefly watches for the target role to claim the route. If tmux delivery itself fails, the route is blocked with pane evidence. If delivery succeeds but the role does not claim before the acknowledgement timeout, the route remains `dispatched` and stale-route recovery owns retry/block decisions.
 5. `scripts/claim-route.sh` validates the actor matches the route target, atomically claims the route in SQLite, and marks it `in-progress`.
 6. `scripts/complete-route.sh` validates the actor, requires `--report agent-control/routes/R000.md`, enforces any approval/review refs, and marks it `done`.
@@ -50,7 +50,7 @@ Non-draft routes must not contain `TBD` in `Instruction`, `Expected output`, or 
 8. `scripts/cancel-route.sh` marks it `cancelled`.
 9. `scripts/record-route-run.sh` records model, token, cost, exit-code, and summary metadata in the SQLite `route_runs` table and route report.
 10. `scripts/route-status.sh R000` reads the route report first and prints owner, status, evidence, output refs, and next action.
-11. `scripts/recover-stale-routes.sh --apply` requeues stale active routes inside retry budget and blocks stale routes after retry budget is exhausted.
+11. `scripts/recover-stale-routes.sh --apply` requeues stale active routes and recoverable communication blockers inside retry budget, then blocks routes after retry budget is exhausted. In-progress routes whose pane output shows Codex transport/session failure use `AGENT_TEAM_FAILED_SESSION_MINUTES` before recovery, so a failed role session does not stop the whole team until the broad in-progress timeout expires. Blocked routes caused by dispatch infrastructure such as missing tmux sessions or delivery timeouts use `AGENT_TEAM_BLOCKED_COMMUNICATION_MINUTES`.
 
 All lifecycle scripts append to `agent-control/events.jsonl` and mirror route status into `agent-control/state/workflow.sqlite3`.
 

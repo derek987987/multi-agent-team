@@ -10,14 +10,15 @@ fi
 MODE="--dry-run"
 INTERVAL="${AGENT_TEAM_HEARTBEAT_INTERVAL:-30}"
 ONCE=0
-RECOVER_STALE=0
+RECOVER_STALE="${AGENT_TEAM_AUTO_RECOVER_STALE:-1}"
 DB_PATH="${AGENT_TEAM_DB_PATH:-$ROOT/agent-control/state/workflow.sqlite3}"
 
 usage() {
   cat >&2 <<EOF
-Usage: $(basename "$0") [tmux-session] [--dry-run|--send] [--interval <seconds>] [--once] [--recover-stale]
+Usage: $(basename "$0") [tmux-session] [--dry-run|--send] [--interval <seconds>] [--once] [--recover-stale|--no-recover-stale]
 
-Runs a heartbeat-style dispatch pass from the structured route store.
+Runs a heartbeat-style dispatch pass from the structured route store. Stale
+route recovery runs before dispatch by default unless disabled.
 EOF
 }
 
@@ -47,6 +48,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --recover-stale)
       RECOVER_STALE=1
+      shift
+      ;;
+    --no-recover-stale)
+      RECOVER_STALE=0
       shift
       ;;
     -h|--help)
@@ -83,7 +88,7 @@ scan_once() {
     printf "queued route: none\n"
   fi
 
-  if [ "$RECOVER_STALE" -eq 1 ]; then
+  if [ "$RECOVER_STALE" != "0" ]; then
     if [ "$MODE" = "--send" ]; then
       "$ROOT/scripts/recover-stale-routes.sh" "$SESSION" --apply
     else

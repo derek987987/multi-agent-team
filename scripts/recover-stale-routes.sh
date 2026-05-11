@@ -5,6 +5,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 QUEUED_MINUTES="${QUEUED_MINUTES:-30}"
 DISPATCHED_MINUTES="${DISPATCHED_MINUTES:-30}"
 IN_PROGRESS_HOURS="${IN_PROGRESS_HOURS:-4}"
+FAILED_SESSION_MINUTES="${AGENT_TEAM_FAILED_SESSION_MINUTES:-5}"
+BLOCKED_COMMUNICATION_MINUTES="${AGENT_TEAM_BLOCKED_COMMUNICATION_MINUTES:-${BLOCKED_COMMUNICATION_MINUTES:-5}}"
 MAX_ROUTE_RETRIES="${MAX_ROUTE_RETRIES:-$(awk -F':[[:space:]]*' '/Max retries per route:/ { print $2; exit }' "$ROOT/agent-control/route-budget.md" 2>/dev/null || true)}"
 MAX_ROUTE_RETRIES="${MAX_ROUTE_RETRIES:-2}"
 MODE="--dry-run"
@@ -18,9 +20,10 @@ usage() {
   cat >&2 <<EOF
 Usage: $(basename "$0") [tmux-session] [--dry-run|--apply]
 
-Find stale queued, dispatching, dispatched, and in-progress routes. With
---apply, routes inside retry budget are requeued with Attempt incremented.
-Routes at or over retry budget are blocked with recovery evidence.
+Find stale queued, dispatching, dispatched, in-progress, and recoverable
+communication-blocked routes. With --apply, routes inside retry budget are
+requeued with Attempt incremented. Routes at or over retry budget are blocked
+with recovery evidence.
 EOF
 }
 
@@ -105,6 +108,7 @@ append_recovery_event() {
   local next_attempt="$7"
   local age_seconds="$8"
   local pane_tail="$9"
+  local reason="${10:-}"
   [ -f "$report" ] || return 0
   {
     printf '\n### Recovery Event\n\n'
@@ -116,6 +120,9 @@ append_recovery_event() {
     printf 'Previous attempt: %s\n' "$attempt"
     printf 'Next attempt: %s\n' "$next_attempt"
     printf 'Age seconds: %s\n' "$age_seconds"
+    if [ -n "$reason" ]; then
+      printf 'Reason: %s\n' "$reason"
+    fi
     if [ "$status" = "queued" ]; then
       printf 'Action: Requeued by recover-stale-routes\n'
     else
@@ -132,6 +139,32 @@ capture_pane_tail() {
   else
     printf "No tmux session supplied."
   fi
+}
+
+pane_indicates_failed_session() {
+  local pane_tail="$1"
+  printf '%s' "$pane_tail" | grep -Eiq \
+    'stream disconnected|Transport error|error decoding response body|Timeout waiting for child|Falling back from WebSockets|Reconnecting[.][.][.] 5/5|network error'
+}
+
+report_blocked_reason() {
+  local report="$1"
+  [ -f "$report" ] || return 0
+  awk '
+    /^### Blocked Event/ { in_block = 1; reason = ""; next }
+    /^### / && in_block { in_block = 0 }
+    in_block && /^Reason:/ {
+      sub(/^Reason:[[:space:]]*/, "")
+      reason = $0
+    }
+    END { print reason }
+  ' "$report"
+}
+
+recoverable_communication_blocker() {
+  local reason="$1"
+  printf '%s' "$reason" | grep -Eiq \
+    'tmux session not found|tmux delivery timeout|Session not found for route|route dispatch timeout|dispatch infrastructure|failed role session|Codex transport|Transport error|stream disconnected'
 }
 
 while [ "$#" -gt 0 ]; do
@@ -167,6 +200,18 @@ case "$MAX_ROUTE_RETRIES" in
     ;;
 esac
 
+case "$FAILED_SESSION_MINUTES" in
+  ''|*[!0-9]*)
+    FAILED_SESSION_MINUTES=5
+    ;;
+esac
+
+case "$BLOCKED_COMMUNICATION_MINUTES" in
+  ''|*[!0-9]*)
+    BLOCKED_COMMUNICATION_MINUTES=5
+    ;;
+esac
+
 now="$(date -u +%s)"
 UPDATED="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 found=0
@@ -175,7 +220,7 @@ for inbox in "$ROOT"/agent-control/inbox/*.md; do
   role="$(basename "$inbox" .md)"
   while IFS=$'\t' read -r route route_status created attempt report; do
     case "$route_status" in
-      queued|dispatching|dispatched|in-progress)
+      queued|dispatching|dispatched|in-progress|blocked)
         ;;
       *)
         continue
@@ -188,15 +233,43 @@ for inbox in "$ROOT"/agent-control/inbox/*.md; do
     fi
 
     age_seconds=$((now - created_epoch))
+    pane_tail=""
+    recovery_reason=""
+
+    report="${report:-agent-control/routes/$route.md}"
+    report_path="$ROOT/$report"
+
     case "$route_status" in
       queued)
         limit=$((QUEUED_MINUTES * 60))
         ;;
       dispatching|dispatched)
         limit=$((DISPATCHED_MINUTES * 60))
+        if [ "$FAILED_SESSION_MINUTES" -gt 0 ]; then
+          pane_tail="$(capture_pane_tail "$role")"
+          if pane_indicates_failed_session "$pane_tail"; then
+            limit=$((FAILED_SESSION_MINUTES * 60))
+            recovery_reason="Detected failed role session from pane output"
+          fi
+        fi
         ;;
       in-progress)
         limit=$((IN_PROGRESS_HOURS * 3600))
+        if [ "$FAILED_SESSION_MINUTES" -gt 0 ]; then
+          pane_tail="$(capture_pane_tail "$role")"
+          if pane_indicates_failed_session "$pane_tail"; then
+            limit=$((FAILED_SESSION_MINUTES * 60))
+            recovery_reason="Detected failed role session from pane output"
+          fi
+        fi
+        ;;
+      blocked)
+        blocked_reason="$(report_blocked_reason "$report_path")"
+        if ! recoverable_communication_blocker "$blocked_reason"; then
+          continue
+        fi
+        limit=$((BLOCKED_COMMUNICATION_MINUTES * 60))
+        recovery_reason="Detected recoverable communication blocker: $blocked_reason"
         ;;
     esac
 
@@ -211,15 +284,15 @@ for inbox in "$ROOT"/agent-control/inbox/*.md; do
         attempt=0
         ;;
     esac
-    report="${report:-agent-control/routes/$route.md}"
-    report_path="$ROOT/$report"
-    pane_tail="$(capture_pane_tail "$role")"
+    if [ -z "$pane_tail" ]; then
+      pane_tail="$(capture_pane_tail "$role")"
+    fi
 
     if [ "$attempt" -lt "$MAX_ROUTE_RETRIES" ]; then
       next_attempt=$((attempt + 1))
       if [ "$MODE" = "--dry-run" ]; then
-        printf "Would recover stale route %s for %s: status=%s attempt=%s next_attempt=%s age_seconds=%s\n" \
-          "$route" "$role" "$route_status" "$attempt" "$next_attempt" "$age_seconds"
+        printf "Would recover stale route %s for %s: status=%s attempt=%s next_attempt=%s age_seconds=%s reason=%s\n" \
+          "$route" "$role" "$route_status" "$attempt" "$next_attempt" "$age_seconds" "${recovery_reason:-age-threshold}"
         continue
       fi
 
@@ -234,24 +307,25 @@ for inbox in "$ROOT"/agent-control/inbox/*.md; do
       update_report_field "$report_path" "Status" "queued"
       update_report_field "$report_path" "Attempt" "$next_attempt"
       update_report_field "$report_path" "Last updated" "$UPDATED"
-      append_recovery_event "$report_path" "queued" "$route" "$role" "$route_status" "$attempt" "$next_attempt" "$age_seconds" "$pane_tail"
-      "$ROOT/scripts/log-event.sh" route-recovered recover-stale-routes "Recovered stale route $route for $role" "attempt=$next_attempt age_seconds=$age_seconds" "$route"
+      append_recovery_event "$report_path" "queued" "$route" "$role" "$route_status" "$attempt" "$next_attempt" "$age_seconds" "$pane_tail" "$recovery_reason"
+      "$ROOT/scripts/log-event.sh" route-recovered recover-stale-routes "Recovered stale route $route for $role" "attempt=$next_attempt age_seconds=$age_seconds reason=${recovery_reason:-age-threshold}" "$route"
       "$ROOT/scripts/update-agent-state.sh" "$role" --status available --active-route none --blocked-reason none
       printf '{"route_id":"%s","status":"queued","actor":"recover-stale-routes","attempt":%s,"previous_status":"%s","age_seconds":%s,"report":"%s","updated":"%s"}\n' \
         "$(json_escape "$route")" "$next_attempt" "$(json_escape "$route_status")" "$age_seconds" "$(json_escape "$report")" "$(json_escape "$UPDATED")" >> "$ROOT/agent-control/state/routes.jsonl"
       "$ROOT/scripts/route-db.sh" update-status "$route" queued \
         --actor recover-stale-routes \
         --note "requeued stale route attempt=$next_attempt age_seconds=$age_seconds" \
+        --attempt "$next_attempt" \
         --updated "$UPDATED" >/dev/null
       printf "Recovered stale route %s for %s: attempt %s -> %s\n" "$route" "$role" "$attempt" "$next_attempt"
     else
       if [ "$MODE" = "--dry-run" ]; then
-        printf "Would block stale route %s for %s: status=%s attempt=%s max=%s age_seconds=%s\n" \
-          "$route" "$role" "$route_status" "$attempt" "$MAX_ROUTE_RETRIES" "$age_seconds"
+        printf "Would block stale route %s for %s: status=%s attempt=%s max=%s age_seconds=%s reason=%s\n" \
+          "$route" "$role" "$route_status" "$attempt" "$MAX_ROUTE_RETRIES" "$age_seconds" "${recovery_reason:-age-threshold}"
         continue
       fi
 
-      append_recovery_event "$report_path" "blocked" "$route" "$role" "$route_status" "$attempt" "$attempt" "$age_seconds" "$pane_tail"
+      append_recovery_event "$report_path" "blocked" "$route" "$role" "$route_status" "$attempt" "$attempt" "$age_seconds" "$pane_tail" "$recovery_reason"
       "$ROOT/scripts/block-route.sh" "$route" recover-stale-routes "Retry budget exhausted for stale route after attempt $attempt" --report "$report" >/dev/null
       printf "Blocked stale route %s for %s: retry budget exhausted at attempt %s\n" "$route" "$role" "$attempt"
     fi

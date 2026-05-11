@@ -65,8 +65,8 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `scripts/codex-role.sh` - launches each role-specific Codex agent sandboxed with command approval prompts disabled
 - `scripts/trust-codex-projects.sh` - pre-trusts generated agent-team and target paths in Codex config to avoid first-run trust prompts during auto-start
 - `scripts/wait-for-agent-sessions.sh` - waits for `ROLE_READY <role>` markers before route dispatch treats role panes as ready
-- `scripts/watch-routes.sh` - watches queued routes and dispatches them to tmux agent windows
-- `scripts/heartbeat-routes.sh` - performs a heartbeat-style pass over the SQLite route queue and delegates dispatch/recovery
+- `scripts/watch-routes.sh` - recovers stale active routes, watches queued routes, and dispatches them to tmux agent windows
+- `scripts/heartbeat-routes.sh` - performs a heartbeat-style pass over the SQLite route queue, runs recovery by default, and delegates dispatch
 - `scripts/route-db.sh` - owns the generated SQLite runtime store schema and route/run state mutations
 - `scripts/record-route-run.sh` - records route run metadata, token counts, cost cents, exit status, and summary
 - `scripts/route-status.sh` - summarizes a route from its canonical report, owner, evidence, output refs, and next action
@@ -95,7 +95,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 15. Run `scripts/validate-structured-state.sh` before review/merge.
 16. Run `scripts/validate-route-state.sh` before review/merge.
 17. Run `scripts/check-stale-routes.sh` and escalate stale routes.
-18. Run `scripts/recover-stale-routes.sh --apply` to requeue or block stale routes when automatic recovery is appropriate.
+18. Run `scripts/recover-stale-routes.sh --apply` to requeue or block stale routes when automatic recovery is appropriate; the control-window watcher and heartbeat dispatcher run the same recovery pass before dispatch by default.
 19. Run `scripts/check-secrets.sh` before review/merge.
 20. Prefer small, reviewable branches or worktrees over broad edits in one checkout.
 21. For new projects, send rough ideas to the orchestrator using `agent-control/prompts/intake-orchestrator.md`; the orchestrator drafts `agent-control/brief.md`.

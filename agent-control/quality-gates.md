@@ -49,7 +49,7 @@ Add project-specific commands as the repo takes shape.
 - Human approvals and accepted risks are mirrored in `agent-control/approvals.jsonl`.
 - `scripts/check-route-budget.sh` passes.
 - `scripts/check-stale-routes.sh` passes or stale routes are recovered with `scripts/recover-stale-routes.sh --apply` and then escalated if still blocked.
-- `scripts/watch-routes.sh <session> --send` is active in the control window or routes are manually dispatched.
+- `scripts/watch-routes.sh <session> --send` is active in the control window or routes are manually dispatched; watcher and heartbeat dispatch loops should run automatic stale/communication recovery before dispatch unless intentionally disabled with `AGENT_TEAM_AUTO_RECOVER_STALE=0`.
 - Human approval needs are explicit.
 - Approval-required routes use `--approval-ref` at completion, and review-required routes use `--review-ref`.
 - Scope/architecture changes are recorded in `agent-control/decisions.md`.

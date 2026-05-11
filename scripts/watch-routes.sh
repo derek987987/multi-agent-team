@@ -10,6 +10,7 @@ fi
 MODE="--dry-run"
 INTERVAL="${AGENT_TEAM_ROUTE_WATCH_INTERVAL:-5}"
 ONCE=0
+AUTO_RECOVER_STALE="${AGENT_TEAM_AUTO_RECOVER_STALE:-1}"
 
 usage() {
   cat >&2 <<EOF
@@ -79,6 +80,25 @@ scan_once() {
       printf "watch-routes: tmux session not found: %s\n" "$SESSION" >&2
       return 1
     fi
+  fi
+
+  if [ "$AUTO_RECOVER_STALE" != "0" ]; then
+    local recover_mode
+    local recover_output
+    recover_mode="--dry-run"
+    if [ "$MODE" = "--send" ]; then
+      recover_mode="--apply"
+    fi
+    recover_output="$(mktemp)"
+    if "$ROOT/scripts/recover-stale-routes.sh" "$SESSION" "$recover_mode" >"$recover_output" 2>&1; then
+      if ! grep -qx "No stale routes found for recovery." "$recover_output"; then
+        cat "$recover_output"
+      fi
+    else
+      cat "$recover_output" >&2
+      printf "watch-routes: stale recovery pass failed; continuing dispatch scan\n" >&2
+    fi
+    rm -f "$recover_output"
   fi
 
   "$ROOT/scripts/dispatch-routes.sh" "$SESSION" "$MODE"

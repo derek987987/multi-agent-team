@@ -54,6 +54,26 @@ assert_file_exists "$test_root/scripts/route-db.sh"
 assert_file_exists "$test_root/scripts/record-route-run.sh"
 assert_file_exists "$test_root/scripts/heartbeat-routes.sh"
 
+set_route_created() {
+  local route="$1"
+  local role="$2"
+  local created="$3"
+  local inbox="$test_root/agent-control/inbox/$role.md"
+  local report="$test_root/agent-control/routes/$route.md"
+  local tmp
+  tmp="$(mktemp)"
+  awk -v id="$route" -v created="$created" '
+    /^## / { in_route = ($2 == id) }
+    in_route && /^Created:/ { print; getline; print created; next }
+    { print }
+  ' "$inbox" > "$tmp"
+  mv "$tmp" "$inbox"
+
+  tmp="$(mktemp)"
+  awk -v created="$created" '/^Created:/ { print "Created: " created; next } { print }' "$report" > "$tmp"
+  mv "$tmp" "$report"
+}
+
 "$test_root/scripts/route-agent.sh" R910 cto "DB backed route" \
   --instruction "Use the structured route store for this route." \
   --expected-output "agent-control/routes/R910.md plus SQLite route state" \
@@ -103,6 +123,14 @@ assert_equals "$run_row" "R910|cto|succeeded|gpt-runtime-test|100|50|12|0" "run 
 "$test_root/scripts/heartbeat-routes.sh" fake-session --once --dry-run >/tmp/runtime-heartbeat.out
 assert_contains "$(cat /tmp/runtime-heartbeat.out)" "queued route R911 -> pm" "heartbeat dry run"
 assert_contains "$(cat /tmp/runtime-heartbeat.out)" "dispatch-routes.sh fake-session --dry-run" "heartbeat dispatch preview"
+
+"$test_root/scripts/route-agent.sh" R917 pm "Heartbeat auto recovery" \
+  --instruction "Use heartbeat-routes automatic stale recovery." \
+  --expected-output "Heartbeat dry run reports the stale route recovery without an extra flag." \
+  --validation "heartbeat-routes --once --dry-run runs stale recovery by default." >/tmp/runtime-route-r917.out
+set_route_created R917 pm "2020-01-01T00:00:00Z"
+QUEUED_MINUTES=1 "$test_root/scripts/heartbeat-routes.sh" fake-session --once --dry-run >/tmp/runtime-heartbeat-recover.out
+assert_contains "$(cat /tmp/runtime-heartbeat-recover.out)" "Would recover stale route R917" "heartbeat auto recovery"
 
 "$test_root/scripts/route-agent.sh" R912 frontend "Review gated implementation" \
   --instruction "Implement a change that requires independent review." \

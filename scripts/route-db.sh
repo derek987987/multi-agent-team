@@ -320,6 +320,7 @@ SQL
     output_refs=""
     blocked_reason=""
     run_id=""
+    attempt=""
     updated="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     while [ "$#" -gt 0 ]; do
       case "$1" in
@@ -330,6 +331,7 @@ SQL
         --output-refs) output_refs="${2:-}"; shift 2 ;;
         --blocked-reason) blocked_reason="${2:-}"; shift 2 ;;
         --run-id) run_id="${2:-}"; shift 2 ;;
+        --attempt) attempt="${2:-}"; shift 2 ;;
         --updated) updated="${2:-$updated}"; shift 2 ;;
         *)
           printf "Unexpected update-status argument: %s\n" "$1" >&2
@@ -341,6 +343,16 @@ SQL
     if [ "$status" = "done" ]; then
       completed_sql=", completed_by=$(sql_value "$actor"), completed_at=$(sql_value "$updated")"
     fi
+    attempt_sql=""
+    if [ -n "$attempt" ]; then
+      attempt_sql=", attempt=$(sql_int "$attempt")"
+    fi
+    blocked_reason_sql="''"
+    if [ "$status" = "blocked" ] && [ -z "$blocked_reason" ]; then
+      blocked_reason_sql="blocked_reason"
+    elif [ -n "$blocked_reason" ]; then
+      blocked_reason_sql="$(sql_value "$blocked_reason")"
+    fi
     sqlite3 "$DB_PATH" "$(cat <<SQL
 BEGIN IMMEDIATE;
 UPDATE routes SET
@@ -349,8 +361,9 @@ UPDATE routes SET
   approval_ref=CASE WHEN $(sql_value "$approval_ref") <> '' THEN $(sql_value "$approval_ref") ELSE approval_ref END,
   review_ref=CASE WHEN $(sql_value "$review_ref") <> '' THEN $(sql_value "$review_ref") ELSE review_ref END,
   output_refs=CASE WHEN $(sql_value "$output_refs") <> '' THEN $(sql_value "$output_refs") ELSE output_refs END,
-  blocked_reason=CASE WHEN $(sql_value "$blocked_reason") <> '' THEN $(sql_value "$blocked_reason") ELSE blocked_reason END,
+  blocked_reason=$blocked_reason_sql,
   run_id=CASE WHEN $(sql_value "$run_id") <> '' THEN $(sql_value "$run_id") ELSE run_id END
+  $attempt_sql
   $completed_sql
 WHERE route_id=$(sql_value "$route_id");
 $(append_event_sql "$route_id" "route-$status" "$actor" "$status" "$note" "$updated")

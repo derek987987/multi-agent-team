@@ -50,5 +50,9 @@ Recovery behavior:
 
 - stale routes inside retry budget are requeued with `Attempt` incremented
 - stale routes at retry budget are blocked
+- active routes with pane evidence of Codex transport/session failure are recovered using `AGENT_TEAM_FAILED_SESSION_MINUTES`, default `5`, instead of waiting for the broad in-progress timeout
+- routes blocked by recoverable dispatch infrastructure, such as missing tmux sessions or tmux delivery timeouts, are requeued using `AGENT_TEAM_BLOCKED_COMMUNICATION_MINUTES`, default `5`, so communication failures do not become permanent manual stops
+- `scripts/watch-routes.sh` runs this recovery pass automatically before dispatch unless `AGENT_TEAM_AUTO_RECOVER_STALE=0`
+- `scripts/heartbeat-routes.sh` also runs recovery before dispatch by default; use `--no-recover-stale` or `AGENT_TEAM_AUTO_RECOVER_STALE=0` for diagnostic scans
 - route reports receive `### Recovery Event` evidence
 - pane evidence is captured when a tmux session is supplied
