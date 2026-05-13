@@ -90,8 +90,10 @@ scan_once() {
 
   if [ "$RECOVER_STALE" != "0" ]; then
     if [ "$MODE" = "--send" ]; then
+      "$ROOT/scripts/monitor-agent-sessions.sh" "$SESSION" --apply || true
       "$ROOT/scripts/recover-stale-routes.sh" "$SESSION" --apply
     else
+      "$ROOT/scripts/monitor-agent-sessions.sh" "$SESSION" --dry-run || true
       "$ROOT/scripts/recover-stale-routes.sh" "$SESSION" --dry-run
     fi
   fi

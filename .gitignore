@@ -9,6 +9,7 @@ __pycache__/
 .agents/state/workflow.sqlite3-*
 agent-control/state/workflow.sqlite3
 agent-control/state/workflow.sqlite3-*
+agent-control/state/agent-recovery/
 
 # Local environment and logs
 .env

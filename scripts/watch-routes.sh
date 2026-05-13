@@ -80,6 +80,9 @@ scan_once() {
       printf "watch-routes: tmux session not found: %s\n" "$SESSION" >&2
       return 1
     fi
+    "$ROOT/scripts/monitor-agent-sessions.sh" "$SESSION" --apply || true
+  else
+    "$ROOT/scripts/monitor-agent-sessions.sh" "$SESSION" --dry-run || true
   fi
 
   if [ "$AUTO_RECOVER_STALE" != "0" ]; then

@@ -13,6 +13,7 @@ clear_control_plane_hidden_flags() {
 
 mkdir -p "$ROOT/agent-control/company" "$ROOT/agent-control/meetings" "$ROOT/agent-control/media" "$ROOT/agent-control/state" "$ROOT/agent-control/routes"
 rm -rf "$ROOT/agent-control/state/role-ready"
+rm -rf "$ROOT/agent-control/state/agent-recovery"
 
 cat > "$ROOT/agent-control/brief.md" <<'EOF'
 # Product Brief
