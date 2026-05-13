@@ -15,6 +15,7 @@ Markdown remains the human-readable source for now, but scripts should prefer st
 - `media.jsonl` - media attachment records
 - `approvals.jsonl` - approval and risk acceptance records
 - `workflow.sqlite3` - generated SQLite runtime mirror for routes, route events, route runs, and task rows
+- `agent-recovery/` - generated role-session checkpoints and compact/relaunch request markers used to preserve context during recovery
 
 ## JSONL Rule
 

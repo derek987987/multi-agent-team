@@ -56,3 +56,28 @@ Recovery behavior:
 - `scripts/heartbeat-routes.sh` also runs recovery before dispatch by default; use `--no-recover-stale` or `AGENT_TEAM_AUTO_RECOVER_STALE=0` for diagnostic scans
 - route reports receive `### Recovery Event` evidence
 - pane evidence is captured when a tmux session is supplied
+
+## Agent Session Recovery
+
+Agent session recovery is separate from route stale recovery. It protects the
+role's working context before any relaunch:
+
+- `scripts/detect-agent-health.sh <session>` emits JSONL findings for
+  readiness telemetry drift, missing/dead panes on active routes, failed Codex
+  session pane evidence, and context-pressure messages.
+- `scripts/checkpoint-agent-context.sh <role> <session>` writes a durable
+  packet under `agent-control/state/agent-recovery/` with pane evidence, active
+  route packet, route report, workflow state, handoffs, and target git status.
+- `scripts/recover-agent-session.sh <role> <session> --apply --action compact-context`
+  sends a checkpoint request to the live role so it can compact into shared
+  files before context exhaustion.
+- `scripts/recover-agent-session.sh <role> <session> --apply --action relaunch-agent`
+  checkpoints first, then relaunches the role pane and sends a resume prompt
+  pointing at the checkpoint.
+- `scripts/monitor-agent-sessions.sh <session> --apply` runs the detector and
+  chooses the safe action. `watch-routes.sh` and `heartbeat-routes.sh` run it
+  before route recovery and dispatch unless `AGENT_TEAM_AUTO_RECOVER_AGENTS=0`.
+
+Recovery rule: never relaunch an active role before writing a recovery
+checkpoint. When the pane is still alive and only context pressure is detected,
+request a file-backed context checkpoint first instead of restarting the agent.

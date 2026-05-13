@@ -50,6 +50,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `agent-control/events.jsonl` - append-only workflow event trace
 - `agent-control/state/*.jsonl` - structured state mirrors for projects, routes, tasks, findings, meetings, media, and approvals
 - `agent-control/state/workflow.sqlite3` - generated SQLite runtime mirror for atomic route claims, run metadata, gate refs, and cost fields
+- `agent-control/state/agent-recovery/` - generated recovery checkpoints used to preserve role context before compaction or relaunch
 - `agent-control/inbox/<role>.md` - per-role routed work queue
 - `agent-control/ownership/<role>.paths` - path ownership allowlist for each role
 - `agent-control/agent-config/<role>.yaml` - per-role required reads, allowed paths, and checks
@@ -67,6 +68,10 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `scripts/wait-for-agent-sessions.sh` - waits for `ROLE_READY <role>` markers before route dispatch treats role panes as ready
 - `scripts/watch-routes.sh` - recovers stale active routes, watches queued routes, and dispatches them to tmux agent windows
 - `scripts/heartbeat-routes.sh` - performs a heartbeat-style pass over the SQLite route queue, runs recovery by default, and delegates dispatch
+- `scripts/detect-agent-health.sh` - detects role-session readiness drift, failed/dead panes, missing active panes, and context-pressure signals
+- `scripts/checkpoint-agent-context.sh` - writes durable recovery packets before context compaction or role relaunch
+- `scripts/recover-agent-session.sh` - asks live agents to checkpoint context or relaunches failed panes from a recovery packet
+- `scripts/monitor-agent-sessions.sh` - runs the role-session prevention loop before stale-route recovery and dispatch
 - `scripts/route-db.sh` - owns the generated SQLite runtime store schema and route/run state mutations
 - `scripts/record-route-run.sh` - records route run metadata, token counts, cost cents, exit status, and summary
 - `scripts/route-status.sh` - summarizes a route from its canonical report, owner, evidence, output refs, and next action
@@ -95,17 +100,18 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 15. Run `scripts/validate-structured-state.sh` before review/merge.
 16. Run `scripts/validate-route-state.sh` before review/merge.
 17. Run `scripts/check-stale-routes.sh` and escalate stale routes.
-18. Run `scripts/recover-stale-routes.sh --apply` to requeue or block stale routes when automatic recovery is appropriate; the control-window watcher and heartbeat dispatcher run the same recovery pass before dispatch by default.
-19. Run `scripts/check-secrets.sh` before review/merge.
-20. Prefer small, reviewable branches or worktrees over broad edits in one checkout.
-21. For new projects, send rough ideas to the orchestrator using `agent-control/prompts/intake-orchestrator.md`; the orchestrator drafts `agent-control/brief.md`.
-22. For minimal prompting, route mid-workflow scope changes, feature changes, bugs, or status questions through the orchestrator prompt in `agent-control/prompts/orchestrator.md`.
-23. Do not ask the human to prompt another role during normal work; write a route or handoff and let the route watcher dispatch it.
-24. Auto-launched role agents run sandboxed without shell-command approval prompts; they must still respect ownership, approval gates, and required checks.
-25. Use `agent-control/company/agent-profiles.jsonl` to choose the right role before routing; use meetings when several roles need a shared decision before tasking.
-26. Attach media through `scripts/attach-media.sh` so future visual tools can render the same references without changing workflow files; use the Media Builder tab in `visual-media/` only as a visible option builder for those same parameters.
-27. Completion routes marked `Human approval required: yes` must pass `scripts/complete-route.sh ... --approval-ref <approved-id>`.
-28. Completion routes marked `Review required: <role>` must pass `scripts/complete-route.sh ... --review-ref <done-review-route-id>`.
+18. Run `scripts/monitor-agent-sessions.sh <session> --apply` before relaunching or recovering stuck role sessions; it must checkpoint context before compaction or relaunch.
+19. Run `scripts/recover-stale-routes.sh --apply` to requeue or block stale routes when automatic recovery is appropriate; the control-window watcher and heartbeat dispatcher run the same recovery pass before dispatch by default.
+20. Run `scripts/check-secrets.sh` before review/merge.
+21. Prefer small, reviewable branches or worktrees over broad edits in one checkout.
+22. For new projects, send rough ideas to the orchestrator using `agent-control/prompts/intake-orchestrator.md`; the orchestrator drafts `agent-control/brief.md`.
+23. For minimal prompting, route mid-workflow scope changes, feature changes, bugs, or status questions through the orchestrator prompt in `agent-control/prompts/orchestrator.md`.
+24. Do not ask the human to prompt another role during normal work; write a route or handoff and let the route watcher dispatch it.
+25. Auto-launched role agents run sandboxed without shell-command approval prompts; they must still respect ownership, approval gates, and required checks.
+26. Use `agent-control/company/agent-profiles.jsonl` to choose the right role before routing; use meetings when several roles need a shared decision before tasking.
+27. Attach media through `scripts/attach-media.sh` so future visual tools can render the same references without changing workflow files; use the Media Builder tab in `visual-media/` only as a visible option builder for those same parameters.
+28. Completion routes marked `Human approval required: yes` must pass `scripts/complete-route.sh ... --approval-ref <approved-id>`.
+29. Completion routes marked `Review required: <role>` must pass `scripts/complete-route.sh ... --review-ref <done-review-route-id>`.
 
 ## Recommended Flow
 
