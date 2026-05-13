@@ -101,8 +101,10 @@ scan_once() {
   printf "dispatch-routes.sh %s %s\n" "$SESSION" "$MODE"
   if [ "$MODE" = "--send" ]; then
     "$ROOT/scripts/dispatch-routes.sh" "$SESSION" --send
+    "$ROOT/scripts/check-project-completion-notification.sh" "$SESSION" --apply || true
   else
     "$ROOT/scripts/dispatch-routes.sh" "$SESSION" --dry-run
+    "$ROOT/scripts/check-project-completion-notification.sh" "$SESSION" --dry-run || true
   fi
 }
 

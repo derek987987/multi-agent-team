@@ -135,7 +135,8 @@ project.
 
    - Agent Office reads `agent-control/company/agent-profiles.jsonl`,
      `agent-control/state/agents.jsonl`, `agent-control/state/routes.jsonl`,
-     `agent-control/events.jsonl`, `agent-control/workflow-state.md`, and route reports.
+     `agent-control/state/notifications.jsonl`, `agent-control/events.jsonl`,
+     `agent-control/workflow-state.md`, and route reports.
    - If agents show as offline, the dashboard is telling you that live telemetry
      is empty or the tmux team is not running.
    - Clicking an agent opens the inspector with role, status, active route,
@@ -145,6 +146,10 @@ project.
      signals, such as blocked routes, stale active routes, missing tmux panes,
      dead panes, missing readiness markers, old launching/dispatching telemetry,
      or explicit blocked reasons.
+   - When a project is ready for final human ship/no-ship review, Agent Office
+     shows a `!` marker on the Orchestrator. That marker comes from
+     `agent-control/state/notifications.jsonl` and does not mean approval has
+     already happened.
 
 7. Use the dashboard prompt box for context-aware Orchestrator requests:
 
@@ -341,7 +346,7 @@ Company files:
 - `agent-control/meetings/M*.md` - cross-agent meeting records, decisions, and action items.
 - `agent-control/media/manifest.jsonl` - image, video, screenshot, audio, and document attachment metadata.
 - `agent-control/approvals.jsonl` - approval and accepted-risk ledger.
-- `agent-control/state/projects.jsonl`, `meetings.jsonl`, `media.jsonl`, and `approvals.jsonl` - structured mirrors for scripts and future UI.
+- `agent-control/state/projects.jsonl`, `meetings.jsonl`, `media.jsonl`, `approvals.jsonl`, and `notifications.jsonl` - structured mirrors for scripts and future UI.
 - `agent-control/state/workflow.sqlite3` - generated runtime mirror for atomic route claims, route gate refs, run metadata, token counts, and cost cents.
 - `agent-control/state/agent-recovery/` - generated context checkpoints and recovery request markers for role-session compaction or relaunch.
 - `visual-media/` - no-build Agent Office dashboard plus the static option builder for `scripts/attach-media.sh` parameters.
@@ -769,5 +774,12 @@ Final outputs:
 
 - `agent-control/final-cto-review.md`
 - `agent-control/final-acceptance.md`
+
+The route watcher and heartbeat run `scripts/check-project-completion-notification.sh`.
+When no open routes/tasks, blocking findings, final-review gaps, or agent health
+issues remain, the script records `project-complete-ready-for-human` in
+`agent-control/state/notifications.jsonl` and mirrors the message under
+`Human Attention Needed` in `agent-control/workflow-state.md`. Agent Office
+renders that active Orchestrator notification as a `!` marker.
 
 The human makes the final ship/no-ship decision.

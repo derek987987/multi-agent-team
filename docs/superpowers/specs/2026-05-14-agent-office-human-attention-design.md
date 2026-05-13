@@ -31,6 +31,7 @@ It does not mean the human has approved the project.
 
 The first implementation should keep the check conservative. It can notify when:
 - no active route is in `queued`, `dispatching`, `dispatched`, `acknowledged`, `in-progress`, or `blocked`;
+- no task-board task is in `pending`, `in-progress`, `blocked`, or `ready-for-review`;
 - Agent Office health has no `stuck` or `watch` items;
 - `scripts/check-done.sh` passes;
 - `agent-control/final-cto-review.md` and `agent-control/final-acceptance.md` exist and are non-placeholder enough to be meaningful.

@@ -220,6 +220,25 @@ def read_profiles(root: Path) -> list[dict[str, Any]]:
     return [profile for profile in profiles if profile.get("role")]
 
 
+def read_notifications(root: Path) -> list[dict[str, Any]]:
+    records = latest_by(read_jsonl(root / "agent-control" / "state" / "notifications.jsonl"), "notification_id")
+    notifications = list(records.values())
+    return sorted(
+        notifications,
+        key=lambda item: str(item.get("updated") or item.get("created") or ""),
+        reverse=True,
+    )
+
+
+def active_human_attention_notifications(notifications: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        notification
+        for notification in notifications
+        if str(notification.get("status") or "").lower() == "active"
+        and str(notification.get("target_role") or "").strip()
+    ]
+
+
 def tmux_pane_inventory() -> dict[str, dict[str, Any]]:
     try:
         result = subprocess.run(
@@ -514,12 +533,15 @@ def build_health_summary(agents: list[dict[str, Any]], routes: list[dict[str, An
 def build_snapshot(root: Path) -> dict[str, Any]:
     routes = build_routes(root)
     agents = build_agents(root, routes)
+    notifications = read_notifications(root)
     return {
         "generated_at": utc_now(),
         "project_target": read_text(root / "agent-control" / "project-target.md"),
         "profiles": read_profiles(root),
         "agents": agents,
         "routes": routes,
+        "notifications": notifications,
+        "human_attention_notifications": active_human_attention_notifications(notifications),
         "workflow": parse_workflow_state(root),
         "events": read_jsonl(root / "agent-control" / "events.jsonl")[-40:],
         "health": build_health_summary(agents, routes),
@@ -527,6 +549,7 @@ def build_snapshot(root: Path) -> dict[str, Any]:
             "profiles": "agent-control/company/agent-profiles.jsonl",
             "agents": "agent-control/state/agents.jsonl",
             "routes": "agent-control/state/routes.jsonl",
+            "notifications": "agent-control/state/notifications.jsonl",
             "events": "agent-control/events.jsonl",
             "workflow": "agent-control/workflow-state.md",
             "route_reports": "agent-control/routes/*.md",

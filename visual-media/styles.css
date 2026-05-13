@@ -497,6 +497,31 @@ a {
   border-left-color: var(--red);
 }
 
+.notification-card {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid #6d4a16;
+  border-left: 4px solid var(--amber);
+  border-radius: 6px;
+  background: #171106;
+  color: #f2d39a;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.notification-card strong {
+  color: #ffdc8a;
+  font-size: 0.84rem;
+}
+
+.notification-card code {
+  color: #d7b66e;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
 .event-list li {
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr);

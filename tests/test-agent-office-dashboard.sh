@@ -83,6 +83,9 @@ assert_contains "$dashboard_markup" "/api/orchestrator-prompt" "agent office das
 assert_contains "$dashboard_markup" "Codex Session" "agent office dashboard"
 assert_contains "$dashboard_markup" "stuckSignalCount" "agent office dashboard"
 assert_contains "$dashboard_markup" "healthList" "agent office dashboard"
+assert_contains "$dashboard_markup" "notificationsForRole" "agent office notification marker"
+assert_contains "$dashboard_markup" "notificationBadge" "agent office notification marker"
+assert_contains "$dashboard_markup" "notification-card" "agent office notification marker"
 assert_contains "$dashboard_markup" "scripts/attach-media.sh" "media builder tab"
 
 office_url="$("$ROOT/scripts/start-agent-office-dashboard.sh" --print-url 9877)"
@@ -127,6 +130,9 @@ cat >> "$test_root/agent-control/state/routes.jsonl" <<'JSONL'
 {"route_id":"R777","from":"orchestrator","to":"frontend","status":"in-progress","priority":"P1","attempt":1,"created":"2026-01-01T00:00:00Z","updated":"2099-01-01T00:00:00Z","report":"agent-control/routes/R777.md"}
 {"route_id":"R778","from":"orchestrator","to":"backend","status":"blocked","priority":"P1","attempt":1,"created":"2026-01-01T00:00:00Z","updated":"2026-01-01T00:00:00Z","report":"agent-control/routes/R778.md"}
 JSONL
+cat > "$test_root/agent-control/state/notifications.jsonl" <<'JSONL'
+{"notification_id":"project-complete-ready-for-human","status":"active","severity":"action","target_role":"orchestrator","title":"Project ready for final human review","message":"Project ready for final human review.","source":"test","evidence_refs":["agent-control/final-acceptance.md"],"created":"2026-01-01T00:00:00Z","updated":"2026-01-01T00:00:00Z"}
+JSONL
 
 PATH="$ROOT/tests/fixtures:$PATH" TMUX_FIXTURE_CAPTURE="ROLE_READY frontend" python3 - "$test_root" <<'PY'
 import importlib.util
@@ -138,6 +144,11 @@ spec = importlib.util.spec_from_file_location("agent_office_server", root / "vis
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 payload = module.build_snapshot(root)
+assert "notifications" in payload, payload
+assert payload["notifications"][0]["notification_id"] == "project-complete-ready-for-human", payload["notifications"]
+assert payload["notifications"][0]["target_role"] == "orchestrator", payload["notifications"]
+assert "human_attention_notifications" in payload, payload
+assert payload["human_attention_notifications"][0]["status"] == "active", payload["human_attention_notifications"]
 frontend = {agent["role"]: agent for agent in payload["agents"]}["frontend"]
 assert frontend["pane"]["pane_pid"] == "fixture-pane", frontend
 assert frontend["health"]["ready_marker_matches_pane"] is False, frontend

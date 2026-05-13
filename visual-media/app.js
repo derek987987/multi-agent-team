@@ -197,6 +197,18 @@ function routeById(routeId) {
   return state.snapshot?.routes.find((route) => route.route_id === routeId) || null;
 }
 
+function notificationsForRole(role) {
+  return (state.snapshot?.human_attention_notifications || [])
+    .filter((notification) => notification.target_role === role);
+}
+
+function hasActionNotification(role) {
+  return notificationsForRole(role).some((notification) => {
+    const severity = notification.severity || "";
+    return severity === "action" || severity === "watch";
+  });
+}
+
 function formatRelative(value) {
   if (!value) {
     return "-";
@@ -283,6 +295,7 @@ function drawAgent(ctx, agent, x, y, t, selected) {
   const color = statusColors[key] || statusColors.idle;
   const bob = key === "busy" || key === "dispatching" ? Math.sin(t / 180 + x) * 2 : 0;
   const offsetY = y - 28 + bob;
+  const notificationBadge = hasActionNotification(agent.role);
 
   if (selected) {
     ctx.strokeStyle = "#35d3c8";
@@ -316,6 +329,15 @@ function drawAgent(ctx, agent, x, y, t, selected) {
     ctx.fillStyle = "#4ea7ff";
     ctx.fillRect(x + 27, y + 20, 22, 14);
     drawPixelText(ctx, "^", x + 34, y + 19, "#04101d", 13);
+  }
+
+  if (notificationBadge) {
+    ctx.fillStyle = "#f3aa3d";
+    ctx.fillRect(x + 27, offsetY - 24, 22, 22);
+    ctx.strokeStyle = "#2b1903";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 27.5, offsetY - 23.5, 21, 21);
+    drawPixelText(ctx, "!", x + 35, offsetY - 22, "#160d02", 16);
   }
 
   const label = agent.display_name || agent.role;
@@ -463,6 +485,14 @@ function refsForAgent(agent) {
     lines.push(`Route report: agent-control/routes/${agent.active_route}.md`);
     lines.push(`Status command: ./scripts/route-status.sh ${agent.active_route}`);
   }
+  const notifications = notificationsForRole(agent.role);
+  for (const notification of notifications) {
+    lines.push(`Notification: ${notification.title || notification.notification_id}`);
+    lines.push(`Notification state: agent-control/state/notifications.jsonl`);
+    for (const ref of notification.evidence_refs || []) {
+      lines.push(`Notification evidence: ${ref}`);
+    }
+  }
   return lines.join("\n");
 }
 
@@ -476,6 +506,20 @@ function updateHealthList(agent) {
   }
 
   const health = agent.health || { severity: "watch", label: "No health data", signals: [] };
+  const notifications = notificationsForRole(agent.role);
+  for (const notification of notifications) {
+    const notice = document.createElement("li");
+    notice.className = "notification-card";
+    const title = document.createElement("strong");
+    title.textContent = notification.title || "Human attention needed";
+    const message = document.createElement("span");
+    message.textContent = notification.message || notification.notification_id || "Notification active.";
+    const refs = document.createElement("code");
+    refs.textContent = (notification.evidence_refs || []).join(", ") || "agent-control/state/notifications.jsonl";
+    notice.append(title, message, refs);
+    elements.healthList.append(notice);
+  }
+
   const item = document.createElement("li");
   item.className = `health-item health-${health.severity || "ok"}`;
   const title = document.createElement("strong");

@@ -48,6 +48,7 @@ check_jsonl "$ROOT/agent-control/state/findings.jsonl"
 check_jsonl "$ROOT/agent-control/state/meetings.jsonl"
 check_jsonl "$ROOT/agent-control/state/media.jsonl"
 check_jsonl "$ROOT/agent-control/state/approvals.jsonl"
+check_jsonl "$ROOT/agent-control/state/notifications.jsonl"
 
 if [ -f "$ROOT/agent-control/state/workflow.sqlite3" ]; then
   if ! "$ROOT/scripts/route-db.sh" check; then

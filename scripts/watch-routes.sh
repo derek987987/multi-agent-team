@@ -105,6 +105,12 @@ scan_once() {
   fi
 
   "$ROOT/scripts/dispatch-routes.sh" "$SESSION" "$MODE"
+  local completion_mode
+  completion_mode="--dry-run"
+  if [ "$MODE" = "--send" ]; then
+    completion_mode="--apply"
+  fi
+  "$ROOT/scripts/check-project-completion-notification.sh" "$SESSION" "$completion_mode" || true
   printf "watch-routes: scan complete\n"
 }
 

@@ -418,6 +418,7 @@ cat > "$ROOT/agent-control/state/findings.jsonl" </dev/null
 cat > "$ROOT/agent-control/state/meetings.jsonl" </dev/null
 cat > "$ROOT/agent-control/state/media.jsonl" </dev/null
 cat > "$ROOT/agent-control/state/approvals.jsonl" </dev/null
+cat > "$ROOT/agent-control/state/notifications.jsonl" </dev/null
 cat > "$ROOT/agent-control/events.jsonl" </dev/null
 rm -f "$ROOT/agent-control/state/workflow.sqlite3" "$ROOT/agent-control/state/workflow.sqlite3-shm" "$ROOT/agent-control/state/workflow.sqlite3-wal"
 

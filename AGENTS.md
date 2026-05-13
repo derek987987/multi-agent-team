@@ -48,7 +48,8 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `agent-control/route-budget.md` - max open routes, retries, and escalation rules
 - `agent-control/milestone-budget.md` - active task, retry, and branch budget limits
 - `agent-control/events.jsonl` - append-only workflow event trace
-- `agent-control/state/*.jsonl` - structured state mirrors for projects, routes, tasks, findings, meetings, media, and approvals
+- `agent-control/state/*.jsonl` - structured state mirrors for projects, routes, tasks, findings, meetings, media, approvals, and notifications
+- `agent-control/state/notifications.jsonl` - active and historical human-attention notifications for Agent Office
 - `agent-control/state/workflow.sqlite3` - generated SQLite runtime mirror for atomic route claims, run metadata, gate refs, and cost fields
 - `agent-control/state/agent-recovery/` - generated recovery checkpoints used to preserve role context before compaction or relaunch
 - `agent-control/inbox/<role>.md` - per-role routed work queue
@@ -72,6 +73,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `scripts/checkpoint-agent-context.sh` - writes durable recovery packets before context compaction or role relaunch
 - `scripts/recover-agent-session.sh` - asks live agents to checkpoint context or relaunches failed panes from a recovery packet
 - `scripts/monitor-agent-sessions.sh` - runs the role-session prevention loop before stale-route recovery and dispatch
+- `scripts/check-project-completion-notification.sh` - records the final human-attention notification when the project is ready for ship/no-ship review
 - `scripts/route-db.sh` - owns the generated SQLite runtime store schema and route/run state mutations
 - `scripts/record-route-run.sh` - records route run metadata, token counts, cost cents, exit status, and summary
 - `scripts/route-status.sh` - summarizes a route from its canonical report, owner, evidence, output refs, and next action
