@@ -45,6 +45,11 @@ fi
 command -v jq >/dev/null 2>&1 || exit 0
 mkdir -p "$RECOVERY_DIR"
 
+if [ "$MODE" = "--apply" ]; then
+  # Repair stale launch/readiness telemetry before deeper recovery decisions.
+  "$ROOT/scripts/repair-role-readiness.sh" "$SESSION" --quiet || true
+fi
+
 marker_matches() {
   local marker="$1"
   local pane_pid="$2"

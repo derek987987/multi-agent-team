@@ -216,7 +216,30 @@ update_response() {
   mv "$tmp" "$file"
 }
 
+update_task_status() {
+  local task_id="$1"
+  local status="$2"
+  local tmp
+  [ -n "$task_id" ] || return 0
+  [ -f "$ROOT/agent-control/task-board.md" ] || return 0
+  tmp="$(mktemp)"
+  awk -v id="$task_id" -v status="$status" '
+    /^### T[0-9]+/ { in_task = ($2 == id); print; next }
+    in_task && /^Status:/ { print "Status: " status; next }
+    { print }
+  ' "$ROOT/agent-control/task-board.md" > "$tmp"
+  mv "$tmp" "$ROOT/agent-control/task-board.md"
+}
+
 update_response "$route_file" "##"
+
+related_task="$(awk -v id="$ROUTE_ID" '
+  /^## / { in_route = ($2 == id) }
+  in_route && /^Related task:/ { sub(/^Related task:[[:space:]]*/, ""); print; exit }
+' "$route_file")"
+if [ -n "$related_task" ] && [ "$related_task" != "none" ]; then
+  update_task_status "$related_task" "done"
+fi
 
 if grep -qE "^### $ROUTE_ID([[:space:]-]|$)" "$ROOT/agent-control/handoffs.md"; then
   update_status "$ROOT/agent-control/handoffs.md" "###" "done"

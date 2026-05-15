@@ -43,7 +43,7 @@ cd /Users/hay/Documents/agent-team-instances/my-app-team
 ./scripts/start-agent-team.sh
 ```
 
-Startup launches Codex in every agent window with `--ask-for-approval never --sandbox workspace-write --disable apps` so role agents stay sandboxed, avoid app-MCP startup stalls, and do not stop for shell-command approval prompts. Before launch, startup pre-trusts the generated agent-team copy and target project in Codex config so first-run workspace trust prompts do not strand role panes. The `control` window waits for every role to emit `ROLE_READY <role>` before the route watcher starts dispatching. The `office` window serves Agent Office at `http://127.0.0.1:8765/visual-media/`, and the `orchestrator` window is the normal place where you talk to the team.
+Startup launches Codex in every agent window with `--ask-for-approval never --sandbox workspace-write --disable apps` so role agents stay sandboxed, avoid app-MCP startup stalls, and do not stop for shell-command approval prompts. Before launch, startup pre-trusts the generated agent-team copy and target project in Codex config so first-run workspace trust prompts do not strand role panes. The `control` window waits for every role to emit `ROLE_READY <role>` before the control loop starts dispatching. The `office` window serves Agent Office at `http://127.0.0.1:8765/visual-media/`, and the `orchestrator` window is the normal place where you talk to the team.
 
 Set `AGENT_OFFICE_PORT=<port>` before startup when the default dashboard port is already in use. Set `AGENT_ROLE_READY_TIMEOUT=<seconds>` when a slow machine or model needs more startup time. Set `AGENT_TEAM_AUTO_TRUST_CODEX_PROJECTS=0` if you want to handle Codex workspace trust prompts manually.
 
@@ -564,7 +564,7 @@ The control window normally runs this automatically through:
 ./scripts/watch-routes.sh agent-team --send
 ```
 
-The startup scripts keep this watcher inside a restart loop. They start role windows first, pre-trust the local Codex workspaces, then run `scripts/wait-for-agent-sessions.sh` so dispatch waits for the explicit `ROLE_READY <role>` marker instead of a blind sleep. Each watcher scan first runs agent-session monitoring, which can repair stale readiness telemetry, ask context-pressured live agents to write a file-backed checkpoint, or relaunch failed role panes from a recovery packet. It then runs stale-route and recoverable communication-blocker recovery before dispatching queued routes. If a role is still launching, `dispatch-routes.sh` leaves its queued routes queued for the next watcher pass instead of blocking them as infrastructure failures. If `watch-routes.sh` exits, the `control` window stays open, prints the exit status, waits 5 seconds, and restarts the watcher. Startup also falls back to the `orchestrator` window if the `control` window is unavailable, so a watcher crash should not abort startup with `can't find window: control`.
+The startup scripts keep this watcher inside a restart loop through `scripts/agent-control-loop.sh`. They start role windows first, pre-trust the local Codex workspaces, then run `scripts/wait-for-agent-sessions.sh` so dispatch waits for the explicit `ROLE_READY <role>` marker instead of a blind sleep. Each watcher scan first runs agent-session monitoring, which can repair stale readiness telemetry, ask context-pressured live agents to write a file-backed checkpoint, or relaunch failed role panes from a recovery packet. It then runs stale-route and recoverable communication-blocker recovery before dispatching queued routes. If `watch-routes.sh` exits, the control loop restarts it after a short pause. Startup also falls back to the `orchestrator` window if the `control` window is unavailable, so a watcher crash should not abort startup with `can't find window: control`.
 
 Dispatch has two separate timeouts. `ROUTE_DISPATCH_SEND_TIMEOUT` bounds tmux delivery; a delivery timeout blocks the route because the prompt did not reach the role pane. `ROUTE_DISPATCH_ACK_TIMEOUT` only controls how long the watcher waits for the role to claim the route; if that expires, the route stays `dispatched` so a slow Codex session can still claim it and stale-route recovery can make the retry/block decision later.
 
@@ -583,6 +583,14 @@ Check route health:
 ```
 
 `recover-stale-routes.sh --apply` increments `Attempt` and requeues stale active routes while they are inside `agent-control/route-budget.md`; routes at retry budget are blocked with recovery evidence in `agent-control/routes/R000.md`. In-progress routes with pane evidence such as `stream disconnected`, `Transport error`, `error decoding response body`, `Timeout waiting for child process`, or `Reconnecting... 5/5` use the faster `AGENT_TEAM_FAILED_SESSION_MINUTES` threshold, default `5`, instead of waiting for the broad `IN_PROGRESS_HOURS` threshold. Routes blocked by recoverable dispatch infrastructure, such as missing tmux sessions or tmux delivery timeouts, use `AGENT_TEAM_BLOCKED_COMMUNICATION_MINUTES`, default `5`, and are requeued if retry budget remains. Set `AGENT_TEAM_AUTO_RECOVER_STALE=0` when you need the watcher or heartbeat loop to dispatch without mutating recovery state.
+
+If you need to restart the monitoring loop manually in an already running tmux session, use:
+
+```bash
+./scripts/agent-control-loop.sh agent-team --send
+```
+
+That helper wraps `watch-routes.sh` in a restart loop so one failed scan does not stop dispatch monitoring.
 
 Agent-session recovery is the context-preserving layer before route recovery:
 

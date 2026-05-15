@@ -296,6 +296,21 @@ if [ -e "$ROUTE_REPORT" ]; then
   exit 1
 fi
 
+update_task_status() {
+  local task_id="$1"
+  local status="$2"
+  local tmp
+  [ -n "$task_id" ] || return 0
+  [ -f "$ROOT/agent-control/task-board.md" ] || return 0
+  tmp="$(mktemp)"
+  awk -v id="$task_id" -v status="$status" '
+    /^### T[0-9]+/ { in_task = ($2 == id); print; next }
+    in_task && /^Status:/ { print "Status: " status; next }
+    { print }
+  ' "$ROOT/agent-control/task-board.md" > "$tmp"
+  mv "$tmp" "$ROOT/agent-control/task-board.md"
+}
+
 cat > "$ROUTE_REPORT" <<ROUTE
 # $ROUTE_ID - $TITLE
 
@@ -456,6 +471,10 @@ printf '{"route_id":"%s","from":"%s","to":"%s","status":"queued","priority":"%s"
   --report "agent-control/routes/$ROUTE_ID.md" \
   --created "$CREATED" \
   --updated "$UPDATED" >/dev/null
+
+if [ -n "$RELATED_TASK" ] && [ "$DRAFT" -eq 0 ]; then
+  update_task_status "$RELATED_TASK" "in-progress"
+fi
 
 "$ROOT/scripts/log-event.sh" route-created "$FROM_ACTOR" "Created route $ROUTE_ID for $TO_ROLE" "$TITLE" "$ROUTE_ID"
 "$ROOT/scripts/check-route-budget.sh" >/dev/null

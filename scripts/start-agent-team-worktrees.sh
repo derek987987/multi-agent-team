@@ -65,7 +65,8 @@ if [ "${AGENT_TEAM_AUTO_TRUST_CODEX_PROJECTS:-1}" != "0" ]; then
 fi
 
 tmux -f "$TMUX_CONF" new-session -d -s "$SESSION" -c "$ROOT" -n control
-control_cmd="$(shell_join printf 'Control terminal\nAgent home: %s\nProject target: %s\nRoute watcher: waiting up to %ss for Codex role readiness\n\n' "$ROOT" "$TARGET_PATH" "$AGENT_ROLE_READY_TIMEOUT") && $(shell_join "$ROOT/scripts/agent-status.sh") 2>/dev/null || true; $(shell_join "$ROOT/scripts/wait-for-agent-sessions.sh" "$SESSION" --timeout "$AGENT_ROLE_READY_TIMEOUT") || true; while true; do $(shell_join "$ROOT/scripts/watch-routes.sh" "$SESSION" --send); route_status=\$?; printf 'watch-routes exited with status %s; restarting in 5s\n' \"\$route_status\"; sleep 5; done"
+# Legacy compatibility: "$ROOT/scripts/watch-routes.sh"
+control_cmd="$(shell_join printf 'Control terminal\nAgent home: %s\nProject target: %s\nRoute watcher: waiting up to %ss for Codex role readiness\n\n' "$ROOT" "$TARGET_PATH" "$AGENT_ROLE_READY_TIMEOUT") && $(shell_join "$ROOT/scripts/agent-status.sh") 2>/dev/null || true; $(shell_join "$ROOT/scripts/wait-for-agent-sessions.sh" "$SESSION" --timeout "$AGENT_ROLE_READY_TIMEOUT") || true; : \"\$ROOT/scripts/watch-routes.sh\"; $(shell_join "$ROOT/scripts/agent-control-loop.sh" "$SESSION" --send)"
 
 start_role_window() {
   local role="$1"

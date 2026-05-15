@@ -104,6 +104,8 @@ scan_once() {
     rm -f "$recover_output"
   fi
 
+  "$ROOT/scripts/promote-ready-task-route.sh" "$SESSION" "$MODE"
+
   "$ROOT/scripts/dispatch-routes.sh" "$SESSION" "$MODE"
   local completion_mode
   completion_mode="--dry-run"

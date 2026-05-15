@@ -68,6 +68,7 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `scripts/trust-codex-projects.sh` - pre-trusts generated agent-team and target paths in Codex config to avoid first-run trust prompts during auto-start
 - `scripts/wait-for-agent-sessions.sh` - waits for `ROLE_READY <role>` markers before route dispatch treats role panes as ready
 - `scripts/watch-routes.sh` - recovers stale active routes, watches queued routes, and dispatches them to tmux agent windows
+- `scripts/agent-control-loop.sh` - keeps the control-window watcher alive by restarting route dispatch after exits
 - `scripts/heartbeat-routes.sh` - performs a heartbeat-style pass over the SQLite route queue, runs recovery by default, and delegates dispatch
 - `scripts/detect-agent-health.sh` - detects role-session readiness drift, failed/dead panes, missing active panes, and context-pressure signals
 - `scripts/checkpoint-agent-context.sh` - writes durable recovery packets before context compaction or role relaunch

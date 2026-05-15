@@ -98,6 +98,8 @@ scan_once() {
     fi
   fi
 
+  "$ROOT/scripts/promote-ready-task-route.sh" "$SESSION" "$MODE"
+
   printf "dispatch-routes.sh %s %s\n" "$SESSION" "$MODE"
   if [ "$MODE" = "--send" ]; then
     "$ROOT/scripts/dispatch-routes.sh" "$SESSION" --send
