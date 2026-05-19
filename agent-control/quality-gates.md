@@ -29,7 +29,14 @@ Add project-specific commands as the repo takes shape.
 | --- | --- | --- | --- | --- | --- |
 | Node / TypeScript | `npm install` | `npm run lint` | `npm run typecheck` | `npm test` | `npm run build` |
 | Python | `python -m pip install -e .` | `python -m ruff check .` | `python -m mypy .` | `python -m pytest` | `python -m compileall .` |
+| Flutter mobile | `flutter pub get` | `flutter analyze` | n/a | `flutter test` | `flutter build apk --debug` for Android or `flutter build ios --debug` / `flutter run -d <device-id>` for iOS |
 | Swift / iOS | n/a | n/a | n/a | `xcodebuild test -scheme <Scheme> -destination 'generic/platform=iOS'` | `xcodebuild build -scheme <Scheme> -destination 'generic/platform=iOS'` |
+
+For Flutter/mobile projects, final validation must also confirm the platform scaffold
+needed for the requested test target exists, such as `android/` for APK work or
+`ios/` for iPhone install work. If a local toolchain is missing, record the exact
+blocker from `flutter doctor -v` and do not call the project install-ready for
+that platform.
 
 ## Role-Specific Gates
 
