@@ -105,6 +105,7 @@ scan_once() {
   fi
 
   "$ROOT/scripts/promote-ready-task-route.sh" "$SESSION" "$MODE"
+  "$ROOT/scripts/promote-final-review-routes.sh" "$SESSION" "$MODE"
 
   "$ROOT/scripts/dispatch-routes.sh" "$SESSION" "$MODE"
   local completion_mode
