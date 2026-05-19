@@ -42,7 +42,7 @@ import pathlib
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 ROOT = pathlib.Path(sys.argv[1])
 SESSION = sys.argv[2]
@@ -50,6 +50,7 @@ MODE = sys.argv[3]
 APPLY = MODE == "--apply"
 
 NOTIFICATION_ID = "project-complete-ready-for-human"
+FINAL_DECISION_SUBJECT_PREFIX = "final ship/no-ship"
 ACTIVE_ROUTE_STATUSES = {
     "queued",
     "dispatching",
@@ -67,10 +68,26 @@ EVIDENCE_REFS = [
     "agent-control/review-report.md",
     "agent-control/security-report.md",
 ]
+FINAL_DECISION_STATUS = {"approved", "rejected"}
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def parse_utc(value: object) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    try:
+        if text.endswith("Z"):
+            return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        parsed = datetime.fromisoformat(text)
+        if parsed.tzinfo is None:
+            return parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except ValueError:
+        return None
 
 
 def read_text(path: pathlib.Path) -> str:
@@ -117,6 +134,13 @@ def parse_field_block(text: str) -> dict[str, str]:
     return fields
 
 
+def current_request_id() -> str:
+    text = read_text(ROOT / "agent-control" / "workflow-state.md")
+    match = re.search(r"^Request ID:[ \t]*(.*?)$", text, re.MULTILINE)
+    value = match.group(1).strip() if match else ""
+    return value or "current-request"
+
+
 def active_routes() -> list[str]:
     routes: dict[str, str] = {}
     for route_id, record in latest_by(
@@ -156,6 +180,68 @@ def active_tasks() -> list[str]:
         if status in ACTIVE_ROUTE_STATUSES:
             active.append(f"{current_task or 'unknown task'}:{status}")
     return active
+
+
+def latest_project_change_at() -> datetime | None:
+    timestamps: list[datetime] = []
+
+    for record in latest_by(
+        read_jsonl(ROOT / "agent-control" / "state" / "routes.jsonl"), "route_id"
+    ).values():
+        for field in ("updated", "created"):
+            parsed = parse_utc(record.get(field))
+            if parsed is not None:
+                timestamps.append(parsed)
+
+    for relative in (
+        "agent-control/task-board.md",
+        "agent-control/final-cto-review.md",
+        "agent-control/final-acceptance.md",
+        "agent-control/validation-report.md",
+        "agent-control/review-report.md",
+        "agent-control/security-report.md",
+    ):
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        timestamps.append(datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc))
+
+    return max(timestamps) if timestamps else None
+
+
+def latest_final_decision() -> dict | None:
+    request_id = current_request_id()
+    subject_exact = f"{FINAL_DECISION_SUBJECT_PREFIX}:{request_id}"
+    records = latest_by(read_jsonl(ROOT / "agent-control" / "approvals.jsonl"), "approval_id")
+    latest: dict | None = None
+    latest_at: datetime | None = None
+
+    for record in records.values():
+        if str(record.get("subject") or "").strip() != subject_exact:
+            continue
+        status = str(record.get("status") or "").strip().lower()
+        if status not in FINAL_DECISION_STATUS:
+            continue
+        created = parse_utc(record.get("created"))
+        if created is None:
+            continue
+        if latest_at is None or created > latest_at:
+            latest = record
+            latest_at = created
+
+    return latest
+
+
+def final_decision_is_current(record: dict | None) -> bool:
+    if not record:
+        return False
+    created = parse_utc(record.get("created"))
+    if created is None:
+        return False
+    latest_change = latest_project_change_at()
+    if latest_change is None:
+        return True
+    return latest_change <= created + timedelta(seconds=1)
 
 
 def final_artifact_missing_reason(path: pathlib.Path) -> str:
@@ -206,7 +292,31 @@ def health_reason() -> str:
     if result.returncode != 0:
         return f"agent health check failed: {' '.join(output.split()) or result.returncode}"
     if output:
-        return f"agent health needs attention: {' '.join(output.split())}"
+        blocking_findings: list[str] = []
+        passthrough_lines: list[str] = []
+        for line in output.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            try:
+                finding = json.loads(stripped)
+            except json.JSONDecodeError:
+                passthrough_lines.append(stripped)
+                continue
+            if not isinstance(finding, dict):
+                passthrough_lines.append(stripped)
+                continue
+            severity = str(finding.get("severity") or "").strip().lower()
+            active_route = str(finding.get("active_route") or "").strip().lower()
+            # Idle watch-level findings are advisory cleanup. They should not block
+            # the final human review notification once all routed work is done.
+            if severity == "watch" and active_route in {"", "none"}:
+                continue
+            blocking_findings.append(stripped)
+        if passthrough_lines:
+            return f"agent health needs attention: {' '.join(' '.join(line.split()) for line in passthrough_lines)}"
+        if blocking_findings:
+            return f"agent health needs attention: {' '.join(' '.join(line.split()) for line in blocking_findings)}"
     return ""
 
 
@@ -281,12 +391,36 @@ def main() -> int:
 
     reasons = completion_reasons()
     latest_status = latest_notification_status(notification_path)
+    final_decision = latest_final_decision()
     active_message = (
         "Project ready for final human review. Agents report no open routes, "
         "blocking findings, or final acceptance gaps; human ship/no-ship attention is needed.\n\n"
         "Evidence refs:\n"
         + "\n".join(f"- {ref}" for ref in EVIDENCE_REFS)
     )
+
+    if final_decision_is_current(final_decision):
+        approval_id = str(final_decision.get("approval_id") or "").strip() or "unknown-approval"
+        status = str(final_decision.get("status") or "").strip().lower() or "recorded"
+        decision = str(final_decision.get("decision") or "").strip()
+        detail = f"Final human decision already recorded: {approval_id} {status}"
+        if decision:
+            detail += f" ({decision})"
+        if APPLY and latest_status == "active":
+            append_notification(
+                notification_path,
+                "dismissed",
+                "Project completion notification dismissed because final human decision is already recorded: "
+                + detail,
+            )
+            update_human_attention("None.")
+            print("Project completion notification dismissed because final human decision is already recorded.")
+            return 0
+        if APPLY:
+            update_human_attention("None.")
+            return 0
+        print(detail + ".")
+        return 0
 
     if not reasons:
         if APPLY:

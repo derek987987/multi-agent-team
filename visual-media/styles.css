@@ -522,6 +522,12 @@ a {
   white-space: normal;
 }
 
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .event-list li {
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr);

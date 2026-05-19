@@ -202,6 +202,10 @@ function notificationsForRole(role) {
     .filter((notification) => notification.target_role === role);
 }
 
+function isFinalReviewNotification(notification) {
+  return notification?.notification_id === "project-complete-ready-for-human";
+}
+
 function hasActionNotification(role) {
   return notificationsForRole(role).some((notification) => {
     const severity = notification.severity || "";
@@ -517,6 +521,29 @@ function updateHealthList(agent) {
     const refs = document.createElement("code");
     refs.textContent = (notification.evidence_refs || []).join(", ") || "agent-control/state/notifications.jsonl";
     notice.append(title, message, refs);
+    if (agent?.role === "orchestrator" && isFinalReviewNotification(notification)) {
+      const actions = document.createElement("div");
+      actions.className = "notification-actions";
+
+      const approveButton = document.createElement("button");
+      approveButton.type = "button";
+      approveButton.className = "small-button";
+      approveButton.textContent = "Approve Ship";
+      approveButton.addEventListener("click", () =>
+        submitFinalDecision("approved", "Approved ship/no-ship review from Agent Office."),
+      );
+
+      const holdButton = document.createElement("button");
+      holdButton.type = "button";
+      holdButton.className = "small-button";
+      holdButton.textContent = "Hold";
+      holdButton.addEventListener("click", () =>
+        submitFinalDecision("rejected", "Rejected ship/no-ship review from Agent Office."),
+      );
+
+      actions.append(approveButton, holdButton);
+      notice.append(actions);
+    }
     elements.healthList.append(notice);
   }
 
@@ -703,7 +730,11 @@ async function submitPrompt(event) {
     if (!response.ok) {
       throw new Error(payload.error || `Request failed: ${response.status}`);
     }
-    elements.promptResult.textContent = `Queued ${payload.route_id}`;
+    if (payload.action === "final-decision") {
+      elements.promptResult.textContent = `Recorded ${payload.approval_id} (${payload.status})`;
+    } else {
+      elements.promptResult.textContent = `Queued ${payload.route_id}`;
+    }
     elements.promptMessage.value = "";
     await loadSnapshot();
     state.selectedRole = role;
@@ -732,6 +763,27 @@ async function copyPaneText() {
     elements.promptResult.textContent = "Pane copied.";
   } catch {
     elements.promptResult.textContent = text;
+  }
+}
+
+async function submitFinalDecision(status, decision) {
+  elements.promptResult.textContent = "";
+  try {
+    const response = await fetch("/api/final-decision", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, decision }),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || `Decision failed: ${response.status}`);
+    }
+    elements.promptResult.textContent = `Recorded ${payload.approval_id} (${payload.status})`;
+    await loadSnapshot();
+    state.selectedRole = "orchestrator";
+    updateDrawer();
+  } catch (error) {
+    elements.promptResult.textContent = error.message;
   }
 }
 

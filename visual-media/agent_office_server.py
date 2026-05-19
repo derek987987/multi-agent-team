@@ -21,6 +21,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 
 ACTIVE_ROUTE_STATUSES = {"queued", "dispatching", "dispatched", "in-progress", "blocked"}
+FINAL_REVIEW_NOTIFICATION_ID = "project-complete-ready-for-human"
 ROUTE_WATCH_LIMITS = {
     "queued": 120,
     "dispatching": 45,
@@ -32,6 +33,28 @@ ROUTE_STALE_LIMITS = {
     "dispatching": 30 * 60,
     "dispatched": 30 * 60,
     "in-progress": 4 * 60 * 60,
+}
+FINAL_DECISION_PROMPTS = {
+    "approved": (
+        "proceed to ship",
+        "ship confirmation",
+        "approve ship",
+        "approve release",
+        "ship it",
+        "go ahead and ship",
+        "release approved",
+        "ship approved",
+    ),
+    "rejected": (
+        "do not ship",
+        "don't ship",
+        "hold release",
+        "hold ship",
+        "reject ship",
+        "reject release",
+        "release rejected",
+        "ship rejected",
+    ),
 }
 
 
@@ -237,6 +260,21 @@ def active_human_attention_notifications(notifications: list[dict[str, Any]]) ->
         if str(notification.get("status") or "").lower() == "active"
         and str(notification.get("target_role") or "").strip()
     ]
+
+
+def active_final_review_notification(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+    for notification in snapshot.get("human_attention_notifications", []):
+        if str(notification.get("notification_id") or "").strip() == FINAL_REVIEW_NOTIFICATION_ID:
+            return notification
+    return None
+
+
+def classify_final_decision(message: str) -> str | None:
+    normalized = " ".join(re.split(r"[^a-z0-9]+", message.lower())).strip()
+    for status, phrases in FINAL_DECISION_PROMPTS.items():
+        if normalized in phrases:
+            return status
+    return None
 
 
 def tmux_pane_inventory() -> dict[str, dict[str, Any]]:
@@ -697,6 +735,16 @@ def create_orchestrator_prompt(root: Path, body: dict[str, Any]) -> tuple[int, d
     if agent is None:
         return 400, {"error": "role must match agent-control/company/agent-profiles.jsonl"}
 
+    final_decision_status = classify_final_decision(message)
+    if role == "orchestrator" and final_decision_status and active_final_review_notification(snapshot):
+        return record_final_human_decision(
+            root,
+            str(agent.get("session") or "agent-team"),
+            final_decision_status,
+            message,
+            actor="human-ui",
+        )
+
     route_id = next_route_id(root)
     display_name = agent.get("display_name") or role
     active_route = str(agent.get("active_route") or "none")
@@ -768,6 +816,39 @@ def create_orchestrator_prompt(root: Path, body: dict[str, Any]) -> tuple[int, d
     }
 
 
+def record_final_human_decision(
+    root: Path,
+    session: str,
+    status: str,
+    decision: str,
+    actor: str = "human-ui",
+) -> tuple[int, dict[str, Any]]:
+    command = [
+        str(root / "scripts" / "record-final-human-decision.sh"),
+        session,
+        "--status",
+        status,
+        "--decision",
+        decision,
+        "--actor",
+        actor,
+    ]
+    result = subprocess.run(command, cwd=root, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        return 500, {"error": "final decision failed", "stderr": result.stderr.strip() or result.stdout.strip()}
+    approval_id = result.stdout.strip().splitlines()[-1] if result.stdout.strip() else ""
+    return 201, {
+        "action": "final-decision",
+        "approval_id": approval_id,
+        "status": status,
+        "decision": decision,
+        "from": actor,
+        "workflow_state": "agent-control/workflow-state.md",
+        "approvals": "agent-control/approvals.jsonl",
+        "notifications": "agent-control/state/notifications.jsonl",
+    }
+
+
 class AgentOfficeHandler(BaseHTTPRequestHandler):
     server_version = "AgentOfficeDashboard/1.0"
 
@@ -812,7 +893,7 @@ class AgentOfficeHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path != "/api/orchestrator-prompt":
+        if parsed.path not in {"/api/orchestrator-prompt", "/api/final-decision"}:
             self.send_error(HTTPStatus.NOT_FOUND)
             return
         length = int(self.headers.get("Content-Length") or 0)
@@ -828,7 +909,36 @@ class AgentOfficeHandler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             self.send_json(HTTPStatus.BAD_REQUEST, {"error": "JSON object required"})
             return
-        status, payload = create_orchestrator_prompt(self.root, body)
+        if parsed.path == "/api/orchestrator-prompt":
+            status, payload = create_orchestrator_prompt(self.root, body)
+            self.send_json(status, payload)
+            return
+
+        snapshot = build_snapshot(self.root)
+        notification = active_final_review_notification(snapshot)
+        if notification is None:
+            self.send_json(HTTPStatus.CONFLICT, {"error": "no active final human review notification"})
+            return
+        status_value = str(body.get("status") or "").strip().lower()
+        if status_value not in {"approved", "rejected"}:
+            self.send_json(HTTPStatus.BAD_REQUEST, {"error": "status must be approved or rejected"})
+            return
+        decision = str(body.get("decision") or "").strip()
+        if not decision:
+            decision = (
+                "Approved ship/no-ship review from Agent Office."
+                if status_value == "approved"
+                else "Rejected ship/no-ship review from Agent Office."
+            )
+        orchestrator = selected_agent(snapshot, "orchestrator")
+        session = str((orchestrator or {}).get("session") or "agent-team")
+        status, payload = record_final_human_decision(
+            self.root,
+            session,
+            status_value,
+            decision,
+            actor="human-ui",
+        )
         self.send_json(status, payload)
 
     def safe_static_path(self, request_path: str) -> Path | None:

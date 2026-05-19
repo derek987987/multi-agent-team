@@ -80,12 +80,14 @@ assert_contains "$dashboard_markup" "Media Builder" "agent office dashboard"
 assert_contains "$dashboard_markup" "/api/snapshot" "agent office dashboard"
 assert_contains "$dashboard_markup" "/api/agent-pane" "agent office dashboard"
 assert_contains "$dashboard_markup" "/api/orchestrator-prompt" "agent office dashboard"
+assert_contains "$dashboard_markup" "/api/final-decision" "agent office dashboard"
 assert_contains "$dashboard_markup" "Codex Session" "agent office dashboard"
 assert_contains "$dashboard_markup" "stuckSignalCount" "agent office dashboard"
 assert_contains "$dashboard_markup" "healthList" "agent office dashboard"
 assert_contains "$dashboard_markup" "notificationsForRole" "agent office notification marker"
 assert_contains "$dashboard_markup" "notificationBadge" "agent office notification marker"
 assert_contains "$dashboard_markup" "notification-card" "agent office notification marker"
+assert_contains "$dashboard_markup" "Approve Ship" "agent office final decision action"
 assert_contains "$dashboard_markup" "scripts/attach-media.sh" "media builder tab"
 
 office_url="$("$ROOT/scripts/start-agent-office-dashboard.sh" --print-url 9877)"
@@ -224,17 +226,20 @@ PY
 : > "$test_root/agent-control/state/routes.jsonl"
 
 prompt_response="$tmp_parent/prompt-response.json"
-python3 - "$port" "$prompt_response" <<'PY'
+python3 - "$port" "$prompt_response" "$test_root" <<'PY'
 import json
+import pathlib
 import sys
 import urllib.error
 import urllib.request
 
 port = int(sys.argv[1])
 out = sys.argv[2]
-url = f"http://127.0.0.1:{port}/api/orchestrator-prompt"
+root = pathlib.Path(sys.argv[3])
+prompt_url = f"http://127.0.0.1:{port}/api/orchestrator-prompt"
+decision_url = f"http://127.0.0.1:{port}/api/final-decision"
 
-def post(payload):
+def post(url, payload):
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(
         url,
@@ -245,7 +250,7 @@ def post(payload):
     with urllib.request.urlopen(request, timeout=3) as response:
         return response.status, json.load(response)
 
-status, payload = post({"role": "frontend", "message": "Check the selected frontend route and decide the next step."})
+status, payload = post(prompt_url, {"role": "frontend", "message": "Check the selected frontend route and decide the next step."})
 assert status == 201, status
 assert payload["route_id"] == "R001", payload
 assert payload["to"] == "orchestrator", payload
@@ -254,14 +259,40 @@ assert payload["report"] == "agent-control/routes/R001.md", payload
 with open(out, "w", encoding="utf-8") as handle:
     json.dump(payload, handle)
 
-status, payload = post({"role": "frontend", "message": "Follow-up prompt should use the next sequential route id."})
+status, payload = post(prompt_url, {"role": "frontend", "message": "Follow-up prompt should use the next sequential route id."})
 assert status == 201, status
 assert payload["route_id"] == "R002", payload
 assert payload["report"] == "agent-control/routes/R002.md", payload
 
+status, payload = post(prompt_url, {"role": "orchestrator", "message": "proceed to ship"})
+assert status == 201, status
+assert payload["action"] == "final-decision", payload
+assert payload["status"] == "approved", payload
+assert payload["approval_id"] == "AP001", payload
+
+with open(root / "agent-control" / "state" / "notifications.jsonl", "w", encoding="utf-8") as handle:
+    handle.write(json.dumps({
+        "notification_id": "project-complete-ready-for-human",
+        "status": "active",
+        "severity": "action",
+        "target_role": "orchestrator",
+        "title": "Project ready for final human review",
+        "message": "Project ready for final human review.",
+        "source": "test",
+        "evidence_refs": ["agent-control/final-acceptance.md"],
+        "created": "2026-01-01T00:00:00Z",
+        "updated": "2026-01-01T00:00:00Z",
+    }) + "\n")
+
+status, payload = post(decision_url, {"status": "rejected", "decision": "Hold release for follow-up changes."})
+assert status == 201, status
+assert payload["action"] == "final-decision", payload
+assert payload["status"] == "rejected", payload
+assert payload["approval_id"] == "AP002", payload
+
 for bad_payload in ({"role": "frontend", "message": "   "}, {"role": "not-a-role", "message": "hello"}):
     request = urllib.request.Request(
-        url,
+        prompt_url,
         data=json.dumps(bad_payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -287,9 +318,12 @@ assert_contains "$inbox" "From: human-ui" "orchestrator inbox"
 assert_contains "$routes_state" "\"from\":\"human-ui\"" "routes structured state"
 assert_contains "$routes_state" "\"to\":\"orchestrator\"" "routes structured state"
 assert_contains "$events_state" "\"actor\":\"human-ui\"" "events structured state"
+assert_contains "$(cat "$test_root/agent-control/approvals.jsonl")" "\"approval_id\":\"AP001\"" "agent office approval ledger"
+assert_contains "$(cat "$test_root/agent-control/approvals.jsonl")" "\"approval_id\":\"AP002\"" "agent office approval ledger"
 
 structured_output="$("$test_root/scripts/validate-structured-state.sh")"
 assert_contains "$structured_output" "agent-control/state/routes.jsonl valid" "agent office structured state"
+assert_contains "$structured_output" "agent-control/state/approvals.jsonl valid" "agent office structured state"
 route_output="$("$test_root/scripts/validate-route-state.sh")"
 assert_contains "$route_output" "Route state validation passed." "agent office route state"
 
