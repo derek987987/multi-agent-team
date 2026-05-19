@@ -150,6 +150,9 @@ project.
      shows a `!` marker on the Orchestrator. That marker comes from
      `agent-control/state/notifications.jsonl` and does not mean approval has
      already happened.
+   - The Orchestrator inspector now shows `Approve Ship` and `Hold` actions on
+     that notification. Those actions record a durable final human decision and
+     clear the notification when the project state has not changed since review.
 
 7. Use the dashboard prompt box for context-aware Orchestrator requests:
 
@@ -161,11 +164,14 @@ project.
    orchestrator`, and selected-agent context. The Orchestrator is still the
    routing authority; the dashboard does not directly task implementation
    agents.
+   When the active Orchestrator notification is `project-complete-ready-for-human`,
+   explicit prompt text such as `proceed to ship`, `ship confirmation`, `hold release`,
+   or `do not ship` is treated as a final human decision instead of another generic
+   routed request.
 
 8. Continue approvals and interactive decisions in the tmux `orchestrator`
-   window. The dashboard is best for visibility, selected-agent context, and
-   quick routed prompts; tmux is still where Codex agents actually run and where
-   longer back-and-forth is easiest.
+   window when you need longer discussion. For final ship/no-ship decisions, prefer
+   the Orchestrator notification actions or the explicit decision prompts above.
 
 9. Let the route watcher dispatch work. The normal path is:
 
@@ -433,7 +439,11 @@ Agent Office APIs:
 - `GET /api/agent-pane?role=<role>&lines=<count>` captures the selected role's
   tmux pane tail when the role has matching session/window telemetry.
 - `POST /api/orchestrator-prompt` validates the selected role and prompt, then
-  queues an Orchestrator route with `From: human-ui`.
+  queues an Orchestrator route with `From: human-ui`, unless the prompt is an
+  explicit final ship/no-ship decision while the final-review notification is active.
+- `POST /api/final-decision` records a durable final human ship/no-ship decision,
+  updates workflow state, and dismisses the final-review notification when the
+  reviewed project state is still current.
 
 ## Real Coding Mode
 
@@ -766,13 +776,22 @@ It also shows live agent telemetry from `agent-control/state/agents.jsonl`.
 
 ## Final Acceptance
 
-Route final CTO review:
+The route watcher and heartbeat automatically promote final review routes after
+normal task-board work and validation routes are done:
+
+1. CTO final architecture review writes `agent-control/final-cto-review.md`.
+2. PM final acceptance review writes `agent-control/final-acceptance.md`.
+3. Human ship/no-ship notification is created only after both final review
+   artifacts exist and no open routes, blocking findings, or health blockers
+   remain.
+
+Manual fallback for final CTO review:
 
 ```text
 Use agent-control/prompts/final-cto-review.md.
 ```
 
-Route final PM acceptance:
+Manual fallback for final PM acceptance:
 
 ```text
 Use agent-control/prompts/final-acceptance.md.
@@ -783,11 +802,19 @@ Final outputs:
 - `agent-control/final-cto-review.md`
 - `agent-control/final-acceptance.md`
 
-The route watcher and heartbeat run `scripts/check-project-completion-notification.sh`.
+The route watcher and heartbeat run `scripts/promote-final-review-routes.sh`
+before `scripts/check-project-completion-notification.sh`.
 When no open routes/tasks, blocking findings, final-review gaps, or agent health
 issues remain, the script records `project-complete-ready-for-human` in
 `agent-control/state/notifications.jsonl` and mirrors the message under
 `Human Attention Needed` in `agent-control/workflow-state.md`. Agent Office
 renders that active Orchestrator notification as a `!` marker.
 
-The human makes the final ship/no-ship decision.
+The human makes the final ship/no-ship decision. Record that decision with:
+
+```bash
+./scripts/record-final-human-decision.sh <session> --status approved --decision "Proceed to ship"
+```
+
+Agent Office uses the same script behind the `Approve Ship` / `Hold` actions and
+the explicit final-decision API.

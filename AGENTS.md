@@ -75,13 +75,14 @@ This repository is configured for a tmux-based multi-agent coding workflow. The 
 - `scripts/recover-agent-session.sh` - asks live agents to checkpoint context or relaunches failed panes from a recovery packet
 - `scripts/monitor-agent-sessions.sh` - runs the role-session prevention loop before stale-route recovery and dispatch
 - `scripts/check-project-completion-notification.sh` - records the final human-attention notification when the project is ready for ship/no-ship review
+- `scripts/record-final-human-decision.sh` - records the durable final human ship/no-ship decision, updates workflow state, and syncs the completion notification
 - `scripts/route-db.sh` - owns the generated SQLite runtime store schema and route/run state mutations
 - `scripts/record-route-run.sh` - records route run metadata, token counts, cost cents, exit status, and summary
 - `scripts/route-status.sh` - summarizes a route from its canonical report, owner, evidence, output refs, and next action
 - `scripts/recover-stale-routes.sh` - requeues stale routes inside retry budget and blocks stale routes after retry budget is exhausted
 - `scripts/block-route.sh` - records blocked route state with reason and report evidence
 - `scripts/validate-route-state.sh` - validates route markdown/report consistency
-- `scripts/start-agent-office-dashboard.sh` - serves the Agent Office dashboard, snapshot API, Orchestrator prompt API, and media builder; startup scripts launch it in the tmux `office` window by default
+- `scripts/start-agent-office-dashboard.sh` - serves the Agent Office dashboard, snapshot API, final-decision API, Orchestrator prompt API, and media builder; startup scripts launch it in the tmux `office` window by default
 - `scripts/start-visual-media-dashboard.sh` - compatibility launcher for the same dashboard URL
 
 ## Core Rules
